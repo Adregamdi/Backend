@@ -54,35 +54,35 @@ public class GlobalExceptionHandler {
                 .body(new ErrorResponse(HttpStatus.BAD_REQUEST, DEFAULT_FORMAT_ERROR_MESSAGE));
     }
 
-    // 존재x 예외
-    @ExceptionHandler(value = {})
-    public ResponseEntity<ErrorResponse> handleNotFoundException(final RuntimeException exception) {
-        log.warn(exception.getMessage());
-
-        return ResponseEntity
-                .status(HttpStatus.NOT_FOUND)
-                .body(new ErrorResponse(HttpStatus.NOT_FOUND, exception.getMessage()));
-    }
-
-    // 존재 예외
-    @ExceptionHandler(value = {})
-    public ResponseEntity<ErrorResponse> handleExistException(final RuntimeException exception) {
-        log.warn(exception.getMessage());
-
-        return ResponseEntity
-                .status(HttpStatus.CONFLICT)
-                .body(new ErrorResponse(HttpStatus.CONFLICT, exception.getMessage()));
-    }
-
-    // 커스텀 예외
-    @ExceptionHandler(value = {})
-    public ResponseEntity<ErrorResponse> handleCustomBadRequestException(final RuntimeException exception) {
-        log.warn(exception.getMessage());
-
-        return ResponseEntity
-                .status(HttpStatus.BAD_REQUEST)
-                .body(new ErrorResponse(HttpStatus.BAD_REQUEST, exception.getMessage()));
-    }
+//    // 존재x 예외
+//    @ExceptionHandler(value = {})
+//    public ResponseEntity<ErrorResponse> handleNotFoundException(final RuntimeException exception) {
+//        log.warn(exception.getMessage());
+//
+//        return ResponseEntity
+//                .status(HttpStatus.NOT_FOUND)
+//                .body(new ErrorResponse(HttpStatus.NOT_FOUND, exception.getMessage()));
+//    }
+//
+//    // 존재 예외
+//    @ExceptionHandler(value = {})
+//    public ResponseEntity<ErrorResponse> handleExistException(final RuntimeException exception) {
+//        log.warn(exception.getMessage());
+//
+//        return ResponseEntity
+//                .status(HttpStatus.CONFLICT)
+//                .body(new ErrorResponse(HttpStatus.CONFLICT, exception.getMessage()));
+//    }
+//
+//    // 커스텀 예외
+//    @ExceptionHandler(value = {})
+//    public ResponseEntity<ErrorResponse> handleCustomBadRequestException(final RuntimeException exception) {
+//        log.warn(exception.getMessage());
+//
+//        return ResponseEntity
+//                .status(HttpStatus.BAD_REQUEST)
+//                .body(new ErrorResponse(HttpStatus.BAD_REQUEST, exception.getMessage()));
+//    }
 
     @ExceptionHandler(RuntimeException.class)
     public ResponseEntity<ErrorResponse> handleRuntimeException(final RuntimeException exception) {

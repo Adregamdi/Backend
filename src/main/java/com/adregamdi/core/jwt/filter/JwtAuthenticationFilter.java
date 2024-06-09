@@ -1,4 +1,4 @@
-package com.adregamdi.core.filter;
+package com.adregamdi.core.jwt.filter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.FilterChain;

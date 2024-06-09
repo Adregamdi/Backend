@@ -1,4 +1,4 @@
-package com.adregamdi.core.service;
+package com.adregamdi.core.jwt.service;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;

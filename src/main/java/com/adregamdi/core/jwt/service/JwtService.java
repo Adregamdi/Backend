@@ -1,5 +1,8 @@
 package com.adregamdi.core.jwt.service;
 
+import com.adregamdi.member.domain.Member;
+import com.adregamdi.member.domain.Role;
+import com.adregamdi.member.infrastructure.MemberRepository;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTVerificationException;
@@ -13,7 +16,10 @@ import org.springframework.stereotype.Service;
 
 import java.util.Date;
 import java.util.Optional;
-import java.util.UUID;
+
+import static com.adregamdi.core.exception.GlobalException.LogoutMemberException;
+import static com.adregamdi.core.exception.GlobalException.TokenValidationException;
+import static com.adregamdi.member.exception.MemberException.MemberNotFoundException;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -50,8 +56,7 @@ public class JwtService {
                 .sign(Algorithm.HMAC512(secretKey));
     }
 
-    public String createRefreshToken(
-    ) {
+    public String createRefreshToken() {
         Date now = new Date();
         return JWT.create()
                 .withSubject(REFRESH_TOKEN_SUBJECT)
@@ -60,17 +65,14 @@ public class JwtService {
     }
 
     public void sendAccessToken(
-            final HttpServletResponse response, final String accessToken
+            final HttpServletResponse response,
+            final String accessToken
     ) {
         response.setStatus(HttpServletResponse.SC_OK);
-
         response.setHeader(accessHeader, accessToken);
         log.info("재발급된 Access Token : {}", accessToken);
     }
 
-    /**
-     * AccessToken + RefreshToken 헤더에 실어서 보내기
-     */
     public void sendAccessAndRefreshToken(
             final HttpServletResponse response,
             final String accessToken,
@@ -82,35 +84,29 @@ public class JwtService {
         log.info("Access Token, Refresh Token 헤더 설정 완료");
     }
 
-    public Optional<String> extractAccessToken(
-            final HttpServletRequest request
-    ) {
+    public Optional<String> extractAccessToken(final HttpServletRequest request) {
         return Optional.ofNullable(request.getHeader(accessHeader))
                 .filter(accessToken -> accessToken.startsWith(BEARER))
                 .map(accessToken -> accessToken.replace(BEARER, ""));
     }
 
-    public Optional<String> extractRefreshToken(
-            final HttpServletRequest request
-    ) {
+    public Optional<String> extractRefreshToken(final HttpServletRequest request) {
         return Optional.ofNullable(request.getHeader(refreshHeader))
                 .filter(refreshToken -> refreshToken.startsWith(BEARER))
                 .map(refreshToken -> refreshToken.replace(BEARER, ""));
     }
 
-    public Optional<UUID> extractMemberId(
-            final String accessToken
-    ) {
-        UUID memberId = JWT.require(Algorithm.HMAC512(secretKey))
+    public Optional<Long> extractMemberId(final String accessToken) {
+        Long memberId = JWT.require(Algorithm.HMAC512(secretKey))
                 .build()
                 .verify(accessToken)
                 .getClaim(MEMBER_ID_CLAIM)
-                .as(UUID.class);
+                .asLong();
         Member member = memberRepository.findById(memberId)
-                .orElseThrow(MemberException.MemberNotFoundException::new);
+                .orElseThrow(MemberNotFoundException::new);
 
-        if ((RefreshTokenStatus.LOGOUT).equals(member.getRefreshTokenStatus())) {
-            throw new GlobalException.LogoutMemberException();
+        if ((member.getRefreshTokenStatus()).equals(false)) {
+            throw new LogoutMemberException();
         }
 
         return Optional.of(memberId);
@@ -130,14 +126,12 @@ public class JwtService {
         response.setHeader(refreshHeader, refreshToken);
     }
 
-    public boolean isTokenValid(
-            final String token
-    ) {
+    public boolean isTokenValid(final String token) {
         try {
             JWT.require(Algorithm.HMAC512(secretKey)).build().verify(token);
             return true;
         } catch (JWTVerificationException e) {
-            throw new GlobalException.TokenValidationException();
+            throw new TokenValidationException();
         }
     }
 }

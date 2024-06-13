@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.Date;
 import java.util.Optional;
+import java.util.UUID;
 
 import static com.adregamdi.core.exception.GlobalException.LogoutMemberException;
 import static com.adregamdi.core.exception.GlobalException.TokenValidationException;
@@ -96,12 +97,12 @@ public class JwtService {
                 .map(refreshToken -> refreshToken.replace(BEARER, ""));
     }
 
-    public Optional<Long> extractMemberId(final String accessToken) {
-        Long memberId = JWT.require(Algorithm.HMAC512(secretKey))
+    public Optional<UUID> extractMemberId(final String accessToken) {
+        UUID memberId = JWT.require(Algorithm.HMAC512(secretKey))
                 .build()
                 .verify(accessToken)
                 .getClaim(MEMBER_ID_CLAIM)
-                .asLong();
+                .as(UUID.class);
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(MemberNotFoundException::new);
 

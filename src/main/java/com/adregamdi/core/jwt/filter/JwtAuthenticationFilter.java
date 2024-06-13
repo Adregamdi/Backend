@@ -1,5 +1,10 @@
 package com.adregamdi.core.jwt.filter;
 
+import com.adregamdi.core.handler.ErrorResponse;
+import com.adregamdi.core.jwt.service.JwtService;
+import com.adregamdi.core.utils.PasswordUtil;
+import com.adregamdi.member.domain.Member;
+import com.adregamdi.member.infrastructure.MemberRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -18,14 +23,19 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.Objects;
+
+import static com.adregamdi.core.exception.GlobalException.LogoutMemberException;
+import static com.adregamdi.core.exception.GlobalException.TokenValidationException;
 
 @Slf4j
 @RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private static final String NO_CHECK_URL = "/login"; // "/login"으로 들어오는 요청은 Filter 작동 X
-    private final JwtService jwtService;
     private final GrantedAuthoritiesMapper authoritiesMapper = new NullAuthoritiesMapper();
+    private final JwtService jwtService;
+    private final MemberRepository memberRepository;
 
     @Override
     protected void doFilterInternal(
@@ -59,7 +69,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     ) {
         memberRepository.findByRefreshToken(refreshToken)
                 .ifPresent(user -> {
-                    if ((RefreshTokenStatus.LOGIN).equals(user.getRefreshTokenStatus())) {
+                    if (Objects.equals(user.getRefreshTokenStatus(), true)) {
                         jwtService.sendAccessAndRefreshToken(
                                 response,
                                 jwtService.createAccessToken(String.valueOf(user.getId()), user.getRole()),
@@ -69,9 +79,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 });
     }
 
-    private String reIssueRefreshToken(
-            final Member member
-    ) {
+    private String reIssueRefreshToken(final Member member) {
         String reIssuedRefreshToken = jwtService.createRefreshToken();
         member.updateRefreshToken(reIssuedRefreshToken);
         memberRepository.saveAndFlush(member);
@@ -89,28 +97,26 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             jwtService.extractAccessToken(request)
                     .filter(jwtService::isTokenValid)
                     .flatMap(jwtService::extractMemberId)
-                    .flatMap(memberId -> memberRepository.findByIdAndMemberStatus(memberId, MemberStatus.REGISTRATION))
+                    .flatMap(memberId -> memberRepository.findByIdAndMemberStatus(memberId, true))
                     .ifPresent(this::saveAuthentication);
-        } catch (GlobalException.TokenValidationException e) {
+        } catch (TokenValidationException e) {
             response.setStatus(HttpStatus.UNAUTHORIZED.value());
             response.setContentType(MediaType.APPLICATION_JSON_VALUE);
             response.setCharacterEncoding("UTF-8");
-            objectMapper.writeValue(response.getWriter(), new ErrorResponse(e.getMessage()));
+            objectMapper.writeValue(response.getWriter(), new ErrorResponse(HttpStatus.UNAUTHORIZED, e.getMessage()));
             return;
-        } catch (GlobalException.LogoutMemberException e) {
+        } catch (LogoutMemberException e) {
             response.setStatus(HttpStatus.FORBIDDEN.value());
             response.setContentType(MediaType.APPLICATION_JSON_VALUE);
             response.setCharacterEncoding("UTF-8");
-            objectMapper.writeValue(response.getWriter(), new ErrorResponse(e.getMessage()));
+            objectMapper.writeValue(response.getWriter(), new ErrorResponse(HttpStatus.FORBIDDEN, e.getMessage()));
             return;
         }
 
         filterChain.doFilter(request, response);
     }
 
-    public void saveAuthentication(
-            final Member myMember
-    ) {
+    public void saveAuthentication(final Member myMember) {
         String password = myMember.getPassword();
         if (password == null) {
             password = PasswordUtil.generateRandomPassword();

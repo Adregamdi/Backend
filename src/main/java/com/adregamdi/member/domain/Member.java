@@ -1,5 +1,6 @@
 package com.adregamdi.member.domain;
 
+import com.adregamdi.core.oauth.dto.SignUpDTO;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -21,6 +22,10 @@ public class Member {
     @Column
     private String password; // 비밀번호 (사용 x)
     @Column
+    private String age;
+    @Column
+    private String gender;
+    @Column
     private String socialId; // 소셜 id
     @Column
     private String socialAccessToken; // 소셜 액세스 토큰
@@ -36,6 +41,16 @@ public class Member {
 
     @Enumerated(EnumType.STRING)
     private Role role; // 회원 권한
+
+    public Member(SignUpDTO signUpDTO) {
+        this.email = signUpDTO.getEmail();
+        this.age = signUpDTO.getAge();
+        this.gender = signUpDTO.getGender();
+        this.socialId = signUpDTO.getSocialId();
+        this.socialType = signUpDTO.getSocialType();
+        this.role = Role.MEMBER;
+        this.memberStatus = true;
+    }
 
     public void updateSocialAccessToken(final String socialAccessToken) {
         this.socialAccessToken = socialAccessToken;

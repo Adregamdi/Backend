@@ -73,8 +73,7 @@ public class OAuth2Attributes {
 
     public Member toEntity(
             final SocialType socialType,
-            final OAuth2UserInfo oauth2UserInfo,
-            final String nickname
+            final OAuth2UserInfo oauth2UserInfo
     ) {
         String email = UUID.randomUUID() + "@adregamdi.com";
         String age = "Unknown";
@@ -92,8 +91,6 @@ public class OAuth2Attributes {
 
         SignUpDTO signUpDTO = new SignUpDTO(
                 email,
-                nickname,
-                "취준생",
                 age,
                 gender,
                 oauth2UserInfo.getId(),

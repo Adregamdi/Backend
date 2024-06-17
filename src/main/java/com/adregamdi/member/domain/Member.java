@@ -52,11 +52,15 @@ public class Member {
         this.memberStatus = true;
     }
 
-    public void updateSocialAccessToken(final String socialAccessToken) {
+    public void updateSocialAccessToken(String socialAccessToken) {
         this.socialAccessToken = socialAccessToken;
     }
 
     public void updateRefreshToken(String refreshToken) {
         this.refreshToken = refreshToken;
+    }
+
+    public void updateRefreshTokenStatus(Boolean status) {
+        this.refreshTokenStatus = status;
     }
 }

@@ -1,6 +1,10 @@
 package com.adregamdi.core.oauth.handler;
 
+import com.adregamdi.core.jwt.service.JwtService;
 import com.adregamdi.core.oauth.domain.CustomOAuth2User;
+import com.adregamdi.member.domain.Member;
+import com.adregamdi.member.exception.MemberException;
+import com.adregamdi.member.infrastructure.MemberRepository;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -8,6 +12,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import java.io.IOException;
 import java.net.URI;
@@ -16,6 +23,9 @@ import java.net.URI;
 @RequiredArgsConstructor
 @Component
 public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
+
+    private final JwtService jwtService;
+    private final MemberRepository memberRepository;
 
     @Override
     public void onAuthenticationSuccess(
@@ -26,29 +36,31 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
         log.info("OAuth2 Login 성공!");
         CustomOAuth2User oAuth2User = (CustomOAuth2User) authentication.getPrincipal();
 
-        // 인가 코드 및 회원 권한 URL에 담기
-        String targetUrl = createURI(code, String.valueOf(oAuth2User.getRole())).toString();
+        Member findMember = memberRepository.findById(oAuth2User.getMemberId())
+                .orElseThrow(MemberException.MemberNotFoundException::new);
 
-        // 프론트의 토큰 관리 페이지로 리다이렉트
+        String accessToken = jwtService.createAccessToken(String.valueOf(findMember.getId()), findMember.getRole());
+        String refreshToken = jwtService.createRefreshToken();
+
+        findMember.updateRefreshToken(refreshToken);
+        findMember.updateRefreshTokenStatus(true);
+        String targetUrl = createURI(accessToken, refreshToken).toString();
+
         response.sendRedirect(targetUrl);
     }
 
-    // 자체 인가 코드를 URL에 담아 리다이렉트
     private URI createURI(
-            final String code,
-            final String role
+            final String accessToken,
+            final String refreshToken
     ) {
         MultiValueMap<String, String> queryParams = new LinkedMultiValueMap<>();
 
-        queryParams.add("code", code);
-        queryParams.add("role", role);
-        log.info("인가 코드 담기 성공");
+        queryParams.add("access_token", accessToken);
+        queryParams.add("refresh_token", refreshToken);
 
         return UriComponentsBuilder.newInstance()
                 .scheme("http")
-                .host("15.165.1.48")
-//               .scheme("https")
-//               .host("coverflow.co.kr")
+                .host("localhost:8080")
                 .path("/auth/token")
                 .queryParams(queryParams)
                 .build()

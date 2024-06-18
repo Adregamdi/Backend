@@ -22,9 +22,9 @@ public class Member {
     @Column
     private String password; // 비밀번호 (사용 x)
     @Column
-    private String age;
+    private String age; // 연령대
     @Column
-    private String gender;
+    private String gender; // 성별
     @Column
     private String socialId; // 소셜 id
     @Column

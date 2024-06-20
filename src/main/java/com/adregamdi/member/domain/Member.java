@@ -18,6 +18,8 @@ public class Member {
     private UUID id;
 
     @Column
+    private String nickname; // 닉네임
+    @Column
     private String email; // 이메일
     @Column
     private String password; // 비밀번호 (사용 x)

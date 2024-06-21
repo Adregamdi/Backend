@@ -75,12 +75,25 @@ public class OAuth2Attributes {
             final SocialType socialType,
             final OAuth2UserInfo oauth2UserInfo
     ) {
-        String email = UUID.randomUUID() + "@adregamdi.com";
+        String uuid = String.valueOf(UUID.randomUUID());
+        String nickname = uuid + "-ad";
+        String email = uuid + "@adregamdi.com";
         String age = "Unknown";
         String gender = "Unknown";
 
         if (oauth2UserInfo.getEmail() != null) {
+            int atIndex = oauth2UserInfo.getEmail().indexOf("@");
             email = oauth2UserInfo.getEmail();
+
+            if (socialType == SocialType.APPLE) {
+                nickname = oauth2UserInfo.getEmail().substring(0, atIndex) + "-ap";
+            }
+            if (socialType == SocialType.GOOGLE) {
+                nickname = oauth2UserInfo.getEmail().substring(0, atIndex) + "-go";
+            }
+            if (socialType == SocialType.KAKAO) {
+                nickname = oauth2UserInfo.getEmail().substring(0, atIndex) + "-ka";
+            }
         }
         if (oauth2UserInfo.getAge() != null) {
             age = oauth2UserInfo.getAge();
@@ -90,6 +103,7 @@ public class OAuth2Attributes {
         }
 
         SignUpDTO signUpDTO = new SignUpDTO(
+                nickname,
                 email,
                 age,
                 gender,

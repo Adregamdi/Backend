@@ -54,7 +54,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 .filter(jwtService::isTokenValid)
                 .orElse(null);
 
-        if (refreshToken != null && ("/api/auth/reissue").equals(request.getRequestURI())) {
+        if (refreshToken != null && Objects.equals("/api/auth/reissue", request.getRequestURI())) {
             log.info("리프레쉬 토큰 존재");
             checkRefreshTokenAndReIssueAccessToken(response, refreshToken);
             return;

@@ -1,4 +1,4 @@
-package com.adregamdi.core.oauth.dto;
+package com.adregamdi.core.oauth2.dto;
 
 import com.adregamdi.member.domain.SocialType;
 import lombok.AllArgsConstructor;

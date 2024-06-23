@@ -1,7 +1,7 @@
-package com.adregamdi.core.oauth.handler;
+package com.adregamdi.core.oauth2.handler;
 
 import com.adregamdi.core.jwt.service.JwtService;
-import com.adregamdi.core.oauth.domain.CustomOAuth2User;
+import com.adregamdi.core.oauth2.domain.CustomOAuth2User;
 import com.adregamdi.member.domain.Member;
 import com.adregamdi.member.exception.MemberException;
 import com.adregamdi.member.infrastructure.MemberRepository;

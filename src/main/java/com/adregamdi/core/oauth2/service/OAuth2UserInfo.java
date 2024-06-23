@@ -1,4 +1,4 @@
-package com.adregamdi.core.oauth.service;
+package com.adregamdi.core.oauth2.service;
 
 import java.util.Map;
 

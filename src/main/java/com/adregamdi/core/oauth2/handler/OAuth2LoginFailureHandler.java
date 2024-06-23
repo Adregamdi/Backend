@@ -1,4 +1,4 @@
-package com.adregamdi.core.oauth.handler;
+package com.adregamdi.core.oauth2.handler;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;

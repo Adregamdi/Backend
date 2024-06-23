@@ -1,6 +1,6 @@
 package com.adregamdi.member.domain;
 
-import com.adregamdi.core.oauth.dto.SignUpDTO;
+import com.adregamdi.core.oauth2.dto.SignUpDTO;
 import jakarta.persistence.*;
 import lombok.*;
 

@@ -1,9 +1,9 @@
-package com.adregamdi.core.oauth.dto;
+package com.adregamdi.core.oauth2.dto;
 
-import com.adregamdi.core.oauth.service.AppleOAuth2UserInfo;
-import com.adregamdi.core.oauth.service.GoogleOAuth2UserInfo;
-import com.adregamdi.core.oauth.service.KakaoOAuth2UserInfo;
-import com.adregamdi.core.oauth.service.OAuth2UserInfo;
+import com.adregamdi.core.oauth2.service.AppleOAuth2UserInfo;
+import com.adregamdi.core.oauth2.service.GoogleOAuth2UserInfo;
+import com.adregamdi.core.oauth2.service.KakaoOAuth2UserInfo;
+import com.adregamdi.core.oauth2.service.OAuth2UserInfo;
 import com.adregamdi.member.domain.Member;
 import com.adregamdi.member.domain.SocialType;
 import lombok.Builder;

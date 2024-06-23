@@ -1,4 +1,4 @@
-package com.adregamdi.core.oauth.domain;
+package com.adregamdi.core.oauth2.domain;
 
 import com.adregamdi.member.domain.Role;
 import lombok.Getter;

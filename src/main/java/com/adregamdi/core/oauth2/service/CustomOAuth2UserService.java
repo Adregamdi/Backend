@@ -1,8 +1,8 @@
-package com.adregamdi.core.oauth.service;
+package com.adregamdi.core.oauth2.service;
 
 
-import com.adregamdi.core.oauth.domain.CustomOAuth2User;
-import com.adregamdi.core.oauth.dto.OAuth2Attributes;
+import com.adregamdi.core.oauth2.domain.CustomOAuth2User;
+import com.adregamdi.core.oauth2.dto.OAuth2Attributes;
 import com.adregamdi.member.domain.Member;
 import com.adregamdi.member.domain.SocialType;
 import com.adregamdi.member.infrastructure.MemberRepository;

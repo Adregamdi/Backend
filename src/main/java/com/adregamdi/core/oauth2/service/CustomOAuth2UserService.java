@@ -56,10 +56,10 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
     }
 
     private SocialType getSocialType(final String registrationId) {
-        if (Objects.equals("APPLE", registrationId)) {
+        if (Objects.equals("apple", registrationId)) {
             return SocialType.APPLE;
         }
-        if (Objects.equals("KAKAO", registrationId)) {
+        if (Objects.equals("kakao", registrationId)) {
             return SocialType.KAKAO;
         }
         return SocialType.GOOGLE;

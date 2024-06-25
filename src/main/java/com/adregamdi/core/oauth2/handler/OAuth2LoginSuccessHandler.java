@@ -56,7 +56,9 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
         MultiValueMap<String, String> queryParams = new LinkedMultiValueMap<>();
 
         queryParams.add("access_token", accessToken);
+        log.info("accessToken => {}", accessToken);
         queryParams.add("refresh_token", refreshToken);
+        log.info("refreshToken => {}", refreshToken);
 
         return UriComponentsBuilder.newInstance()
                 .scheme("http")

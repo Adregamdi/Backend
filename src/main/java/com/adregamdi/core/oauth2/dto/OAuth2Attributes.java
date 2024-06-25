@@ -41,7 +41,7 @@ public class OAuth2Attributes {
         return ofGoogle(userNameAttributeName, attributes);
     }
 
-    public static OAuth2Attributes ofApple(
+    private static OAuth2Attributes ofApple(
             final String userNameAttributeName,
             final Map<String, Object> attributes
     ) {
@@ -61,7 +61,7 @@ public class OAuth2Attributes {
                 .build();
     }
 
-    public static OAuth2Attributes ofGoogle(
+    private static OAuth2Attributes ofGoogle(
             final String userNameAttributeName,
             final Map<String, Object> attributes
     ) {

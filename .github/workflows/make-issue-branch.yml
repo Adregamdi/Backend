@@ -1,0 +1,22 @@
+name: issue branch maker
+
+on:
+  issues:
+    types:
+      - assigned
+  pull_request:
+    types:
+      - closed
+
+jobs:
+  make-issue-branch:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      issues: write
+
+    steps:
+      - name: Create Issue Branch
+        uses: robvanderleek/create-issue-branch@main
+        env:
+          GITHUB_TOKEN: ${{ secrets.PERSONAL_GITHUB_TOKEN }}

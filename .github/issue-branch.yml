@@ -1,0 +1,30 @@
+defaultBranch: 'dev'
+branchName: '#${issue.number}'
+autoLinkIssue: true
+autoCloseIssue: true
+commentMessage: 'Branch ${branchName} created for issue: ${issue.title}'
+branches:
+  - label: '📬 API'
+    prefix: api/
+  - label: '🐞 BugFix'
+    prefix: bugfix/
+  - label: '🐳 Build'
+    prefix: build/
+  - label: '⚙ Setting'
+    prefix: chore/
+  - label: '🗨️ Comment'
+    prefix: comment/
+  - label: '🌏 Deploy'
+    prefix: deploy/
+  - label: '📃 Docs'
+    prefix: docs/
+  - label: '✨ Feature'
+    prefix: feature/
+  - label: '⚒️Fix'
+    prefix: fix/
+  - label: '🎈 Perf'
+    prefix: perf/
+  - label: '🔨 Refactor'
+    prefix: refactor/
+  - label: '🎯  Test'
+    prefix: test/

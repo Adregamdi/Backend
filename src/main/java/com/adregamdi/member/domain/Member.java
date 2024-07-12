@@ -65,4 +65,13 @@ public class Member {
     public void updateRefreshTokenStatus(Boolean status) {
         this.refreshTokenStatus = status;
     }
+
+    public void updateAuthorization(Role role) {
+        this.role = role;
+    }
+
+    public void updateMemberStatus(Boolean status) {
+        this.memberStatus = status;
+    }
+
 }

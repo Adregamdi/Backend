@@ -1,6 +1,7 @@
 package com.adregamdi.member.application;
 
 import com.adregamdi.member.domain.Member;
+import com.adregamdi.member.domain.Role;
 import com.adregamdi.member.exception.MemberException.MemberNotFoundException;
 import com.adregamdi.member.infrastructure.MemberRepository;
 import lombok.RequiredArgsConstructor;
@@ -21,6 +22,16 @@ public class MemberService {
         Member member = memberRepository.findByIdAndMemberStatus(UUID.fromString(memberId), true)
                 .orElseThrow(() -> new MemberNotFoundException(memberId));
 
+        member.updateRefreshTokenStatus(false);
+    }
+
+    @Transactional
+    public void delete(final String memberId) {
+        Member member = memberRepository.findByIdAndMemberStatus(UUID.fromString(memberId), true)
+                .orElseThrow(() -> new MemberNotFoundException(memberId));
+
+        member.updateAuthorization(Role.GUEST);
+        member.updateMemberStatus(false);
         member.updateRefreshTokenStatus(false);
     }
 }

@@ -67,9 +67,6 @@ public class MemberService {
 
     }
 
-    /**
-     * [연결 끊기 메서드]
-     */
     private void unlink(
             final SocialType socialType,
             final String memberId,

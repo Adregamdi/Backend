@@ -8,6 +8,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -25,6 +26,16 @@ public class MemberController {
         return ResponseEntity.ok()
                 .body(ApiResponse.<Void>builder()
                         .statusCode(HttpStatus.OK)
+                        .build());
+    }
+
+    @DeleteMapping("/leave")
+    @MemberAuthorize
+    public ResponseEntity<ApiResponse<Void>> delete(@AuthenticationPrincipal final UserDetails userDetails) {
+        memberService.delete(userDetails.getUsername());
+        return ResponseEntity.ok()
+                .body(ApiResponse.<Void>builder()
+                        .statusCode(HttpStatus.NO_CONTENT)
                         .build());
     }
 }

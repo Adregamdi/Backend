@@ -1,5 +1,6 @@
 package com.adregamdi.member.domain;
 
+import com.adregamdi.core.entity.BaseTime;
 import com.adregamdi.core.oauth2.dto.SignUpDTO;
 import jakarta.persistence.*;
 import lombok.*;
@@ -12,7 +13,7 @@ import java.util.UUID;
 @Builder
 @Entity
 @Table(name = "tbl_member")
-public class Member {
+public class Member extends BaseTime {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
@@ -65,4 +66,13 @@ public class Member {
     public void updateRefreshTokenStatus(Boolean status) {
         this.refreshTokenStatus = status;
     }
+
+    public void updateAuthorization(Role role) {
+        this.role = role;
+    }
+
+    public void updateMemberStatus(Boolean status) {
+        this.memberStatus = status;
+    }
+
 }

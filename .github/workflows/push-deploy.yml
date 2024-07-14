@@ -64,4 +64,4 @@ jobs:
           ssh ${{ secrets.DEV_SERVER_USERNAME }}@${{ secrets.DEV_SERVER_HOST }} "
           mkdir -p /home/ubuntu/logs;
           sudo fuser -k ${{ secrets.DEV_SERVER_PORT }}/tcp || true; 
-          nohup sudo java -jar ./*.jar > /home/ubuntu/nohup.out 2>&1 &"
+          nohup sudo java -jar ./*.jar > /home/ubuntu/logs/nohup.out 2>&1 &"

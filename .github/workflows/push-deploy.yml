@@ -1,0 +1,67 @@
+name: Deploy On Merge
+
+on:
+  push:
+    branches:
+      - develop
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      ## MySQL 환경을 테스트 환경에서 설정합니다.
+      - name: Setup MySQL
+        uses: samin/mysql-action@v1
+        with:
+          character set server: 'utf8'
+          mysql database: 'adregamdi'
+          mysql user: ${{ secrets.MYSQL_USERNAME }}
+          mysql password: ${{ secrets.MYSQL_PASSWORD }}
+
+      ## resources 디렉토리 확인 및 생성, application.yml 설정
+      - name: Setup application.yml
+        run: |
+          mkdir -p ./src/main/resources
+          echo "${{ secrets.APPLICATION_YML }}" > ./src/main/resources/application.yml
+
+      - name: Add permission to make gradlew executable
+        run: chmod +x gradlew
+
+      - name: Build with Gradle
+        uses: gradle/gradle-build-action@67421db6bd0bf253fb4bd25b31ebb98943c375e1
+        with:
+          arguments: build
+
+      # 서버에 통신하기 위한 SSH를 설정합니다.
+      - name: Setup SSH
+        uses: webfactory/ssh-agent@v0.5.4
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      # 배포 서버에 host 키 확인
+      - name: Add remote server to known hosts
+        run: |
+          mkdir -p ~/.ssh
+          ssh-keyscan ${{ secrets.DEV_SERVER_HOST }} >> ~/.ssh/known_hosts
+
+      # 서버에 jar파일을 보내기 위해 scp 명령어를 사용합니다.
+      - name: SCP transfer
+        run: scp ./build/libs/*.jar ${{ secrets.DEV_SERVER_USERNAME }}@${{ secrets.DEV_SERVER_HOST }}:/home/ubuntu
+
+      # 서버 원격으로 명령어를 실행합니다. 서버 포트를 확인하고 실행중이면 종료합니다. 빌도된 jar파일을 실행합니다.
+      - name: Execute remote commands
+        run: |
+          ssh ${{ secrets.DEV_SERVER_USERNAME }}@${{ secrets.DEV_SERVER_HOST }} "
+          mkdir -p /home/ubuntu/logs;
+          sudo fuser -k ${{ secrets.DEV_SERVER_PORT }}/tcp || true; 
+          nohup sudo java -jar ./*.jar > /home/ubuntu/logs/nohup.out 2>&1 &"

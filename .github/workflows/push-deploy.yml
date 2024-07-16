@@ -52,8 +52,6 @@ jobs:
           script: |
             # 배포 서버에 host 키 확인
             sudo mkdir -p ~/.ssh
-            echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
-            chmod 600 ~/.ssh/id_rsa
             sudo ssh-keyscan -H ${{ secrets.DEV_SERVER_HOST }} >> ~/.ssh/known_hosts
             
             # 서버에 jar파일을 보내기 위해 scp 명령어를 사용합니다.

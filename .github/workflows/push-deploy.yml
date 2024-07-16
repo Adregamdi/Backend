@@ -44,24 +44,18 @@ jobs:
 
       # 서버에 통신하기 위한 SSH를 설정합니다.
       - name: Setup SSH
-        uses: webfactory/ssh-agent@v0.5.4
+        uses: appleboy/ssh-action@v0.1.8
         with:
-          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
-
-      # 배포 서버에 host 키 확인
-      - name: Add remote server to known hosts
-        run: |
-          mkdir -p ~/.ssh
-          ssh-keyscan -v ${{ secrets.DEV_SERVER_HOST }} >> ~/.ssh/known_hosts
-
-      # 서버에 jar파일을 보내기 위해 scp 명령어를 사용합니다.
-      - name: SCP transfer
-        run: scp ./build/libs/*.jar ${{ secrets.DEV_SERVER_USERNAME }}@${{ secrets.DEV_SERVER_HOST }}:/home/ubuntu
-
-      # 서버 원격으로 명령어를 실행합니다. 서버 포트를 확인하고 실행중이면 종료합니다. 빌도된 jar파일을 실행합니다.
-      - name: Execute remote commands
-        run: |
-          ssh ${{ secrets.DEV_SERVER_USERNAME }}@${{ secrets.DEV_SERVER_HOST }} "
-          mkdir -p /home/ubuntu/logs;
-          sudo fuser -k ${{ secrets.DEV_SERVER_PORT }}/tcp || true; 
-          nohup sudo java -jar ./*.jar > /home/ubuntu/logs/nohup.out 2>&1 &"
+          host: ${{ secrets.DEV_SERVER_HOST }}
+          username: ${{ secrets.DEV_SERVER_USERNAME }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            # 배포 서버에 host 키 확인
+            sudo mkdir -p ~/.ssh
+            sudo ssh-keyscan ${{ secrets.DEV_SERVER_HOST }} >> ~/.ssh/known_hosts
+            
+            # 서버에 jar파일을 보내기 위해 scp 명령어를 사용합니다.
+            scp ./build/libs/*.jar ${{ secrets.DEV_SERVER_USERNAME }}@${{ secrets.DEV_SERVER_HOST }}:/home/ubuntu
+            
+            # 서버 원격으로 명령어를 실행합니다. 서버 포트를 확인하고 실행중이면 종료합니다. 빌도된 jar파일을 실행합니다.
+            ssh ${{ secrets.DEV_SERVER_USERNAME }}@${{ secrets.DEV_SERVER_HOST }} "sudo fuser -k ${{ secrets.DEV_SERVER_PORT }}/tcp || true; nohup sudo java -jar ./*.jar > nohup.out 2>&1 &"

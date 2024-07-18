@@ -67,6 +67,7 @@ jobs:
           username: ${{ secrets.DEV_SERVER_USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
-            # 서버 원격으로 명령어를 실행합니다. 서버 포트를 확인하고 실행중이면 종료합니다. 빌도된 jar파일을 실행합니다.
+            # 서버 원격으로 명령어를 실행합니다. 서버 포트를 확인하고 실행중이면 종료합니다. 빌드된 jar파일을 실행합니다.
             sudo fuser -k ${{ secrets.DEV_SERVER_PORT }}/tcp || true; 
-            nohup sudo java -jar ./*.jar > nohup.out 2>&1 &
+            sudo mkdir -p /home/ubuntu/logs
+            sudo nohup java -jar ./*.jar > /home/ubuntu/logs/nohup.out 2>&1 &

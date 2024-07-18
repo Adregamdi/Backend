@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - develop
+      - bugfix/#23
 
 permissions:
   contents: read
@@ -42,6 +43,9 @@ jobs:
         with:
           arguments: build
 
+      - name: List build directory
+        run: ls -R ./build/libs
+
       # 서버에 통신하기 위한 SSH를 설정합니다.
       - name: Setup SSH
         uses: appleboy/ssh-action@v0.1.8
@@ -55,7 +59,7 @@ jobs:
             sudo ssh-keyscan ${{ secrets.DEV_SERVER_HOST }} >> ~/.ssh/known_hosts
             
             # 서버에 jar파일을 보내기 위해 scp 명령어를 사용합니다.
-            scp ./build/libs/*.jar ${{ secrets.DEV_SERVER_USERNAME }}@${{ secrets.DEV_SERVER_HOST }}:/home/ubuntu
+            scp -o StrictHostKeyChecking=no ./build/libs/*.jar ${{ secrets.DEV_SERVER_USERNAME }}@${{ secrets.DEV_SERVER_HOST }}:/home/ubuntu
             
             # 서버 원격으로 명령어를 실행합니다. 서버 포트를 확인하고 실행중이면 종료합니다. 빌도된 jar파일을 실행합니다.
             sudo fuser -k ${{ secrets.DEV_SERVER_PORT }}/tcp || true; 

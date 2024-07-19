@@ -15,5 +15,7 @@ import java.util.UUID;
 public class Notification extends BaseTime {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    private UUID id;
+    private Long id;
+    @Column
+    private UUID memberId;
 }

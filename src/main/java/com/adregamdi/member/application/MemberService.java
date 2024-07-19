@@ -3,6 +3,7 @@ package com.adregamdi.member.application;
 import com.adregamdi.member.domain.Member;
 import com.adregamdi.member.domain.Role;
 import com.adregamdi.member.domain.SocialType;
+import com.adregamdi.member.dto.response.GetMyMemberResponse;
 import com.adregamdi.member.exception.MemberException.MemberNotFoundException;
 import com.adregamdi.member.infrastructure.MemberRepository;
 import lombok.RequiredArgsConstructor;
@@ -25,6 +26,14 @@ import java.util.UUID;
 public class MemberService {
     private final MemberRepository memberRepository;
     private final WebClient webClient;
+
+    @Transactional
+    public GetMyMemberResponse getMyMember(final String username) {
+        Member member = memberRepository.findById(UUID.fromString(username))
+                .orElseThrow(() -> new MemberNotFoundException(username));
+
+        return GetMyMemberResponse.from(member);
+    }
 
     @Transactional
     public void logout(final String memberId) {

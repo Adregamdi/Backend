@@ -14,7 +14,7 @@ import java.util.UUID;
 @Table(name = "tbl_notification")
 public class Notification extends BaseTime {
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     @Column
     private UUID memberId; // 회원 id

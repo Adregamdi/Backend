@@ -67,7 +67,7 @@ public class MemberService {
      */
     @Scheduled(cron = "0 0 0 * * ?")
     @Transactional
-    public void leave() {
+    protected void leave() {
         LocalDateTime date = LocalDateTime.now().minusDays(30);
         List<Member> members = memberRepository.findByMemberStatusAndUpdatedAt(date)
                 .orElseThrow(MemberNotFoundException::new);

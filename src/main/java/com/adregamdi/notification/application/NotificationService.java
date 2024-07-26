@@ -23,7 +23,7 @@ public class NotificationService {
     private final NotificationRepository notificationRepository;
 
     /**
-     * [전체 안 읽은 알림 조회]
+     * [내 알림 조회]
      */
     @Transactional(readOnly = true)
     public GetNotificationResponse get(final Long lastId, final String memberId) {

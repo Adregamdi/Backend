@@ -24,4 +24,11 @@ public class Notification extends BaseTime {
     private String uri; // 필요 시 리다이렉트 시킬 uri
     @Column
     private boolean isRead; // 상태 (T: 읽음, F: 안 읽음)
+
+    @Enumerated(EnumType.STRING)
+    private NotificationType type; // 알림 종류 ()
+
+    public void updateIsRead(final boolean isRead) {
+        this.isRead = isRead;
+    }
 }

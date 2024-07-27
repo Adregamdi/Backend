@@ -27,6 +27,9 @@ public class MemberService {
     private final MemberRepository memberRepository;
     private final WebClient webClient;
 
+    /**
+     * [내 정보 조회]
+     */
     @Transactional
     public GetMyMemberResponse getMyMember(final String username) {
         Member member = memberRepository.findById(UUID.fromString(username))
@@ -35,6 +38,9 @@ public class MemberService {
         return GetMyMemberResponse.from(member);
     }
 
+    /**
+     * [로그아웃]
+     */
     @Transactional
     public void logout(final String memberId) {
         Member member = memberRepository.findByIdAndMemberStatus(UUID.fromString(memberId), true)
@@ -43,6 +49,9 @@ public class MemberService {
         member.updateRefreshTokenStatus(false);
     }
 
+    /**
+     * [소프트 탈퇴]
+     */
     @Transactional
     public void delete(final String memberId) {
         Member member = memberRepository.findByIdAndMemberStatus(UUID.fromString(memberId), true)
@@ -53,9 +62,12 @@ public class MemberService {
         member.updateRefreshTokenStatus(false);
     }
 
+    /**
+     * [완전 탈퇴]
+     */
     @Scheduled(cron = "0 0 0 * * ?")
     @Transactional
-    public void leave() {
+    protected void leave() {
         LocalDateTime date = LocalDateTime.now().minusDays(30);
         List<Member> members = memberRepository.findByMemberStatusAndUpdatedAt(date)
                 .orElseThrow(MemberNotFoundException::new);
@@ -76,6 +88,9 @@ public class MemberService {
 
     }
 
+    /**
+     * [연결 끊기]
+     */
     private void unlink(
             final SocialType socialType,
             final String memberId,

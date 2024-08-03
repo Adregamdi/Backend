@@ -11,15 +11,15 @@ import java.util.UUID;
 @AllArgsConstructor
 @Builder
 @Entity
-@Table(name = "tbl_schedule")
-public class Schedule extends BaseTime {
+@Table(name = "tbl_schedule_place")
+public class SchedulePlace extends BaseTime {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     @Column
-    private UUID memberId; // 회원 id
+    private Long scheduleId; // 일정 id
     @Column
-    private String startDate; // 시작일
+    private Long placeId; // 장소 id
     @Column
-    private String endDate; // 종료일
+    private String day; // 날짜
 }

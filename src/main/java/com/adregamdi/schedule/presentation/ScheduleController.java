@@ -3,7 +3,7 @@ package com.adregamdi.schedule.presentation;
 import com.adregamdi.core.annotation.MemberAuthorize;
 import com.adregamdi.core.handler.ApiResponse;
 import com.adregamdi.schedule.application.ScheduleService;
-import com.adregamdi.schedule.dto.request.CreateScheduleRequest;
+import com.adregamdi.schedule.dto.request.CreateMyScheduleRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -22,11 +22,11 @@ public class ScheduleController {
 
     @PostMapping
     @MemberAuthorize
-    public ResponseEntity<ApiResponse<Void>> create(
-            @RequestBody final CreateScheduleRequest request,
+    public ResponseEntity<ApiResponse<Void>> createMySchedule(
+            @RequestBody final CreateMyScheduleRequest request,
             @AuthenticationPrincipal final UserDetails userDetails
     ) {
-        scheduleService.create(request, userDetails.getUsername());
+        scheduleService.createMySchedule(request, userDetails.getUsername());
         return ResponseEntity.ok()
                 .body(ApiResponse.<Void>builder()
                         .statusCode(HttpStatus.CREATED)

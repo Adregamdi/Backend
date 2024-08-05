@@ -22,4 +22,6 @@ public class Schedule extends BaseTime {
     private String startDate; // 시작일
     @Column
     private String endDate; // 종료일
+    @Column
+    private String title; // 제목
 }

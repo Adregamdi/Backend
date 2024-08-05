@@ -17,7 +17,9 @@ public class Place extends BaseTime {
     @Column
     private String name; // 장소 이름
     @Column
-    private String profileImage; // 장소 프로필 사진
+    private String information; // 기본 정보
+    @Column
+    private String image; // 장소 사진
     @Column
     private Double latitude; // 위도
     @Column

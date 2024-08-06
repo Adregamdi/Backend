@@ -29,9 +29,9 @@ public class ShortsController {
         UUID memberId = jwtService.extractMemberId(accessToken)
                 .orElseThrow(IllegalArgumentException::new);
 
-        String shortsUrl = shortsService.uploadVideo(video);
+        String shortsUrl = shortsService.uploadVideo(video, memberId);
 
-
+        return null;
 
     }
 

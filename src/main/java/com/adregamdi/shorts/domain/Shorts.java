@@ -41,4 +41,5 @@ public class Shorts extends BaseTime {
         this.placeNo = placeNo;
         this.travelReviewNo = travelReviewNo;
     }
+
 }

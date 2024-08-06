@@ -10,43 +10,41 @@ import com.querydsl.core.types.Path;
 
 
 /**
- * QSchedule is a Querydsl query type for Schedule
+ * QSchedulePlace is a Querydsl query type for SchedulePlace
  */
 @Generated("com.querydsl.codegen.DefaultEntitySerializer")
-public class QSchedule extends EntityPathBase<Schedule> {
+public class QSchedulePlace extends EntityPathBase<SchedulePlace> {
 
-    private static final long serialVersionUID = 96321667L;
+    private static final long serialVersionUID = -1895890364L;
 
-    public static final QSchedule schedule = new QSchedule("schedule");
+    public static final QSchedulePlace schedulePlace = new QSchedulePlace("schedulePlace");
 
     public final com.adregamdi.core.entity.QBaseTime _super = new com.adregamdi.core.entity.QBaseTime(this);
 
     //inherited
     public final DateTimePath<java.time.LocalDateTime> createdAt = _super.createdAt;
 
-    public final StringPath endDate = createString("endDate");
+    public final StringPath day = createString("day");
 
     public final NumberPath<Long> id = createNumber("id", Long.class);
 
-    public final ComparablePath<java.util.UUID> memberId = createComparable("memberId", java.util.UUID.class);
+    public final NumberPath<Long> placeId = createNumber("placeId", Long.class);
 
-    public final StringPath startDate = createString("startDate");
-
-    public final StringPath title = createString("title");
+    public final NumberPath<Long> scheduleId = createNumber("scheduleId", Long.class);
 
     //inherited
     public final DateTimePath<java.time.LocalDateTime> updatedAt = _super.updatedAt;
 
-    public QSchedule(String variable) {
-        super(Schedule.class, forVariable(variable));
+    public QSchedulePlace(String variable) {
+        super(SchedulePlace.class, forVariable(variable));
     }
 
-    public QSchedule(Path<? extends Schedule> path) {
+    public QSchedulePlace(Path<? extends SchedulePlace> path) {
         super(path.getType(), path.getMetadata());
     }
 
-    public QSchedule(PathMetadata metadata) {
-        super(Schedule.class, metadata);
+    public QSchedulePlace(PathMetadata metadata) {
+        super(SchedulePlace.class, metadata);
     }
 
 }

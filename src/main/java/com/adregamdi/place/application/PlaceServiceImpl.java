@@ -13,7 +13,7 @@ public class PlaceServiceImpl implements PlaceService {
     @Override
     @Transactional(readOnly = true)
     public GetPlaceResponse get(int pageNo, String name) {
-
+        return null;
     }
 
     @Override

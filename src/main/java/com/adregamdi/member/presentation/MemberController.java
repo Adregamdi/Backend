@@ -19,6 +19,7 @@ public class MemberController {
 
     @GetMapping("/login")
     public ResponseEntity<ApiResponse<Void>> login() {
+        memberService.login();
         return ResponseEntity.ok()
                 .body(ApiResponse.<Void>builder()
                         .statusCode(HttpStatus.OK)

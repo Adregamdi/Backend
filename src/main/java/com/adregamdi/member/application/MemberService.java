@@ -27,6 +27,10 @@ public class MemberService {
     private final MemberRepository memberRepository;
     private final WebClient webClient;
 
+    @Transactional
+    public void login() {
+    }
+
     /**
      * [내 정보 조회]
      */

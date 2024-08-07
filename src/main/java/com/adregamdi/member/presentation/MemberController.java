@@ -17,6 +17,14 @@ import org.springframework.web.bind.annotation.*;
 public class MemberController {
     private final MemberService memberService;
 
+    @GetMapping("/login")
+    public ResponseEntity<ApiResponse<Void>> login() {
+        return ResponseEntity.ok()
+                .body(ApiResponse.<Void>builder()
+                        .statusCode(HttpStatus.OK)
+                        .build());
+    }
+
     @GetMapping("/me")
     @MemberAuthorize
     public ResponseEntity<ApiResponse<GetMyMemberResponse>> getMyMember(@AuthenticationPrincipal final UserDetails userDetails) {

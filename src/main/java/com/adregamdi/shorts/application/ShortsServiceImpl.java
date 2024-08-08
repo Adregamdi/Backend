@@ -1,6 +1,5 @@
 package com.adregamdi.shorts.application;
 
-import com.adregamdi.shorts.domain.Shorts;
 import com.adregamdi.shorts.infrastructure.ShortsRepository;
 import com.amazonaws.services.s3.AmazonS3Client;
 import com.amazonaws.services.s3.model.ObjectMetadata;
@@ -29,6 +28,8 @@ public class ShortsServiceImpl implements ShortsService{
     @Value("cloud.aws.s3.bucket")
     private String bucketName;
 
+    //  저장 경로 - memberId / UUID + 업로드 시.확장자
+
     @Override
     @Transactional
     public String uploadVideo(MultipartFile video, UUID memberId) {
@@ -45,7 +46,7 @@ public class ShortsServiceImpl implements ShortsService{
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "S3 업로드에 실패하였습니다.");
         }
 
-        return null;
+        return videoUrl;
     }
 
     private String putVideoToS3(String key, MultipartFile videoFile) throws IOException {
@@ -75,4 +76,5 @@ public class ShortsServiceImpl implements ShortsService{
 
         return dirName + "/" + newFileName + "." + extension;
     }
+
 }

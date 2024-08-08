@@ -15,7 +15,7 @@ import java.util.UUID;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/shorts")
+@RequestMapping("/api/shorts")
 public class ShortsController {
 
     private final JwtService jwtService;

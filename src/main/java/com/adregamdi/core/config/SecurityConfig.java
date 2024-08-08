@@ -53,11 +53,11 @@ public class SecurityConfig {
                 .authorizeHttpRequests(request ->
                         request.requestMatchers(ALLOWED_URLS).permitAll()
                                 .anyRequest().authenticated())
-                .oauth2Login(oauth2Login -> oauth2Login
-                        .userInfoEndpoint(userInfo -> userInfo.userService(customOAuth2UserService))
-                        .successHandler(oAuth2LoginSuccessHandler) // 동의하기 눌렀을 때 핸들러 설정
-                        .failureHandler(oAuth2LoginFailureHandler) // 소셜 로그인 실패 시 핸들러 설정
-                )
+//                .oauth2Login(oauth2Login -> oauth2Login
+//                        .userInfoEndpoint(userInfo -> userInfo.userService(customOAuth2UserService))
+//                        .successHandler(oAuth2LoginSuccessHandler)
+//                        .failureHandler(oAuth2LoginFailureHandler)
+//                )
                 .addFilterAfter(jwtAuthenticationFilter(), LogoutFilter.class)
         ;
 

@@ -6,7 +6,6 @@ import com.adregamdi.core.oauth2.service.OAuth2Service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -18,11 +17,11 @@ public class OAuth2Controller {
     private final OAuth2Service oAuth2Service;
 
     @GetMapping("/login")
-    public ResponseEntity<ApiResponse<LoginResponse>> login(OAuth2AuthenticationToken token) {
+    public ResponseEntity<ApiResponse<LoginResponse>> login(String oauthAccessToken) {
         return ResponseEntity.ok()
                 .body(ApiResponse.<LoginResponse>builder()
                         .statusCode(HttpStatus.OK)
-                        .data(oAuth2Service.login(token))
+                        .data(oAuth2Service.login(oauthAccessToken))
                         .build());
     }
 }

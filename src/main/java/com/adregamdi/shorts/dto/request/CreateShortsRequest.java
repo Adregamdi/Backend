@@ -6,7 +6,8 @@ import jakarta.validation.constraints.Positive;
 public record CreateShortsRequest(
         @NotBlank(message = "제목을 작성해주세요.")
         String title,
-        @NotBlank
+        @Positive
+        Long placeNo,
         @Positive
         Long travelReviewNo
 ) {

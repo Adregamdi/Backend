@@ -29,18 +29,32 @@ public class OAuth2Service {
 
     @Transactional
     public LoginResponse login(LoginRequest request) {
-        String userInfoUrl = "https://kapi.kakao.com/v2/user/me";
+        Map userInfo = null;
+        String userInfoUrl;
 
-        Map userInfo = webClient
-                .get()
-                .uri(userInfoUrl)
-                .headers(headers -> headers.setBearerAuth(request.oauthAccessToken()))
-                .retrieve()
-                .bodyToMono(Map.class)
-                .block();
+        switch (request.socialType()) {
+            case "kakao":
+                userInfoUrl = "https://kapi.kakao.com/v2/user/me";
+                userInfo = fetchUserInfo(userInfoUrl, request.oauthAccessToken());
+                break;
 
-        SocialType socialType = getSocialType("kakao");
-        String userNameAttributeName = "id";
+            case "google":
+                userInfoUrl = "https://www.googleapis.com/oauth2/v3/userinfo";
+                userInfo = fetchUserInfo(userInfoUrl, request.oauthAccessToken());
+                break;
+
+            case "apple":
+                // 애플의 경우, 추가적인 처리 필요 (예: JWT 디코딩 등)
+                // userInfoUrl = "애플 사용자 정보 URL"; // 실제 URL 설정 필요
+                // userInfo = webClient.get().uri(userInfoUrl)...
+                break;
+
+            default:
+                throw new IllegalArgumentException("지원하지 않는 소셜 서비스입니다.: " + request.socialType());
+        }
+
+        SocialType socialType = getSocialType(request.socialType());
+        String userNameAttributeName = (request.socialType().equals("google")) ? "sub" : "id";
         OAuth2Attributes extractAttributes = OAuth2Attributes.of(socialType, userNameAttributeName, userInfo);
 
         Member findMember = getMember(extractAttributes, socialType);
@@ -52,6 +66,16 @@ public class OAuth2Service {
         findMember.updateRefreshTokenStatus(true);
 
         return new LoginResponse(accessToken, refreshToken);
+    }
+
+    private Map fetchUserInfo(String userInfoUrl, String accessToken) {
+        return webClient
+                .get()
+                .uri(userInfoUrl)
+                .headers(headers -> headers.setBearerAuth(accessToken))
+                .retrieve()
+                .bodyToMono(Map.class)
+                .block();
     }
 
     private SocialType getSocialType(final String registrationId) {

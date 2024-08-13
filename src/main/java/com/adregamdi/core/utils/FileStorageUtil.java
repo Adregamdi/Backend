@@ -120,22 +120,23 @@ public class FileStorageUtil {
         File target = File.createTempFile("compressed", "." + getFileExtension(videoFile.getOriginalFilename()));
 
         MultimediaObject multimediaObject = new MultimediaObject(source);
+        // 동영상 파일 정보 추출
         MultimediaInfo info = multimediaObject.getInfo();
 
         if (info.getDuration() > VIDEO_MAX_DURATION * 1000) {
-            throw new IllegalArgumentException("Video duration exceeds the maximum allowed length of 60 seconds");
+            throw new IllegalArgumentException("쇼츠는 60초를 넘길 수 없습니다!");
         }
 
         AudioAttributes audio = new AudioAttributes();
-        audio.setCodec("aac");
-        audio.setBitRate(128000);
-        audio.setChannels(2);
-        audio.setSamplingRate(44100);
+        audio.setCodec("aac");  // AAC 코덱
+        audio.setBitRate(128000);   // 128 kbps
+        audio.setChannels(2);   // 스테레오 채널
+        audio.setSamplingRate(44100);   // 44.1 kHz 샘플링
 
         VideoAttributes video = new VideoAttributes();
         video.setCodec("h264");
         video.setBitRate(VIDEO_MAX_BITRATE);
-        video.setFrameRate(30);
+        video.setFrameRate(30); // 30 프레임 속도로 인코딩
 
         EncodingAttributes attrs = new EncodingAttributes();
         attrs.setOutputFormat("mp4");

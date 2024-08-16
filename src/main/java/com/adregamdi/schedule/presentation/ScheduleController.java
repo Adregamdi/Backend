@@ -29,7 +29,7 @@ public class ScheduleController {
         scheduleService.createMySchedule(request, userDetails.getUsername());
         return ResponseEntity.ok()
                 .body(ApiResponse.<Void>builder()
-                        .statusCode(HttpStatus.CREATED)
+                        .statusCode(HttpStatus.CREATED.value())
                         .build()
                 );
     }

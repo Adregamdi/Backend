@@ -3,6 +3,7 @@ package com.adregamdi.place.application;
 import com.adregamdi.place.domain.Place;
 import com.adregamdi.place.dto.PlaceDTO;
 import com.adregamdi.place.dto.response.GetPlaceResponse;
+import com.adregamdi.place.dto.response.GetPlacesResponse;
 import com.adregamdi.place.exception.PlaceException.PlaceNotFoundException;
 import com.adregamdi.place.infrastructure.PlaceRepository;
 import lombok.RequiredArgsConstructor;
@@ -22,20 +23,22 @@ public class PlaceServiceImpl implements PlaceService {
 
     @Override
     @Transactional(readOnly = true)
-    public GetPlaceResponse get(int pageNo, String name) {
+    public GetPlaceResponse get(Long placeId) {
+        Place place = placeRepository.findById(placeId)
+                .orElseThrow(() -> new PlaceNotFoundException(placeId));
+        return GetPlaceResponse.from(place);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public GetPlacesResponse getPlaces(int pageNo, String name) {
         Slice<Place> places = placeRepository.findByNameStartingWith(generatePageAsc(pageNo, NORMAL_PAGE_SIZE, "name"), name)
                 .orElseThrow(() -> new PlaceNotFoundException(name));
-        return GetPlaceResponse.from(
+        return GetPlacesResponse.from(
                 places.getContent()
                         .stream()
                         .map(PlaceDTO::from)
                         .toList()
         );
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    public void getPlaces() {
-
     }
 }

@@ -1,6 +1,7 @@
 package com.adregamdi.place.domain;
 
 import com.adregamdi.core.entity.BaseTime;
+import com.adregamdi.place.dto.request.CreatePlaceRequest;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -26,4 +27,13 @@ public class Place extends BaseTime {
     private Double longitude; // 경도
     @Column
     private Integer locationNo; // 지역번호
+
+    public Place(CreatePlaceRequest request) {
+        this.name = request.name();
+        this.information = request.information();
+        this.image = request.image();
+        this.latitude = request.latitude();
+        this.longitude = request.longitude();
+        this.locationNo = request.locationNo();
+    }
 }

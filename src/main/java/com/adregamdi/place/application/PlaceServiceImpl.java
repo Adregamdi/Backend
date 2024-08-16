@@ -2,8 +2,10 @@ package com.adregamdi.place.application;
 
 import com.adregamdi.place.domain.Place;
 import com.adregamdi.place.dto.PlaceDTO;
+import com.adregamdi.place.dto.request.CreatePlaceRequest;
 import com.adregamdi.place.dto.response.GetPlaceResponse;
 import com.adregamdi.place.dto.response.GetPlacesResponse;
+import com.adregamdi.place.exception.PlaceException.PlaceExistException;
 import com.adregamdi.place.exception.PlaceException.PlaceNotFoundException;
 import com.adregamdi.place.infrastructure.PlaceRepository;
 import lombok.RequiredArgsConstructor;
@@ -40,5 +42,14 @@ public class PlaceServiceImpl implements PlaceService {
                         .map(PlaceDTO::from)
                         .toList()
         );
+    }
+
+    @Override
+    @Transactional
+    public void create(CreatePlaceRequest request) {
+        if (placeRepository.findByNameAndLocationNo(request.name(), request.locationNo()).isPresent()) {
+            throw new PlaceExistException(request);
+        }
+        placeRepository.save(new Place(request));
     }
 }

@@ -1,5 +1,8 @@
 package com.adregamdi.core.handler;
 
+import com.adregamdi.member.exception.MemberException;
+import com.adregamdi.notification.exception.NotificationException;
+import com.adregamdi.place.exception.PlaceException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -29,7 +32,7 @@ public class GlobalExceptionHandler {
         log.warn(exception.getBindingResult().getAllErrors().get(0).getDefaultMessage());
 
         return ResponseEntity
-                .status(HttpStatus.BAD_REQUEST)
+                .status(HttpStatus.BAD_REQUEST.value())
                 .body(new ErrorResponse(HttpStatus.BAD_REQUEST, exception.getBindingResult().getAllErrors().get(0).getDefaultMessage()));
     }
 
@@ -41,7 +44,7 @@ public class GlobalExceptionHandler {
         log.warn(exception.getMessage());
 
         return ResponseEntity
-                .status(HttpStatus.BAD_REQUEST)
+                .status(HttpStatus.BAD_REQUEST.value())
                 .body(new ErrorResponse(HttpStatus.BAD_REQUEST, "DateTime 형식이 잘못되었습니다. 서버 관리자에게 문의해 주세요."));
     }
 
@@ -50,29 +53,35 @@ public class GlobalExceptionHandler {
         log.warn(exception.getMessage());
 
         return ResponseEntity
-                .status(HttpStatus.BAD_REQUEST)
+                .status(HttpStatus.BAD_REQUEST.value())
                 .body(new ErrorResponse(HttpStatus.BAD_REQUEST, DEFAULT_FORMAT_ERROR_MESSAGE));
     }
 
-//    // 존재x 예외
-//    @ExceptionHandler(value = {})
-//    public ResponseEntity<ErrorResponse> handleNotFoundException(final RuntimeException exception) {
-//        log.warn(exception.getMessage());
-//
-//        return ResponseEntity
-//                .status(HttpStatus.NOT_FOUND)
-//                .body(new ErrorResponse(HttpStatus.NOT_FOUND, exception.getMessage()));
-//    }
-//
-//    // 존재 예외
-//    @ExceptionHandler(value = {})
-//    public ResponseEntity<ErrorResponse> handleExistException(final RuntimeException exception) {
-//        log.warn(exception.getMessage());
-//
-//        return ResponseEntity
-//                .status(HttpStatus.CONFLICT)
-//                .body(new ErrorResponse(HttpStatus.CONFLICT, exception.getMessage()));
-//    }
+    // 존재x 예외
+    @ExceptionHandler(value = {
+            MemberException.MemberNotFoundException.class,
+            NotificationException.NotificationNotFoundException.class,
+            PlaceException.PlaceNotFoundException.class
+    })
+    public ResponseEntity<ErrorResponse> handleNotFoundException(final RuntimeException exception) {
+        log.warn(exception.getMessage());
+
+        return ResponseEntity
+                .status(HttpStatus.NOT_FOUND.value())
+                .body(new ErrorResponse(HttpStatus.NOT_FOUND, exception.getMessage()));
+    }
+
+    // 존재 예외
+    @ExceptionHandler(value = {
+            PlaceException.PlaceExistException.class
+    })
+    public ResponseEntity<ErrorResponse> handleExistException(final RuntimeException exception) {
+        log.warn(exception.getMessage());
+
+        return ResponseEntity
+                .status(HttpStatus.CONFLICT.value())
+                .body(new ErrorResponse(HttpStatus.CONFLICT, exception.getMessage()));
+    }
 //
 //    // 커스텀 예외
 //    @ExceptionHandler(value = {})
@@ -97,7 +106,7 @@ public class GlobalExceptionHandler {
         log.error(exception.getMessage() + errorKeyInfo + exceptionTypeInfo);
 
         return ResponseEntity
-                .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .status(HttpStatus.INTERNAL_SERVER_ERROR.value())
                 .body(new ErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, DEFAULT_ERROR_MESSAGE + errorKeyInfo));
     }
 }

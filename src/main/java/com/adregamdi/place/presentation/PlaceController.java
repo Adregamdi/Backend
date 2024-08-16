@@ -4,7 +4,6 @@ import com.adregamdi.core.annotation.MemberAuthorize;
 import com.adregamdi.core.handler.ApiResponse;
 import com.adregamdi.place.application.PlaceService;
 import com.adregamdi.place.dto.request.CreatePlaceRequest;
-import com.adregamdi.place.dto.response.CreatePlaceResponse;
 import com.adregamdi.place.dto.response.GetPlaceResponse;
 import com.adregamdi.place.dto.response.GetPlacesResponse;
 import jakarta.validation.constraints.PositiveOrZero;
@@ -46,10 +45,10 @@ public class PlaceController {
 
     @PostMapping
     @MemberAuthorize
-    public ResponseEntity<ApiResponse<CreatePlaceResponse>> create(@RequestBody final CreatePlaceRequest request) {
+    public ResponseEntity<ApiResponse<Void>> create(@RequestBody final CreatePlaceRequest request) {
         placeService.create(request);
         return ResponseEntity.ok()
-                .body(ApiResponse.<CreatePlaceResponse>builder()
+                .body(ApiResponse.<Void>builder()
                         .statusCode(HttpStatus.CREATED.value())
                         .build()
                 );

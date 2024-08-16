@@ -1,17 +1,15 @@
 package com.adregamdi.place.dto.response;
 
-import com.adregamdi.place.dto.PlaceDTO;
+import com.adregamdi.place.domain.Place;
 import lombok.Builder;
-
-import java.util.List;
 
 @Builder
 public record GetPlaceResponse(
-        List<PlaceDTO> companyList
+        Place place
 ) {
-    public static GetPlaceResponse from(final List<PlaceDTO> companyList) {
+    public static GetPlaceResponse from(final Place place) {
         return GetPlaceResponse.builder()
-                .companyList(companyList)
+                .place(place)
                 .build();
     }
 }

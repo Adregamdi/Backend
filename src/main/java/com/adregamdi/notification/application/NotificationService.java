@@ -22,7 +22,7 @@ import java.util.UUID;
 public class NotificationService {
     private final NotificationRepository notificationRepository;
 
-    /**
+    /*
      * [내 알림 조회]
      */
     @Transactional(readOnly = true)
@@ -36,7 +36,7 @@ public class NotificationService {
         );
     }
 
-    /**
+    /*
      * [안 읽은 알림 개수 세기]
      */
     private int countNoReadNotification(final List<Notification> notifications) {
@@ -45,7 +45,7 @@ public class NotificationService {
                 .count();
     }
 
-    /**
+    /*
      * [알림 수정]
      * 사용자가 알림 읽으면 상태 true 로 변경
      */
@@ -57,7 +57,7 @@ public class NotificationService {
                 .forEach(notification -> notification.updateIsRead(true));
     }
 
-    /**
+    /*
      * [알림 삭제]
      * 30일이 지난 알림들 매일 자정에 삭제
      */

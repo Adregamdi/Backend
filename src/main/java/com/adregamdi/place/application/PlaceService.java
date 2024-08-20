@@ -23,7 +23,7 @@ public interface PlaceService {
     void create(CreatePlaceRequest request);
 
     /*
-     * [장소 등록 - 외부 API]
+     * [장소 등록 By 외부 API]
      * */
     void createByAPI();
 }

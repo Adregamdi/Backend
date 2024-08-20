@@ -17,5 +17,13 @@ public interface PlaceService {
      * */
     GetPlacesResponse getPlaces(int pageNo, String name);
 
+    /*
+     * [장소 등록]
+     * */
     void create(CreatePlaceRequest request);
+
+    /*
+     * [장소 등록 - 외부 API]
+     * */
+    void createByAPI();
 }

@@ -52,4 +52,9 @@ public class PlaceServiceImpl implements PlaceService {
         }
         placeRepository.save(new Place(request));
     }
+
+    @Override
+    public void createByAPI() {
+        
+    }
 }

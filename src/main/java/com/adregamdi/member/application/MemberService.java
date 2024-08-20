@@ -1,5 +1,6 @@
 package com.adregamdi.member.application;
 
+import com.adregamdi.core.jwt.service.JwtService;
 import com.adregamdi.member.domain.Member;
 import com.adregamdi.member.domain.Role;
 import com.adregamdi.member.domain.SocialType;

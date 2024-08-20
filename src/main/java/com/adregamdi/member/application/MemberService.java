@@ -1,6 +1,5 @@
 package com.adregamdi.member.application;
 
-import com.adregamdi.core.jwt.service.JwtService;
 import com.adregamdi.member.domain.Member;
 import com.adregamdi.member.domain.Role;
 import com.adregamdi.member.domain.SocialType;
@@ -25,8 +24,8 @@ import java.util.UUID;
 @RequiredArgsConstructor
 @Service
 public class MemberService {
-    private final MemberRepository memberRepository;
     private final WebClient webClient;
+    private final MemberRepository memberRepository;
 
     /**
      * [내 정보 조회]

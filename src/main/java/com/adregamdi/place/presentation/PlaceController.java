@@ -29,7 +29,7 @@ public class PlaceController {
                 );
     }
 
-    @GetMapping
+    @GetMapping("/list")
     @MemberAuthorize
     public ResponseEntity<ApiResponse<GetPlacesResponse>> getPlaces(
             @RequestParam("page_no") @PositiveOrZero final int pageNo,

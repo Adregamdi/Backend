@@ -15,7 +15,7 @@ import java.util.UUID;
 public class Schedule extends BaseTime {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Long scheduleId;
     @Column
     private UUID memberId; // 회원 id
     @Column

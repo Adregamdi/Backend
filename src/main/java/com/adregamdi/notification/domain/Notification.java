@@ -15,7 +15,7 @@ import java.util.UUID;
 public class Notification extends BaseTime {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Long notificationId;
     @Column
     private UUID memberId; // 회원 id
     @Column

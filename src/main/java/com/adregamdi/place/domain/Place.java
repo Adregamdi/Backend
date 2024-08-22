@@ -16,24 +16,44 @@ public class Place extends BaseTime {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     @Column
-    private String name; // 장소 이름
+    private String title; // 장소 이름
     @Column
-    private String information; // 기본 정보
+    private String contentsLabel; // 콘텐츠 라벨
     @Column
-    private String image; // 장소 사진
+    private String regionLabel; // 지역 라벨
+    @Column
+    private String region1Cd; // 1차 지역 코드
+    @Column
+    private String region2Cd; // 2차 지역 코드
+    @Column
+    private String address; // 주소
+    @Column
+    private String roadAddress; // 도로명 주소
+    @Column
+    private String tag; // 태그
+    @Column
+    private String introduction; // 소개
+    @Column
+    private String information; // 정보
     @Column
     private Double latitude; // 위도
     @Column
     private Double longitude; // 경도
     @Column
+    private String phoneNo; // 전화번호
+    @Column
     private Integer locationNo; // 지역번호
+    @Column
+    private String imgPath; // 일반 이미지 경로
+    @Column
+    private String thumbnailPath; // 썸네일 이미지 경로
 
     public Place(CreatePlaceRequest request) {
-        this.name = request.name();
+        this.title = request.title();
         this.information = request.information();
-        this.image = request.image();
         this.latitude = request.latitude();
         this.longitude = request.longitude();
         this.locationNo = request.locationNo();
+        this.imgPath = request.imgPath();
     }
 }

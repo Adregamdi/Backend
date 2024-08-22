@@ -6,5 +6,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.Optional;
 
 public interface PlaceRepository extends JpaRepository<Place, Long>, PlaceCustomRepository {
-    Optional<Place> findByNameAndLocationNo(String name, Integer locationNo);
+    Optional<Place> findByTitleAndContentsLabel(String title, String ContentsLabel);
 }

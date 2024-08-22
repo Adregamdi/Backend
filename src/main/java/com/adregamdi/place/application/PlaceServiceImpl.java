@@ -58,7 +58,7 @@ public class PlaceServiceImpl implements PlaceService {
     @Override
     @Transactional
     public void create(CreatePlaceRequest request) {
-        if (placeRepository.findByNameAndLocationNo(request.name(), request.locationNo()).isPresent()) {
+        if (placeRepository.findByTitleAndContentsLabel(request.title(), request.contentsLabel()).isPresent()) {
             throw new PlaceExistException(request);
         }
         placeRepository.save(new Place(request));

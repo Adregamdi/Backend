@@ -65,9 +65,19 @@ public class Place extends BaseTime {
 
     public Place(CreatePlaceRequest request) {
         this.title = request.title();
+        this.contentsLabel = request.contentsLabel();
+        this.region1Cd = request.region1Cd();
+        this.region2Cd = request.region2Cd();
+        this.regionLabel = request.regionLabel();
+        this.address = request.address();
+        this.roadAddress = request.roadAddress();
+        this.tag = request.tag();
+        this.introduction = request.introduction();
         this.information = request.information();
         this.latitude = request.latitude();
         this.longitude = request.longitude();
+        this.phoneNo = request.phoneNo();
         this.imgPath = request.imgPath();
+        this.thumbnailPath = request.thumbnailPath();
     }
 }

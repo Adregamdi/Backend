@@ -103,13 +103,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             response.setStatus(HttpStatus.UNAUTHORIZED.value());
             response.setContentType(MediaType.APPLICATION_JSON_VALUE);
             response.setCharacterEncoding("UTF-8");
-            objectMapper.writeValue(response.getWriter(), new ErrorResponse(HttpStatus.UNAUTHORIZED, e.getMessage()));
+            objectMapper.writeValue(response.getWriter(), new ErrorResponse(HttpStatus.UNAUTHORIZED.value(), e.getMessage()));
             return;
         } catch (LogoutMemberException e) {
             response.setStatus(HttpStatus.FORBIDDEN.value());
             response.setContentType(MediaType.APPLICATION_JSON_VALUE);
             response.setCharacterEncoding("UTF-8");
-            objectMapper.writeValue(response.getWriter(), new ErrorResponse(HttpStatus.FORBIDDEN, e.getMessage()));
+            objectMapper.writeValue(response.getWriter(), new ErrorResponse(HttpStatus.FORBIDDEN.value(), e.getMessage()));
             return;
         }
 

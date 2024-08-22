@@ -33,7 +33,7 @@ public class GlobalExceptionHandler {
 
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST.value())
-                .body(new ErrorResponse(HttpStatus.BAD_REQUEST, exception.getBindingResult().getAllErrors().get(0).getDefaultMessage()));
+                .body(new ErrorResponse(HttpStatus.BAD_REQUEST.value(), exception.getBindingResult().getAllErrors().get(0).getDefaultMessage()));
     }
 
     @ExceptionHandler(value = {
@@ -45,7 +45,7 @@ public class GlobalExceptionHandler {
 
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST.value())
-                .body(new ErrorResponse(HttpStatus.BAD_REQUEST, "DateTime 형식이 잘못되었습니다. 서버 관리자에게 문의해 주세요."));
+                .body(new ErrorResponse(HttpStatus.BAD_REQUEST.value(), "DateTime 형식이 잘못되었습니다. 서버 관리자에게 문의해 주세요."));
     }
 
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
@@ -54,7 +54,7 @@ public class GlobalExceptionHandler {
 
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST.value())
-                .body(new ErrorResponse(HttpStatus.BAD_REQUEST, DEFAULT_FORMAT_ERROR_MESSAGE));
+                .body(new ErrorResponse(HttpStatus.BAD_REQUEST.value(), DEFAULT_FORMAT_ERROR_MESSAGE));
     }
 
     // 존재x 예외
@@ -68,7 +68,7 @@ public class GlobalExceptionHandler {
 
         return ResponseEntity
                 .status(HttpStatus.NOT_FOUND.value())
-                .body(new ErrorResponse(HttpStatus.NOT_FOUND, exception.getMessage()));
+                .body(new ErrorResponse(HttpStatus.NOT_FOUND.value(), exception.getMessage()));
     }
 
     // 존재 예외
@@ -80,7 +80,7 @@ public class GlobalExceptionHandler {
 
         return ResponseEntity
                 .status(HttpStatus.CONFLICT.value())
-                .body(new ErrorResponse(HttpStatus.CONFLICT, exception.getMessage()));
+                .body(new ErrorResponse(HttpStatus.CONFLICT.value(), exception.getMessage()));
     }
 //
 //    // 커스텀 예외
@@ -107,6 +107,6 @@ public class GlobalExceptionHandler {
 
         return ResponseEntity
                 .status(HttpStatus.INTERNAL_SERVER_ERROR.value())
-                .body(new ErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, DEFAULT_ERROR_MESSAGE + errorKeyInfo));
+                .body(new ErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR.value(), DEFAULT_ERROR_MESSAGE + errorKeyInfo));
     }
 }

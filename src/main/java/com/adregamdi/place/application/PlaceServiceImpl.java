@@ -19,6 +19,9 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.scheduler.Schedulers;
 
+import java.util.stream.IntStream;
+import java.util.stream.StreamSupport;
+
 import static com.adregamdi.core.constant.Constant.NORMAL_PAGE_SIZE;
 import static com.adregamdi.core.utils.PageUtil.generatePageAsc;
 
@@ -64,7 +67,7 @@ public class PlaceServiceImpl implements PlaceService {
     @Override
     @Transactional
     public void createByAPI() {
-        for (int i = 1; i <= 55; i++) {
+        IntStream.rangeClosed(1, 55).forEach(i -> {
             String url = "https://api.visitjeju.net/vsjApi/contents/searchList?locale=kr&apiKey=" + apiKey + "&page=" + i;
 
             webClient.get()
@@ -78,31 +81,34 @@ public class PlaceServiceImpl implements PlaceService {
                             JsonNode jsonNode = objectMapper.readTree(response);
                             JsonNode items = jsonNode.path("items");
 
-                            for (JsonNode item : items) {
-                                String title = item.path("title").asText();
-                                String contentsLabel = item.path("contentscd").path("label").asText();
-                                String region1Value = item.path("region1cd").path("value").asText();
-                                String region2Value = item.path("region2cd").path("value").asText();
-                                String region2Label = item.path("region2cd").path("label").asText();
-                                String address = item.path("address").asText();
-                                String roadAddress = item.path("roadaddress").asText();
-                                String tag = formatTags(item.path("tag").asText());
-                                String introduction = item.path("introduction").asText();
-                                double latitude = item.path("latitude").asDouble();
-                                double longitude = item.path("longitude").asDouble();
-                                String phoneNo = item.path("phoneno").asText();
-                                String imgPath = item.path("repPhoto").path("photoid").path("imgpath").asText();
-                                String thumbnailPath = item.path("repPhoto").path("photoid").path("thumbnailpath").asText();
+                            StreamSupport.stream(items.spliterator(), false)
+                                    .map(item -> {
+                                        String title = item.path("title").asText();
+                                        String contentsLabel = item.path("contentscd").path("label").asText();
+                                        String region1Value = item.path("region1cd").path("value").asText();
+                                        String region2Value = item.path("region2cd").path("value").asText();
+                                        String region2Label = item.path("region2cd").path("label").asText();
+                                        String address = item.path("address").asText();
+                                        String roadAddress = item.path("roadaddress").asText();
+                                        String tag = formatTags(item.path("tag").asText());
+                                        String introduction = item.path("introduction").asText();
+                                        double latitude = item.path("latitude").asDouble();
+                                        double longitude = item.path("longitude").asDouble();
+                                        String phoneNo = item.path("phoneno").asText();
+                                        String imgPath = item.path("repPhoto").path("photoid").path("imgpath").asText();
+                                        String thumbnailPath = item.path("repPhoto").path("photoid").path("thumbnailpath").asText();
 
-                                placeRepository.save(new Place(title, contentsLabel, region1Value, region2Value, region2Label, address, roadAddress, tag, introduction, latitude, longitude, phoneNo, imgPath, thumbnailPath));
-                            }
+                                        return new Place(title, contentsLabel, region1Value, region2Value, region2Label, address, roadAddress, tag, introduction, latitude, longitude, phoneNo, imgPath, thumbnailPath);
+                                    })
+                                    .forEach(placeRepository::save);
+
                             return "Data saved successfully";
                         } catch (Exception e) {
                             return "Error processing response: " + e.getMessage();
                         }
                     })
                     .block();
-        }
+        });
     }
 
     private String formatTags(String tag) {

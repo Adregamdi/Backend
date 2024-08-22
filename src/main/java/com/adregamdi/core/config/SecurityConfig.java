@@ -30,9 +30,10 @@ public class SecurityConfig {
     private final OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler;
     private final OAuth2LoginFailureHandler oAuth2LoginFailureHandler;
     private final String[] ALLOWED_URLS = {
-            "/",
+            "/**",
             "/index.html",
-            "/api/oauth2/login"
+            "/api/oauth2/login",
+            "/api/shorts"
     };
 
     @Bean

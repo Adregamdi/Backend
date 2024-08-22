@@ -7,13 +7,13 @@ import com.amazonaws.services.s3.model.S3Object;
 import com.amazonaws.services.s3.model.S3ObjectInputStream;
 import com.amazonaws.util.IOUtils;
 import lombok.RequiredArgsConstructor;
+import org.imgscalr.Scalr;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
-import org.imgscalr.Scalr;
 import ws.schild.jave.Encoder;
 import ws.schild.jave.EncoderException;
 import ws.schild.jave.MultimediaObject;
@@ -46,9 +46,7 @@ public class FileStorageUtil {
     private final static int VIDEO_MAX_BITRATE = 1000000; // 1Mbps
     private final static int VIDEO_MAX_DURATION = 60; // 60 seconds
 
-    public String uploadFile(byte[] fileContent, String dirName, String fileName) {
-        String key = buildKey(dirName, fileName);
-
+    public String uploadFile(byte[] fileContent, String key) {
         try {
             return putFileToS3(key, fileContent);
         } catch (ResponseStatusException e) {
@@ -56,14 +54,14 @@ public class FileStorageUtil {
         }
     }
 
-    public String uploadImage(MultipartFile imageFile, String dirName) throws IOException {
+    public String uploadImage(MultipartFile imageFile, String key) throws IOException {
         byte[] resizedImage = resizeImage(imageFile);
-        return uploadFile(resizedImage, dirName, imageFile.getOriginalFilename());
+        return uploadFile(resizedImage, key);
     }
 
-    public String uploadVideo(MultipartFile videoFile, String dirName) throws IOException, EncoderException {
+    public String uploadVideo(MultipartFile videoFile, String key) throws IOException, EncoderException {
         byte[] compressedVideo = compressVideo(videoFile);
-        return uploadFile(compressedVideo, dirName, videoFile.getOriginalFilename());
+        return uploadFile(compressedVideo, key);
     }
 
     public byte[] downloadFile(String key) throws IOException {
@@ -95,8 +93,8 @@ public class FileStorageUtil {
         return amazonS3Client.getUrl(bucketName, key).toString();
     }
 
-    private String buildKey(String dirName, String fileName) {
-        String extension = getFileExtension(fileName);
+    public String buildKey(String dirName, String originalFileName) {
+        String extension = getFileExtension(originalFileName);
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         String now = sdf.format(new Date());
         String newFileName = UUID.randomUUID() + "_" + now;

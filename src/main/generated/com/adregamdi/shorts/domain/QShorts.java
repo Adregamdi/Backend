@@ -30,6 +30,8 @@ public class QShorts extends EntityPathBase<Shorts> {
 
     public final NumberPath<Long> placeNo = createNumber("placeNo", Long.class);
 
+    public final StringPath shortsVideoUrl = createString("shortsVideoUrl");
+
     public final StringPath title = createString("title");
 
     public final NumberPath<Long> travelReviewNo = createNumber("travelReviewNo", Long.class);

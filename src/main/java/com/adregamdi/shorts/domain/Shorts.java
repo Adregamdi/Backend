@@ -33,13 +33,18 @@ public class Shorts extends BaseTime {
     @Comment(value = "여행기 번호")
     private Long travelReviewNo;
 
+    @Column
+    @Comment(value = "동영상 업로드 url")
+    private String shortsVideoUrl;
+
     @Builder
-    public Shorts(Long id, String title, UUID memberId, Long placeNo, Long travelReviewNo) {
+    public Shorts(Long id, String title, UUID memberId, Long placeNo, Long travelReviewNo, String shortsVideoUrl) {
         this.id = id;
         this.title = title;
         this.memberId = memberId;
         this.placeNo = placeNo;
         this.travelReviewNo = travelReviewNo;
+        this.shortsVideoUrl = shortsVideoUrl;
     }
 
 }

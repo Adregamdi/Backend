@@ -13,6 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.reactive.function.client.WebClient;
 
 import static com.adregamdi.core.constant.Constant.NORMAL_PAGE_SIZE;
 import static com.adregamdi.core.utils.PageUtil.generatePageAsc;
@@ -21,6 +22,7 @@ import static com.adregamdi.core.utils.PageUtil.generatePageAsc;
 @RequiredArgsConstructor
 @Service
 public class PlaceServiceImpl implements PlaceService {
+    private final WebClient webClient;
     private final PlaceRepository placeRepository;
 
     @Override
@@ -54,7 +56,8 @@ public class PlaceServiceImpl implements PlaceService {
     }
 
     @Override
+    @Transactional
     public void createByAPI() {
-        
+        String url = "";
     }
 }

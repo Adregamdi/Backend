@@ -1,5 +1,6 @@
 package com.adregamdi.place.presentation;
 
+import com.adregamdi.core.annotation.AdminAuthorize;
 import com.adregamdi.core.annotation.MemberAuthorize;
 import com.adregamdi.core.handler.ApiResponse;
 import com.adregamdi.place.application.PlaceService;
@@ -47,6 +48,17 @@ public class PlaceController {
     @MemberAuthorize
     public ResponseEntity<ApiResponse<Void>> create(@RequestBody final CreatePlaceRequest request) {
         placeService.create(request);
+        return ResponseEntity.ok()
+                .body(ApiResponse.<Void>builder()
+                        .statusCode(HttpStatus.CREATED.value())
+                        .build()
+                );
+    }
+
+    @PostMapping("/use-api")
+    @AdminAuthorize
+    public ResponseEntity<ApiResponse<Void>> createByAPI() {
+        placeService.createByAPI();
         return ResponseEntity.ok()
                 .body(ApiResponse.<Void>builder()
                         .statusCode(HttpStatus.CREATED.value())

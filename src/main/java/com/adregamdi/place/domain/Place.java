@@ -46,6 +46,23 @@ public class Place extends BaseTime {
     @Column
     private String thumbnailPath; // 썸네일 이미지 경로
 
+    public Place(String title, String contentsLabel, String region1Value, String region2Value, String region2Label, String address, String roadAddress, String tag, String introduction, double latitude, double longitude, String phoneNo, String imgPath, String thumbnailPath) {
+        this.title = title;
+        this.contentsLabel = contentsLabel;
+        this.region1Cd = region1Value;
+        this.region2Cd = region2Value;
+        this.regionLabel = region2Label;
+        this.address = address;
+        this.roadAddress = roadAddress;
+        this.tag = tag;
+        this.introduction = introduction;
+        this.latitude = latitude;
+        this.longitude = longitude;
+        this.phoneNo = phoneNo;
+        this.imgPath = imgPath;
+        this.thumbnailPath = thumbnailPath;
+    }
+
     public Place(CreatePlaceRequest request) {
         this.title = request.title();
         this.information = request.information();

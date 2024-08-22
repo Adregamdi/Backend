@@ -42,8 +42,6 @@ public class Place extends BaseTime {
     @Column
     private String phoneNo; // 전화번호
     @Column
-    private Integer locationNo; // 지역번호
-    @Column
     private String imgPath; // 일반 이미지 경로
     @Column
     private String thumbnailPath; // 썸네일 이미지 경로
@@ -53,7 +51,6 @@ public class Place extends BaseTime {
         this.information = request.information();
         this.latitude = request.latitude();
         this.longitude = request.longitude();
-        this.locationNo = request.locationNo();
         this.imgPath = request.imgPath();
     }
 }

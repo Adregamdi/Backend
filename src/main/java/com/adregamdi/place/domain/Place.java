@@ -14,7 +14,7 @@ import lombok.*;
 public class Place extends BaseTime {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Long placeId;
     @Column
     private String title; // 장소 이름
     @Column

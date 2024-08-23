@@ -11,23 +11,41 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class PlaceDTO {
-    private Long id;
-    private String name;
+    private Long placeId;
+    private String title;
+    private String contentsLabel;
+    private String regionLabel;
+    private String region1Cd;
+    private String region2Cd;
+    private String address;
+    private String roadAddress;
+    private String tag;
+    private String introduction;
     private String information;
-    private String image;
     private Double latitude;
     private Double longitude;
-    private Integer locationNo;
+    private String phoneNo;
+    private String imgPath;
+    private String thumbnailPath;
 
     public static PlaceDTO from(Place place) {
         return PlaceDTO.builder()
-                .id(place.getId())
-                .name(place.getName())
+                .placeId(place.getPlaceId())
+                .title(place.getTitle())
+                .contentsLabel(place.getContentsLabel())
+                .regionLabel(place.getRegionLabel())
+                .region1Cd(place.getRegion1Cd())
+                .region2Cd(place.getRegion2Cd())
+                .address(place.getAddress())
+                .roadAddress(place.getRoadAddress())
+                .tag(place.getTag())
+                .introduction(place.getIntroduction())
                 .information(place.getInformation())
-                .image(place.getImage())
                 .latitude(place.getLatitude())
                 .longitude(place.getLongitude())
-                .locationNo(place.getLocationNo())
+                .phoneNo(place.getPhoneNo())
+                .imgPath(place.getImgPath())
+                .thumbnailPath(place.getThumbnailPath())
                 .build();
     }
 }

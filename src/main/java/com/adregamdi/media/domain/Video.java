@@ -7,6 +7,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.Comment;
 
+import java.time.LocalDateTime;
+
 @Entity
 @Getter
 @NoArgsConstructor
@@ -29,6 +31,15 @@ public class Video {
     @Comment(value = "대상 식별 값")
     private Long targetId;
 
+    @Column(name = "create_at", updatable = false)
+    @Comment(value = "생성 날짜")
+    private LocalDateTime createAt;
+
+    @PrePersist
+    protected void onCreate() {
+        this.createAt = LocalDateTime.now();
+    }
+
     @Builder
     public Video(Long id, String url, MediaType mediaType, Long targetId) {
         this.id = id;
@@ -36,4 +47,13 @@ public class Video {
         this.mediaType = mediaType;
         this.targetId = targetId;
     }
+
+    public void updateMediaType(MediaType mediaType) {
+        this.mediaType = mediaType;
+    }
+
+    public void updateTargetId(Long targetId) {
+        this.targetId = targetId;
+    }
+
 }

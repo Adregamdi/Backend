@@ -9,9 +9,11 @@ import com.adregamdi.member.domain.SocialType;
 import com.adregamdi.member.infrastructure.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Mono;
 
 import java.util.Map;
 import java.util.Objects;
@@ -60,7 +62,7 @@ public class OAuth2Service {
         Member findMember = getMember(extractAttributes, socialType);
         findMember.updateSocialAccessToken(request.oauthAccessToken());
 
-        String accessToken = jwtService.createAccessToken(String.valueOf(findMember.getId()), findMember.getRole());
+        String accessToken = jwtService.createAccessToken(String.valueOf(findMember.getMemberId()), findMember.getRole());
         String refreshToken = jwtService.createRefreshToken();
         findMember.updateRefreshToken(refreshToken);
         findMember.updateRefreshTokenStatus(true);
@@ -74,6 +76,10 @@ public class OAuth2Service {
                 .uri(userInfoUrl)
                 .headers(headers -> headers.setBearerAuth(accessToken))
                 .retrieve()
+                .onStatus(HttpStatusCode::isError, response ->
+                        response.bodyToMono(String.class)
+                                .flatMap(body -> Mono.error(new RuntimeException("Failed to fetch user info: " + body)))
+                )
                 .bodyToMono(Map.class)
                 .block();
     }

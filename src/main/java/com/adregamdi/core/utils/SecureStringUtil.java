@@ -3,7 +3,7 @@ package com.adregamdi.core.utils;
 import java.security.SecureRandom;
 import java.util.Base64;
 
-public class SecureStringUtils {
+public class SecureStringUtil {
 
     private static final SecureRandom secureRandom = new SecureRandom();
 

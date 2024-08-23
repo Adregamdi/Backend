@@ -1,6 +1,6 @@
 package com.adregamdi.shorts.application;
 
-import com.adregamdi.core.utils.FileStorageUtil;
+import com.adregamdi.core.service.FileUploadService;
 import com.adregamdi.shorts.domain.Shorts;
 import com.adregamdi.shorts.dto.request.CreateShortsRequest;
 import com.adregamdi.shorts.dto.response.CreateShortsResponse;
@@ -22,8 +22,9 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class ShortsServiceImpl implements ShortsService{
 
-    private final FileStorageUtil fileStorageUtil;
+    private FileUploadService fileUploadService;
     private final ShortsRepository shortsRepository;
+
 
 //    private final PlaceService placeService;
 //    private final TravelReviewService travelReviewService;
@@ -33,11 +34,18 @@ public class ShortsServiceImpl implements ShortsService{
 
     @Transactional
     public CreateShortsResponse uploadShorts(MultipartFile videoFile, UUID memberId, CreateShortsRequest request) {
-        String dirName = "shorts/" + memberId;
-        String key = fileStorageUtil.buildKey(dirName, videoFile.getOriginalFilename());
+        String shortsDirName = "shorts/" + memberId;
+        String thumbnailDirName = "shorts/thumbnails/" + memberId;
+        String videoKey = fileUploadService.buildKey(videoFile, shortsDirName);
+        String thumbnailKey = fileUploadService.buildKey(videoFile, thumbnailDirName);
 
         try {
-            String videoUrl = fileStorageUtil.uploadVideo(videoFile, key);
+            byte[] compressedVideo = MediaUtil.compressVideo(videoFile);
+            byte[] thumbnailImage = MediaUtil.generateThumbnail(compressedVideo);
+
+
+            String videoUrl = fileUploadService.uploadFile(compressedVideo, videoKey);
+            String thumbnailUrl = fileUploadService.uploadFile(thumbnailImage, thumbnailKey);
 
             Shorts savedShorts = shortsRepository.save(Shorts.builder()
                     .title(request.title())
@@ -55,6 +63,8 @@ public class ShortsServiceImpl implements ShortsService{
         } catch (IOException | EncoderException e) {
             log.error("영상 업로드 실패");
             throw new RuntimeException("영상 업로드에 실패하였습니다.", e);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
     }
 
@@ -73,7 +83,7 @@ public class ShortsServiceImpl implements ShortsService{
     public void deleteShorts(Long shortsId) {
         Shorts shorts = getShorts(shortsId);
         String key = extractKeyFromUrl(shorts.getShortsVideoUrl());
-        fileStorageUtil.deleteFile(key);
+        mediaUtil.deleteFile(key);
         shortsRepository.delete(shorts);
     }
 

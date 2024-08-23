@@ -14,7 +14,7 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @AllArgsConstructor
 public class NotificationDTO {
-    private Long id;
+    private Long notificationId;
     private String content;
     private String uri;
     private NotificationType type;
@@ -23,7 +23,7 @@ public class NotificationDTO {
 
     public static NotificationDTO from(final Notification notification) {
         return NotificationDTO.builder()
-                .id(notification.getId())
+                .notificationId(notification.getNotificationId())
                 .content(notification.getContent())
                 .uri(notification.getUri())
                 .type(notification.getType())

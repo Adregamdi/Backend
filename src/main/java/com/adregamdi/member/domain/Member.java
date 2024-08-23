@@ -16,7 +16,7 @@ import java.util.UUID;
 public class Member extends BaseTime {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    private UUID id;
+    private UUID memberId;
     @Column
     private String nickname; // 닉네임
     @Column

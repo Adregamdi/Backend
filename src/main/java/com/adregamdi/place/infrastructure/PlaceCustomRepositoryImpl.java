@@ -20,10 +20,10 @@ public class PlaceCustomRepositoryImpl implements PlaceCustomRepository {
     private final JPAQueryFactory jpaQueryFactory;
 
     @Override
-    public Optional<Slice<Place>> findByNameStartingWith(Pageable pageable, String name) {
+    public Optional<Slice<Place>> findByNameStartingWith(Pageable pageable, String title) {
         List<Place> places = jpaQueryFactory
                 .selectFrom(place)
-                .where(place.name.startsWith(name))
+                .where(place.title.startsWith(title))
                 .orderBy(makeOrderSpecifiers(place, pageable))
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())

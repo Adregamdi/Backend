@@ -21,22 +21,40 @@ public class QPlace extends EntityPathBase<Place> {
 
     public final com.adregamdi.core.entity.QBaseTime _super = new com.adregamdi.core.entity.QBaseTime(this);
 
+    public final StringPath address = createString("address");
+
+    public final StringPath contentsLabel = createString("contentsLabel");
+
     //inherited
     public final DateTimePath<java.time.LocalDateTime> createdAt = _super.createdAt;
 
-    public final NumberPath<Long> id = createNumber("id", Long.class);
-
-    public final StringPath image = createString("image");
+    public final StringPath imgPath = createString("imgPath");
 
     public final StringPath information = createString("information");
 
-    public final NumberPath<Double> latitude = createNumber("latitude", Double.class);
+    public final StringPath introduction = createString("introduction");
 
-    public final NumberPath<Integer> locationNo = createNumber("locationNo", Integer.class);
+    public final NumberPath<Double> latitude = createNumber("latitude", Double.class);
 
     public final NumberPath<Double> longitude = createNumber("longitude", Double.class);
 
-    public final StringPath name = createString("name");
+    public final StringPath phoneNo = createString("phoneNo");
+
+    public final NumberPath<Long> placeId = createNumber("placeId", Long.class);
+
+    public final StringPath region1Cd = createString("region1Cd");
+
+    public final StringPath region2Cd = createString("region2Cd");
+
+    public final StringPath regionLabel = createString("regionLabel");
+
+    public final StringPath roadAddress = createString("roadAddress");
+
+    public final StringPath tag = createString("tag");
+
+    public final StringPath thumbnailPath = createString("thumbnailPath");
+
+    public final StringPath title = createString("title");
 
     //inherited
     public final DateTimePath<java.time.LocalDateTime> updatedAt = _super.updatedAt;

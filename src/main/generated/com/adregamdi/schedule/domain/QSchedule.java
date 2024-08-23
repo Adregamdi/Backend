@@ -26,9 +26,9 @@ public class QSchedule extends EntityPathBase<Schedule> {
 
     public final StringPath endDate = createString("endDate");
 
-    public final NumberPath<Long> id = createNumber("id", Long.class);
-
     public final ComparablePath<java.util.UUID> memberId = createComparable("memberId", java.util.UUID.class);
+
+    public final NumberPath<Long> scheduleId = createNumber("scheduleId", Long.class);
 
     public final StringPath startDate = createString("startDate");
 

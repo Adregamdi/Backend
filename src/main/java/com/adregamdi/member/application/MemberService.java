@@ -43,7 +43,7 @@ public class MemberService {
      */
     @Transactional
     public void logout(final String memberId) {
-        Member member = memberRepository.findByIdAndMemberStatus(UUID.fromString(memberId), true)
+        Member member = memberRepository.findByMemberIdAndMemberStatus(UUID.fromString(memberId), true)
                 .orElseThrow(() -> new MemberNotFoundException(memberId));
 
         member.updateRefreshTokenStatus(false);
@@ -54,7 +54,7 @@ public class MemberService {
      */
     @Transactional
     public void delete(final String memberId) {
-        Member member = memberRepository.findByIdAndMemberStatus(UUID.fromString(memberId), true)
+        Member member = memberRepository.findByMemberIdAndMemberStatus(UUID.fromString(memberId), true)
                 .orElseThrow(() -> new MemberNotFoundException(memberId));
 
         member.updateAuthorization(Role.GUEST);
@@ -74,7 +74,7 @@ public class MemberService {
 
         for (Member member : members) {
             // 회원과 관련된 데이터 삭제
-            deleteData(member.getId());
+            deleteData(member.getMemberId());
 
             // 소셜 연결 끊기
             unlink(member.getSocialType(), member.getSocialId(), member.getSocialAccessToken());

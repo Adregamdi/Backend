@@ -72,7 +72,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     if (Objects.equals(user.getRefreshTokenStatus(), true)) {
                         jwtService.sendAccessAndRefreshToken(
                                 response,
-                                jwtService.createAccessToken(String.valueOf(user.getId()), user.getRole()),
+                                jwtService.createAccessToken(String.valueOf(user.getMemberId()), user.getRole()),
                                 reIssueRefreshToken(user)
                         );
                     }
@@ -97,7 +97,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             jwtService.extractAccessToken(request)
                     .filter(jwtService::isTokenValid)
                     .flatMap(jwtService::extractMemberId)
-                    .flatMap(memberId -> memberRepository.findByIdAndMemberStatus(memberId, true))
+                    .flatMap(memberId -> memberRepository.findByMemberIdAndMemberStatus(memberId, true))
                     .ifPresent(this::saveAuthentication);
         } catch (TokenValidationException e) {
             response.setStatus(HttpStatus.UNAUTHORIZED.value());
@@ -123,7 +123,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
 
         UserDetails userDetailsUser = org.springframework.security.core.userdetails.User.builder()
-                .username(String.valueOf(myMember.getId()))
+                .username(String.valueOf(myMember.getMemberId()))
                 .password(password)
                 .roles(myMember.getRole().name())
                 .build();

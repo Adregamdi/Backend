@@ -64,6 +64,9 @@ dependencies {
     implementation 'ws.schild:jave-core:3.3.1'
     implementation 'ws.schild:jave-all-deps:3.3.1'
 
+    // 썸네일 제작을 위한 라이브러리
+    implementation 'org.bytedeco:javacv-platform:1.5.9'
+
 }
 
 tasks.named('test') {

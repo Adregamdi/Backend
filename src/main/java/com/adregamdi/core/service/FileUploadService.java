@@ -1,4 +1,4 @@
-package com.adregamdi.media.application;
+package com.adregamdi.core.service;
 
 import org.springframework.web.multipart.MultipartFile;
 
@@ -11,7 +11,7 @@ public interface FileUploadService {
     String uploadFile(MultipartFile file, String key) throws IOException;
     String uploadFile(byte[] fileContent, String key);
     void copyFile(String sourceKey, String targetKey);
-    void moveFileOnS3(String sourceKey, String targetKey);
+    void moveFileOnStorage(String sourceKey, String targetKey);
     void deleteFile(String key);
     String extractKeyFromUrl(String url);
     String getEncodedFileName(String key);

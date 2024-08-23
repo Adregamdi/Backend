@@ -1,6 +1,6 @@
-package com.adregamdi.media.application;
+package com.adregamdi.core.service;
 
-import com.adregamdi.core.utils.SecureStringUtils;
+import com.adregamdi.core.utils.SecureStringUtil;
 import com.amazonaws.AmazonServiceException;
 import com.amazonaws.services.s3.AmazonS3Client;
 import com.amazonaws.services.s3.model.*;
@@ -27,7 +27,7 @@ import java.util.Objects;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class FileUploadServiceImpl implements FileUploadService{
+public class S3StorageService implements FileUploadService{
 
     private final AmazonS3Client amazonS3Client;
 
@@ -43,7 +43,7 @@ public class FileUploadServiceImpl implements FileUploadService{
         String date = sdf.format(new Date());
 
         return dirName + "/" +
-                SecureStringUtils.buildSecureString(SECURE_STRING_BYTE_SIZE) + "_" + date + extension;
+                SecureStringUtil.buildSecureString(SECURE_STRING_BYTE_SIZE) + "_" + date + extension;
     }
 
     @Override
@@ -76,7 +76,7 @@ public class FileUploadServiceImpl implements FileUploadService{
     }
 
     @Override
-    public void moveFileOnS3(String sourceKey, String targetKey) {
+    public void moveFileOnStorage(String sourceKey, String targetKey) {
         copyFile(sourceKey, targetKey);
         deleteFile(sourceKey);
     }
@@ -129,10 +129,10 @@ public class FileUploadServiceImpl implements FileUploadService{
      */
     @Override
     public File convertMultipartFileToFile(MultipartFile file) throws IOException {
-        File convertedFile = File.createTempFile("temp", "." + extractFileExtension(file));
-        try (FileOutputStream fos = new FileOutputStream(convertedFile)) {
-            fos.write(file.getBytes());
-        }
-        return convertedFile;
+        File convFile = new File(file.getOriginalFilename());
+        FileOutputStream fos = new FileOutputStream(convFile);
+        fos.write(file.getBytes());
+        fos.close();
+        return convFile;
     }
 }

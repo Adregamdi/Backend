@@ -82,8 +82,9 @@ public class S3StorageService implements FileUploadService{
     }
 
     @Override
-    public void deleteFile(String key) {
+    public void deleteFile(String url) {
         try {
+            String key = extractKeyFromUrl(url);
             amazonS3Client.deleteObject(bucketName, key);
         } catch (AmazonServiceException e) {
             throw new RuntimeException("Failed to delete file from S3", e);
@@ -95,10 +96,18 @@ public class S3StorageService implements FileUploadService{
         try {
             URL url = new URL(fileUrl);
             String path = url.getPath();
-            // 버킷 이름 다음의 '/'부터가 실제 키입니다.
-            return path.substring(path.indexOf('/', 1) + 1);
+
+            if (path.startsWith("/")) {
+                path = path.substring(1);
+            }
+
+            if (path.isEmpty()) {
+                throw new IllegalArgumentException("URL 내에 키 값이 포함되어야 합니다.");
+            }
+
+            return path;
         } catch (MalformedURLException e) {
-            throw new IllegalArgumentException("Invalid S3 URL: " + fileUrl, e);
+            throw new IllegalArgumentException("잘못된 URL입니다.");
         }
     }
 

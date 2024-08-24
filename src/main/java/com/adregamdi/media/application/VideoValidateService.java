@@ -1,22 +1,19 @@
-package com.adregamdi.shorts.application;
+package com.adregamdi.media.application;
 
 import org.springframework.stereotype.Component;
 
 @Component
-public class ShortsValidateService {
+public class VideoValidateService {
 
-    public String checkVideoFile(String filename) {
+    public void checkVideoFile(String filename) {
         if (isFileNameInvalid(filename)) {
             throw new IllegalArgumentException("파일 이름이 유효하지 않습니다.");
         }
 
         String extension = getFileExtension(filename);
-
         if (!isVideoExtension(extension)) {
             throw new IllegalArgumentException("지원하지 않는 비디오 파일 형식입니다.");
         }
-
-        return extension;
     }
 
     private boolean isFileNameInvalid(String fileName) {

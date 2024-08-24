@@ -39,6 +39,11 @@ public class S3StorageService implements FileUploadService{
     @Override
     public String buildKey(MultipartFile file, String dirName) {
         String extension = extractFileExtension(file);
+        return buildKey(extension, dirName);
+    }
+
+    @Override
+    public String buildKey(String extension, String dirName) {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
         String date = sdf.format(new Date());
 

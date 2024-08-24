@@ -23,8 +23,9 @@ public class MediaController {
     private final MediaService mediaService;
 
     @PostMapping("/upload-video")
-    public ResponseEntity<ApiResponse<UploadVideoResponse>> uploadVideo(@RequestHeader("Authorization") String accessToken,
-                                                                        @RequestPart MultipartFile videoFile) throws EncoderException, IOException {
+    public ResponseEntity<ApiResponse<UploadVideoResponse>> uploadVideo(
+//            @RequestHeader("Authorization") String accessToken,
+                                                                        @RequestPart("shorts") MultipartFile videoFile) throws EncoderException, IOException {
         //        UUID memberId = jwtService.extractMemberId(accessToken)
 //                        .orElseThrow(IllegalArgumentException::new);
         UUID memberId = UUID.randomUUID();

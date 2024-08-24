@@ -49,42 +49,62 @@ public class VideoService {
     }
 
     public byte[] compressVideo(MultipartFile videoFile) throws IOException, EncoderException {
-        File source = fileUploadService.convertMultipartFileToFile(videoFile);
-        File target = File.createTempFile("compressed", "." + fileUploadService.extractFileExtension(videoFile));
+        File source = null;
+        File target = null;
+        try {
+            source = fileUploadService.convertMultipartFileToFile(videoFile);
+            target = File.createTempFile("compressed", "." + fileUploadService.extractFileExtension(videoFile));
 
-        MultimediaObject multimediaObject = new MultimediaObject(source);
-        MultimediaInfo info = multimediaObject.getInfo();
+            videoFile.transferTo(source);
 
-        if (info.getDuration() > VIDEO_MAX_DURATION * 1000) {
-            throw new IllegalArgumentException("쇼츠는 60초를 넘길 수 없습니다!");
+            // 파일 존재 확인
+            if (!source.exists() || !target.exists()) {
+                throw new IOException("Temporary file creation failed");
+            }
+
+
+            MultimediaObject multimediaObject = new MultimediaObject(source);
+            MultimediaInfo info = multimediaObject.getInfo();
+
+            if (info.getDuration() > VIDEO_MAX_DURATION * 1000) {
+                throw new IllegalArgumentException("쇼츠는 60초를 넘길 수 없습니다!");
+            }
+
+            AudioAttributes audio = new AudioAttributes();
+            audio.setCodec("aac");
+            audio.setBitRate(128000);
+            audio.setChannels(2);
+            audio.setSamplingRate(44100);
+
+            VideoAttributes video = new VideoAttributes();
+            video.setCodec("h264");
+            video.setBitRate(VIDEO_MAX_BITRATE);
+            video.setFrameRate(30);
+
+            EncodingAttributes attrs = new EncodingAttributes();
+            attrs.setOutputFormat("mp4");
+            attrs.setAudioAttributes(audio);
+            attrs.setVideoAttributes(video);
+
+            Encoder encoder = new Encoder();
+            encoder.encode(multimediaObject, target, attrs);
+
+            // 압축된 파일 읽기
+            if (!target.exists()) {
+                throw new IOException("Compressed file not found");
+            }
+            log.info("성공적으로 비디오가 압축되었습니다.: {}", videoFile.getOriginalFilename());
+            return Files.readAllBytes(target.toPath());
+
+        } finally {
+            // 임시 파일 정리
+            if (source != null && source.exists()) {
+                source.delete();
+            }
+            if (target != null && target.exists()) {
+                target.delete();
+            }
         }
-
-        AudioAttributes audio = new AudioAttributes();
-        audio.setCodec("aac");
-        audio.setBitRate(128000);
-        audio.setChannels(2);
-        audio.setSamplingRate(44100);
-
-        VideoAttributes video = new VideoAttributes();
-        video.setCodec("h264");
-        video.setBitRate(VIDEO_MAX_BITRATE);
-        video.setFrameRate(30);
-
-        EncodingAttributes attrs = new EncodingAttributes();
-        attrs.setOutputFormat("mp4");
-        attrs.setAudioAttributes(audio);
-        attrs.setVideoAttributes(video);
-
-        Encoder encoder = new Encoder();
-        encoder.encode(multimediaObject, target, attrs);
-
-        source.delete();
-        target.delete();
-
-        log.info("성공적으로 비디오가 압축되었습니다.: {}", videoFile.getOriginalFilename());
-        return Files.readAllBytes(target.toPath());
-
-
     }
 
     public byte[] generateThumbnail(byte[] videoBytes) {
@@ -115,8 +135,8 @@ public class VideoService {
             byte[] compressedVideo = compressVideo(videoFile);
             byte[] thumbnail = generateThumbnail(compressedVideo);
 
-            String videoKey = buildKey(videoFile, memberId.toString(), "shorts");
-            String thumbnailKey = buildKey(videoFile, memberId.toString(), "thumbnails");
+            String videoKey = buildKey(memberId.toString(), "shorts");
+            String thumbnailKey = buildKey(memberId.toString(), "thumbnails");
 
             String uploadedVideoUrl = fileUploadService.uploadFile(compressedVideo, videoKey);
             String videoThumbnailUrl = fileUploadService.uploadFile(thumbnail, thumbnailKey);
@@ -132,9 +152,14 @@ public class VideoService {
         }
     }
 
-    private String buildKey(MultipartFile file, String additionalDir, String type) {
+    private String buildKey(String additionalDir, String type) {
         String dirName = type + "/" + additionalDir;
-        return fileUploadService.buildKey(file, dirName);
+        String extension = switch (type) {
+            case "shorts" -> ".mp4";
+            case "thumbnails" -> ".png";
+            default -> ".txt";
+        };
+        return fileUploadService.buildKey(extension, dirName);
     }
 
 }

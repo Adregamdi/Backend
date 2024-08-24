@@ -8,6 +8,7 @@ import java.io.IOException;
 public interface FileUploadService {
 
     String buildKey(MultipartFile file, String dirName);
+    String buildKey(String extension, String dirName);
     String uploadFile(MultipartFile file, String key) throws IOException;
     String uploadFile(byte[] fileContent, String key);
     void copyFile(String sourceKey, String targetKey);

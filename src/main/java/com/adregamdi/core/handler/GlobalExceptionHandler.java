@@ -8,6 +8,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import ws.schild.jave.EncoderException;
 
 import java.time.DateTimeException;
 import java.util.Random;
@@ -83,6 +84,14 @@ public class GlobalExceptionHandler {
 //                .status(HttpStatus.BAD_REQUEST)
 //                .body(new ErrorResponse(HttpStatus.BAD_REQUEST, exception.getMessage()));
 //    }
+
+    @ExceptionHandler(EncoderException.class)
+    public ResponseEntity<ErrorResponse> handleEncoderException(final EncoderException exception) {
+        log.warn(exception.getMessage());
+        return ResponseEntity
+                .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(new ErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, "파일을 인코딩하는 과정에서 에러가 발생하였습니다. 재업로드 해주세요."));
+    }
 
     @ExceptionHandler(RuntimeException.class)
     public ResponseEntity<ErrorResponse> handleRuntimeException(final RuntimeException exception) {

@@ -16,12 +16,11 @@ import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
-public class ImageService implements MediaService{
+public class ImageService {
 
     private final FileUploadService fileUploadService;
 
     private final static int IMAGE_RESIZE_TARGET_WIDTH = 650;
-
 
     public String getEncodedFileName(String key) {
         return URLEncoder.encode(key, StandardCharsets.UTF_8).replaceAll("\\+", "%20");

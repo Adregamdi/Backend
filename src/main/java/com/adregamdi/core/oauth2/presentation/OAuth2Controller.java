@@ -23,7 +23,7 @@ public class OAuth2Controller {
     public ResponseEntity<ApiResponse<LoginResponse>> login(@RequestBody @Valid final LoginRequest request) {
         return ResponseEntity.ok()
                 .body(ApiResponse.<LoginResponse>builder()
-                        .statusCode(HttpStatus.OK)
+                        .statusCode(HttpStatus.OK.value())
                         .data(oAuth2Service.login(request))
                         .build());
     }

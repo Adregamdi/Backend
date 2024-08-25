@@ -22,7 +22,7 @@ public class MemberController {
     public ResponseEntity<ApiResponse<GetMyMemberResponse>> getMyMember(@AuthenticationPrincipal final UserDetails userDetails) {
         return ResponseEntity.ok()
                 .body(ApiResponse.<GetMyMemberResponse>builder()
-                        .statusCode(HttpStatus.OK)
+                        .statusCode(HttpStatus.OK.value())
                         .data(memberService.getMyMember(userDetails.getUsername()))
                         .build());
     }
@@ -33,7 +33,7 @@ public class MemberController {
         memberService.logout(userDetails.getUsername());
         return ResponseEntity.ok()
                 .body(ApiResponse.<Void>builder()
-                        .statusCode(HttpStatus.OK)
+                        .statusCode(HttpStatus.OK.value())
                         .build());
     }
 
@@ -43,7 +43,7 @@ public class MemberController {
         memberService.delete(userDetails.getUsername());
         return ResponseEntity.ok()
                 .body(ApiResponse.<Void>builder()
-                        .statusCode(HttpStatus.NO_CONTENT)
+                        .statusCode(HttpStatus.NO_CONTENT.value())
                         .build());
     }
 }

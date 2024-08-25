@@ -44,6 +44,6 @@ public class NotificationCustomRepositoryImpl implements NotificationCustomRepos
         if (lastId == null) {
             return null;
         }
-        return notification.id.lt(lastId);
+        return notification.notificationId.lt(lastId);
     }
 }

@@ -9,16 +9,24 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RequiredArgsConstructor
 @RequestMapping("/api/schedule")
 @RestController
 public class ScheduleController {
     private final ScheduleService scheduleService;
+
+    @GetMapping
+    @MemberAuthorize
+    public ResponseEntity<ApiResponse<Void>> getMySchedule(@AuthenticationPrincipal final UserDetails userDetails) {
+        return ResponseEntity.ok()
+                .body(ApiResponse.<Void>builder()
+                        .statusCode(HttpStatus.OK.value())
+                        .data(scheduleService.getMySchedule(userDetails.getUsername()))
+                        .build()
+                );
+    }
 
     @PostMapping
     @MemberAuthorize

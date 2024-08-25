@@ -19,10 +19,7 @@ public class QShorts extends EntityPathBase<Shorts> {
 
     public static final QShorts shorts = new QShorts("shorts");
 
-    public final com.adregamdi.core.entity.QBaseTime _super = new com.adregamdi.core.entity.QBaseTime(this);
-
-    //inherited
-    public final DateTimePath<java.time.LocalDateTime> createdAt = _super.createdAt;
+    public final DateTimePath<java.time.LocalDateTime> createdAt = createDateTime("createdAt", java.time.LocalDateTime.class);
 
     public final NumberPath<Long> id = createNumber("id", Long.class);
 
@@ -30,14 +27,13 @@ public class QShorts extends EntityPathBase<Shorts> {
 
     public final NumberPath<Long> placeNo = createNumber("placeNo", Long.class);
 
-    public final StringPath shortsVideoUrl = createString("shortsVideoUrl");
-
     public final StringPath title = createString("title");
 
     public final NumberPath<Long> travelReviewNo = createNumber("travelReviewNo", Long.class);
 
-    //inherited
-    public final DateTimePath<java.time.LocalDateTime> updatedAt = _super.updatedAt;
+    public final DateTimePath<java.time.LocalDateTime> updatedAt = createDateTime("updatedAt", java.time.LocalDateTime.class);
+
+    public final NumberPath<Long> viewCount = createNumber("viewCount", Long.class);
 
     public QShorts(String variable) {
         super(Shorts.class, forVariable(variable));

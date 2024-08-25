@@ -7,12 +7,16 @@ import com.adregamdi.media.dto.response.UploadVideoResponse;
 import com.adregamdi.media.enumtype.MediaType;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestPart;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import ws.schild.jave.EncoderException;
 
 import java.io.IOException;
-import java.util.UUID;
 
 @RestController
 @RequiredArgsConstructor
@@ -24,11 +28,11 @@ public class MediaController {
 
     @PostMapping("/upload-video")
     public ResponseEntity<ApiResponse<UploadVideoResponse>> uploadVideo(
-//            @RequestHeader("Authorization") String accessToken,
-                                                                        @RequestPart("shorts") MultipartFile videoFile) throws EncoderException, IOException {
-        //        UUID memberId = jwtService.extractMemberId(accessToken)
-//                        .orElseThrow(IllegalArgumentException::new);
-        UUID memberId = UUID.randomUUID();
+            @AuthenticationPrincipal UserDetails userDetails,
+            @RequestPart("shorts") final MultipartFile videoFile
+    ) throws EncoderException, IOException {
+
+        String memberId = userDetails.getUsername();
         UploadVideoResponse response = videoService.uploadVideo(videoFile, memberId);
         mediaService.saveVideo(response.getVideoUrl(), MediaType.VIDEO);
         mediaService.saveVideo(response.getVideoThumbnailUrl(), MediaType.THUMBNAIL);

@@ -1,4 +1,6 @@
 package com.adregamdi.shorts.dto.response;
 
-public class GetShortsResponse {
+public record GetShortsResponse(
+
+) {
 }

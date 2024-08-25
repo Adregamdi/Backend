@@ -90,7 +90,7 @@ public class GlobalExceptionHandler {
 //
 //        return ResponseEntity
 //                .status(HttpStatus.BAD_REQUEST)
-//                .body(new ErrorResponse(HttpStatus.BAD_REQUEST, exception.getMessage()));
+//                .body(new ErrorResponse(HttpStatus.BAD_REQUEST.value(), exception.getMessage()));
 //    }
 
     @ExceptionHandler(RuntimeException.class)

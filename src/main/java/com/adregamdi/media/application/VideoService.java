@@ -26,7 +26,6 @@ import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.util.UUID;
 
 @Slf4j
 @Service
@@ -39,7 +38,7 @@ public class VideoService {
     private final static int VIDEO_MAX_BITRATE = 1000000; // 1Mbps
     private final static int VIDEO_MAX_DURATION = 60; // 60 seconds
 
-    public String getEncodedFileName(String key) {
+    public String getEncodedFileName(final String key) {
         try {
             return URLEncoder.encode(key, StandardCharsets.UTF_8).replaceAll("\\+", "%20");
         } catch (Exception e) {
@@ -48,7 +47,7 @@ public class VideoService {
         }
     }
 
-    public byte[] compressVideo(MultipartFile videoFile) throws IOException, EncoderException {
+    public byte[] compressVideo(final MultipartFile videoFile) throws IOException, EncoderException {
         File source = null;
         File target = null;
         try {
@@ -129,7 +128,11 @@ public class VideoService {
         }
     }
 
-    public UploadVideoResponse uploadVideo(MultipartFile videoFile, UUID memberId) throws EncoderException {
+    public UploadVideoResponse uploadVideo(
+            final MultipartFile videoFile,
+            final String memberId
+    ) throws EncoderException {
+
         try {
             log.info("비디오 업로드를 시작합니다. memberId: {}", memberId);
             videoValidateService.checkVideoFile(videoFile.getOriginalFilename());
@@ -137,8 +140,8 @@ public class VideoService {
             byte[] compressedVideo = compressVideo(videoFile);
             byte[] thumbnail = generateThumbnail(compressedVideo);
 
-            String videoKey = buildKey(memberId.toString(), "shorts");
-            String thumbnailKey = buildKey(memberId.toString(), "thumbnails");
+            String videoKey = buildKey(memberId, "shorts");
+            String thumbnailKey = buildKey(memberId, "thumbnails");
 
             String uploadedVideoUrl = fileUploadService.uploadFile(compressedVideo, videoKey);
             String videoThumbnailUrl = fileUploadService.uploadFile(thumbnail, thumbnailKey);

@@ -32,13 +32,14 @@ public class MediaService {
         log.info("비디오가 저장되었습니다.: shorts ID: {} and media type: {}", url, mediaType);
     }
 
-    public void assignVideo(String url, Long shortsId, MediaType mediaType) {
+    public void assignVideo(String url, Long targetId, MediaType mediaType) {
 
+        log.info("{}를 할당합니다. targetId: {}, url: {}", mediaType, targetId, url);
         Video video = videoRepository.findByUrlAndMediaType(url, mediaType)
                 .orElseThrow(EntityNotFoundException::new);
 
-        video.updateTargetId(shortsId);
-        log.info("비디오가 할당되었습니다. shorts ID: {} with media type: {}", shortsId, mediaType);
+        video.updateTargetId(targetId);
+        log.info("{}를 성공적으로 할당하였습니다. targetId: {}, url: {}", mediaType, targetId, url);
     }
 
     @Scheduled(cron = "0 0 1 * * ?") // 매일 새벽 1시에 실행

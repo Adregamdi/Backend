@@ -16,7 +16,6 @@ public class CreateShortsResponse {
     private UUID memberId;
     private Long placeNo;
     private Long travelReviewNo;
-    private String shortsVideoUrl;
 
     public static CreateShortsResponse of(Shorts shorts) {
         return new CreateShortsResponse(
@@ -24,8 +23,7 @@ public class CreateShortsResponse {
                 shorts.getTitle(),
                 shorts.getMemberId(),
                 shorts.getPlaceNo(),
-                shorts.getTravelReviewNo(),
-                shorts.getShortsVideoUrl()
+                shorts.getTravelReviewNo()
         );
     }
 

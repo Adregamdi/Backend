@@ -4,8 +4,6 @@ import com.adregamdi.core.entity.BaseTime;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.util.UUID;
-
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
@@ -21,5 +19,11 @@ public class SchedulePlace extends BaseTime {
     @Column
     private Long placeId; // 장소 id
     @Column
-    private String day; // 날짜
+    private Integer day; // 해당 날짜
+
+    public SchedulePlace(Long scheduleId, Long placeId, int day) {
+        this.scheduleId = scheduleId;
+        this.placeId = placeId;
+        this.day = day;
+    }
 }

@@ -108,8 +108,10 @@ public class VideoService {
     }
 
     public byte[] generateThumbnail(byte[] videoBytes) {
-        try (ByteArrayInputStream inputStream = new ByteArrayInputStream(videoBytes);
-             FFmpegFrameGrabber frameGrabber = new FFmpegFrameGrabber(inputStream)) {
+        try {
+
+            ByteArrayInputStream inputStream = new ByteArrayInputStream(videoBytes);
+            FFmpegFrameGrabber frameGrabber = new FFmpegFrameGrabber(inputStream);
 
             frameGrabber.start();
             Frame frame = frameGrabber.grabImage();

@@ -24,4 +24,15 @@ public class ShortsException extends RuntimeException{
             super(String.format(ALREADY_EXIST_MESSAGE + "- request info => %s", object));
         }
     }
+
+    public static class ShortsNOTWRITERException extends ShortsException {
+
+        private final static String NOT_WRITER_MESSAGE = "작성자만 가능한 요청입니다.";
+
+        public ShortsNOTWRITERException() {super(NOT_WRITER_MESSAGE);}
+
+        public ShortsNOTWRITERException(final Object object) {
+            super(String.format(NOT_WRITER_MESSAGE + "- request info => %s", object));
+        }
+    }
 }

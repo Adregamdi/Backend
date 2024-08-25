@@ -86,16 +86,18 @@ public class GlobalExceptionHandler {
                 .status(HttpStatus.CONFLICT.value())
                 .body(new ErrorResponse(HttpStatus.CONFLICT.value(), exception.getMessage()));
     }
-//
-//    // 커스텀 예외
-//    @ExceptionHandler(value = {})
-//    public ResponseEntity<ErrorResponse> handleCustomBadRequestException(final RuntimeException exception) {
-//        log.warn(exception.getMessage());
-//
-//        return ResponseEntity
-//                .status(HttpStatus.BAD_REQUEST)
-//                .body(new ErrorResponse(HttpStatus.BAD_REQUEST, exception.getMessage()));
-//    }
+
+    // 커스텀 예외
+    @ExceptionHandler(value = {
+            ShortsException.ShortsNOTWRITERException.class
+    })
+    public ResponseEntity<ErrorResponse> handleCustomBadRequestException(final RuntimeException exception) {
+        log.warn(exception.getMessage());
+
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(new ErrorResponse(HttpStatus.BAD_REQUEST, exception.getMessage()));
+    }
 
     @ExceptionHandler(EncoderException.class)
     public ResponseEntity<ErrorResponse> handleEncoderException(final EncoderException exception) {

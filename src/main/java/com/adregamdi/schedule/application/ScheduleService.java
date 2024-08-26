@@ -1,6 +1,5 @@
 package com.adregamdi.schedule.application;
 
-import com.adregamdi.place.infrastructure.PlaceRepository;
 import com.adregamdi.schedule.domain.Schedule;
 import com.adregamdi.schedule.domain.SchedulePlace;
 import com.adregamdi.schedule.dto.request.CreateMyScheduleRequest;
@@ -17,7 +16,6 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 @Service
 public class ScheduleService {
-    private final PlaceRepository placeRepository;
     private final ScheduleRepository scheduleRepository;
     private final SchedulePlaceRepository schedulePlaceRepository;
 

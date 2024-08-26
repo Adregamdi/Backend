@@ -5,6 +5,7 @@ import com.adregamdi.schedule.domain.Schedule;
 import com.adregamdi.schedule.domain.SchedulePlace;
 import com.adregamdi.schedule.dto.request.CreateMyScheduleRequest;
 import com.adregamdi.schedule.dto.response.GetMyScheduleResponse;
+import com.adregamdi.schedule.exception.ScheduleException.ScheduleNotFoundException;
 import com.adregamdi.schedule.infrastructure.SchedulePlaceRepository;
 import com.adregamdi.schedule.infrastructure.ScheduleRepository;
 import lombok.RequiredArgsConstructor;
@@ -20,13 +21,15 @@ public class ScheduleService {
     private final ScheduleRepository scheduleRepository;
     private final SchedulePlaceRepository schedulePlaceRepository;
 
-    @Transactional
-    public GetMyScheduleResponse getMySchedule(String username) {
-        return null;
+    @Transactional(readOnly = true)
+    public GetMyScheduleResponse getMySchedule(final String memberId) {
+        Schedule schedule = scheduleRepository.findByMemberId(memberId)
+                .orElseThrow(() -> new ScheduleNotFoundException(memberId));
+        return GetMyScheduleResponse.from(schedule);
     }
 
     @Transactional
-    public void createMySchedule(CreateMyScheduleRequest request, String memberId) {
+    public void createMySchedule(final CreateMyScheduleRequest request, final String memberId) {
         Schedule schedule = scheduleRepository.save(new Schedule(request, memberId));
 
         request.scheduleList().stream()

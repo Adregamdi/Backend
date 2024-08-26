@@ -4,6 +4,7 @@ import com.adregamdi.core.annotation.MemberAuthorize;
 import com.adregamdi.core.handler.ApiResponse;
 import com.adregamdi.schedule.application.ScheduleService;
 import com.adregamdi.schedule.dto.request.CreateMyScheduleRequest;
+import com.adregamdi.schedule.dto.response.GetMyScheduleResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,9 +20,9 @@ public class ScheduleController {
 
     @GetMapping
     @MemberAuthorize
-    public ResponseEntity<ApiResponse<Void>> getMySchedule(@AuthenticationPrincipal final UserDetails userDetails) {
+    public ResponseEntity<ApiResponse<GetMyScheduleResponse>> getMySchedule(@AuthenticationPrincipal final UserDetails userDetails) {
         return ResponseEntity.ok()
-                .body(ApiResponse.<Void>builder()
+                .body(ApiResponse.<GetMyScheduleResponse>builder()
                         .statusCode(HttpStatus.OK.value())
                         .data(scheduleService.getMySchedule(userDetails.getUsername()))
                         .build()

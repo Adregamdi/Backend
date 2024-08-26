@@ -3,6 +3,7 @@ package com.adregamdi.core.handler;
 import com.adregamdi.member.exception.MemberException;
 import com.adregamdi.notification.exception.NotificationException;
 import com.adregamdi.place.exception.PlaceException;
+import com.adregamdi.schedule.exception.ScheduleException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -61,7 +62,8 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(value = {
             MemberException.MemberNotFoundException.class,
             NotificationException.NotificationNotFoundException.class,
-            PlaceException.PlaceNotFoundException.class
+            PlaceException.PlaceNotFoundException.class,
+            ScheduleException.ScheduleNotFoundException.class
     })
     public ResponseEntity<ErrorResponse> handleNotFoundException(final RuntimeException exception) {
         log.warn(exception.getMessage());

@@ -28,7 +28,7 @@ public class ShortsDTO {
                 shorts.getMemberId(),
                 shorts.getPlaceNo(),
                 shorts.getTravelReviewNo(),
-                shorts.getShortsVideoUrl()
+                "set"
         );
     }
 }

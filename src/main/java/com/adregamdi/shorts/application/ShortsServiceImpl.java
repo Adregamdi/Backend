@@ -2,10 +2,10 @@ package com.adregamdi.shorts.application;
 
 import com.adregamdi.media.application.MediaService;
 import com.adregamdi.media.enumtype.MediaType;
-import com.adregamdi.member.application.MemberService;
 import com.adregamdi.shorts.domain.Shorts;
 import com.adregamdi.shorts.dto.request.CreateShortsRequest;
 import com.adregamdi.shorts.dto.request.UpdateShortsRequest;
+import com.adregamdi.shorts.dto.response.GetShortsResponse;
 import com.adregamdi.shorts.exception.ShortsException;
 import com.adregamdi.shorts.infrastructure.ShortsRepository;
 import lombok.RequiredArgsConstructor;
@@ -14,6 +14,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.UUID;
+
+import static com.adregamdi.core.constant.Constant.LARGE_PAGE_SIZE;
 
 @Slf4j
 @Service
@@ -24,8 +26,14 @@ public class ShortsServiceImpl implements ShortsService{
     private final ShortsRepository shortsRepository;
     private final MediaService mediaService;
 
-    private final MemberService memberService;
     private final ShortsValidService shortsValidService;
+
+    @Override
+    public GetShortsResponse getShorts(String memberId, long lastId) {
+
+        GetShortsResponse shortsDTOList = shortsRepository.getShortsForMember(memberId, lastId, LARGE_PAGE_SIZE);
+        return shortsDTOList;
+    }
 
     @Override
     public void saveShorts(final String memberId, final CreateShortsRequest request) {

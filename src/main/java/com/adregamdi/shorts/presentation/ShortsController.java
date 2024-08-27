@@ -2,7 +2,6 @@ package com.adregamdi.shorts.presentation;
 
 import com.adregamdi.core.annotation.MemberAuthorize;
 import com.adregamdi.core.handler.ApiResponse;
-import com.adregamdi.core.jwt.service.JwtService;
 import com.adregamdi.shorts.application.ShortsService;
 import com.adregamdi.shorts.application.VideoService;
 import com.adregamdi.shorts.dto.request.CreateShortsRequest;
@@ -28,7 +27,6 @@ import ws.schild.jave.EncoderException;
 @RequestMapping("/api/shorts")
 public class ShortsController {
 
-    private final JwtService jwtService;
     private final ShortsService shortsService;
     private final VideoService videoService;
 
@@ -77,9 +75,9 @@ public class ShortsController {
             @RequestPart("shorts") final MultipartFile videoFile
     ) throws EncoderException {
 
-        String memberId = userDetails.getUsername();
-        UploadVideoDTO videoUrlDTO = videoService.uploadVideo(videoFile, memberId);
-        SaveVideoResponse response = shortsService.saveVideo(videoUrlDTO, memberId);
+//        String memberId = userDetails.getUsername();
+        UploadVideoDTO videoUrlDTO = videoService.uploadVideo(videoFile, MEMBER_ID_FOR_TEST);
+        SaveVideoResponse response = shortsService.saveVideo(videoUrlDTO, MEMBER_ID_FOR_TEST);
 
         return ResponseEntity.ok()
                 .body(ApiResponse.<SaveVideoResponse>builder()
@@ -95,8 +93,8 @@ public class ShortsController {
             @Valid @RequestBody CreateShortsRequest request
     ) {
 
-        shortsService.saveShorts(userDetails.getUsername(), request);
-
+//        shortsService.saveShorts(userDetails.getUsername(), request);
+        shortsService.saveShorts(MEMBER_ID_FOR_TEST, request);
         return ResponseEntity.ok()
                 .body(ApiResponse.<Void>builder()
                         .statusCode(HttpStatus.OK.value())

@@ -15,8 +15,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.UUID;
 
-import static com.adregamdi.core.constant.Constant.LARGE_PAGE_SIZE;
-
 @Slf4j
 @Service
 @Transactional
@@ -29,10 +27,13 @@ public class ShortsServiceImpl implements ShortsService{
     private final ShortsValidService shortsValidService;
 
     @Override
-    public GetShortsResponse getShorts(String memberId, long lastId) {
+    public GetShortsResponse getShorts(String memberId, long lastId, int size) {
+        return shortsRepository.getShortsForMember(UUID.fromString(memberId), lastId, size);
+    }
 
-        GetShortsResponse shortsDTOList = shortsRepository.getShortsForMember(memberId, lastId, LARGE_PAGE_SIZE);
-        return shortsDTOList;
+    @Override
+    public GetShortsResponse getUserShorts(String memberId, long lastShortsId, int size) {
+        return shortsRepository.getUserShorts(UUID.fromString(memberId), lastShortsId, size);
     }
 
     @Override

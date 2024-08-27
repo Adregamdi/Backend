@@ -8,6 +8,7 @@ import com.adregamdi.shorts.dto.request.CreateShortsRequest;
 import com.adregamdi.shorts.dto.request.UpdateShortsRequest;
 import com.adregamdi.shorts.dto.response.GetShortsResponse;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.PositiveOrZero;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -30,12 +31,30 @@ public class ShortsController {
     @MemberAuthorize
     public ResponseEntity<ApiResponse<GetShortsResponse>> getShorts(
             @AuthenticationPrincipal final UserDetails userDetails,
-            @RequestParam(value = "shorts_id", required = false, defaultValue = "0") @PositiveOrZero final Long lastShortsId
+            @RequestParam(value = "shorts_id", required = false, defaultValue = "0") @PositiveOrZero final Long lastShortsId,
+            @RequestParam(value = "size", defaultValue = "10") @Positive final int size
     ) {
 
 //        String memberId = userDetails.getUsername();
-        GetShortsResponse response = shortsService.getShorts(MEMBER_ID_FOR_TEST, lastShortsId);
+        GetShortsResponse response = shortsService.getShorts(MEMBER_ID_FOR_TEST, lastShortsId, size);
 
+        return ResponseEntity
+                .ok()
+                .body(ApiResponse.<GetShortsResponse>builder()
+                        .statusCode(HttpStatus.OK.value())
+                        .data(response)
+                        .build());
+    }
+
+    @GetMapping("/user-list")
+    @MemberAuthorize
+    public ResponseEntity<ApiResponse<GetShortsResponse>> getUserShorts(
+            @AuthenticationPrincipal final UserDetails userDetails,
+            @RequestParam(value = "shorts_id", required = false, defaultValue = "0") @PositiveOrZero final Long lastShortsId,
+            @RequestParam(value = "size", defaultValue = "10") @Positive final int size
+    ) {
+        //        String memberId = userDetails.getUsername();
+        GetShortsResponse response = shortsService.getUserShorts(MEMBER_ID_FOR_TEST, lastShortsId, size);
         return ResponseEntity
                 .ok()
                 .body(ApiResponse.<GetShortsResponse>builder()
@@ -58,14 +77,16 @@ public class ShortsController {
 
         return ResponseEntity.ok()
                 .body(ApiResponse.<Void>builder()
-                .statusCode(HttpStatus.OK.value())
-                .build());
+                        .statusCode(HttpStatus.OK.value())
+                        .build());
     }
 
     @PutMapping("/{shorts_id}")
     @MemberAuthorize
-    public ResponseEntity<ApiResponse<Void>> updateShorts(@RequestHeader("Authorization") String accessToken,
-                                                          @Valid @RequestBody UpdateShortsRequest request) {
+    public ResponseEntity<ApiResponse<Void>> updateShorts(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @Valid @RequestBody UpdateShortsRequest request
+    ) {
 
 //        UUID memberId = jwtService.extractMemberId(accessToken)
 //                .orElseThrow(IllegalArgumentException::new);
@@ -74,8 +95,16 @@ public class ShortsController {
 
         return ResponseEntity.ok()
                 .body(ApiResponse.<Void>builder()
-                .statusCode(HttpStatus.OK.value())
-                .build());
+                        .statusCode(HttpStatus.OK.value())
+                        .build());
+    }
+
+    @DeleteMapping("/{shorts_id}")
+    @MemberAuthorize
+    public ResponseEntity<ApiResponse<Void>> deleteShort(
+            @AuthenticationPrincipal UserDetails userDetails
+    ) {
+        return null;
     }
 
 }

@@ -4,10 +4,14 @@ import com.adregamdi.core.annotation.MemberAuthorize;
 import com.adregamdi.core.handler.ApiResponse;
 import com.adregamdi.core.jwt.service.JwtService;
 import com.adregamdi.shorts.application.ShortsService;
+import com.adregamdi.shorts.application.VideoService;
 import com.adregamdi.shorts.dto.request.CreateShortsRequest;
 import com.adregamdi.shorts.dto.request.UpdateShortsRequest;
 import com.adregamdi.shorts.dto.response.GetShortsResponse;
+import com.adregamdi.shorts.dto.response.SaveVideoResponse;
+import com.adregamdi.shorts.dto.response.UploadVideoDTO;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.PositiveOrZero;
 import lombok.RequiredArgsConstructor;
@@ -16,6 +20,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+import ws.schild.jave.EncoderException;
 
 @RestController
 @RequiredArgsConstructor
@@ -24,6 +30,7 @@ public class ShortsController {
 
     private final JwtService jwtService;
     private final ShortsService shortsService;
+    private final VideoService videoService;
 
     private static String MEMBER_ID_FOR_TEST = "memberId";
 
@@ -63,15 +70,30 @@ public class ShortsController {
                         .build());
     }
 
+    @PostMapping("/upload-video")
+    @MemberAuthorize
+    public ResponseEntity<ApiResponse<SaveVideoResponse>> uploadVideo(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @RequestPart("shorts") final MultipartFile videoFile
+    ) throws EncoderException {
+
+        String memberId = userDetails.getUsername();
+        UploadVideoDTO videoUrlDTO = videoService.uploadVideo(videoFile, memberId);
+        SaveVideoResponse response = shortsService.saveVideo(videoUrlDTO, memberId);
+
+        return ResponseEntity.ok()
+                .body(ApiResponse.<SaveVideoResponse>builder()
+                        .statusCode(HttpStatus.OK.value())
+                        .data(response)
+                        .build());
+    }
+
     @PostMapping
     @MemberAuthorize
     public ResponseEntity<ApiResponse<Void>> createShorts(
             @AuthenticationPrincipal UserDetails userDetails,
             @Valid @RequestBody CreateShortsRequest request
     ) {
-
-//        UUID memberId = jwtService.extractMemberId(accessToken)
-//                .orElseThrow(IllegalArgumentException::new);
 
         shortsService.saveShorts(userDetails.getUsername(), request);
 
@@ -81,15 +103,12 @@ public class ShortsController {
                         .build());
     }
 
-    @PutMapping("/{shorts_id}")
+    @PutMapping("/update")
     @MemberAuthorize
     public ResponseEntity<ApiResponse<Void>> updateShorts(
             @AuthenticationPrincipal UserDetails userDetails,
             @Valid @RequestBody UpdateShortsRequest request
     ) {
-
-//        UUID memberId = jwtService.extractMemberId(accessToken)
-//                .orElseThrow(IllegalArgumentException::new);
 
         shortsService.updateShorts(MEMBER_ID_FOR_TEST, request);
 
@@ -102,9 +121,16 @@ public class ShortsController {
     @DeleteMapping("/{shorts_id}")
     @MemberAuthorize
     public ResponseEntity<ApiResponse<Void>> deleteShort(
-            @AuthenticationPrincipal UserDetails userDetails
-    ) {
-        return null;
+            @AuthenticationPrincipal UserDetails userDetails,
+            @PathVariable(value = "shorts_id") @NotEmpty(message = "쇼츠 값이 필요합니다.") Long shortsId
+            ) {
+
+        String memberId = userDetails.getUsername();
+        shortsService.deleteShorts(MEMBER_ID_FOR_TEST, shortsId);
+        return ResponseEntity.ok()
+                .body(ApiResponse.<Void>builder()
+                        .statusCode(HttpStatus.OK.value())
+                        .build());
     }
 
 }

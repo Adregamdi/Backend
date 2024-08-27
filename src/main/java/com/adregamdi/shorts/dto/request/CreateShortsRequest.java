@@ -5,6 +5,8 @@ import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Positive;
 
 public record CreateShortsRequest(
+        @Positive(message = "쇼츠 ID 값을 추가해주세요.")
+        Long shortsId,
         @NotBlank(message = "제목을 작성해주세요.")
         String title,
         @Positive

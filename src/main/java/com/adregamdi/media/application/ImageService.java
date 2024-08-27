@@ -1,6 +1,5 @@
 package com.adregamdi.media.application;
 
-import com.adregamdi.core.service.FileUploadService;
 import lombok.RequiredArgsConstructor;
 import org.imgscalr.Scalr;
 import org.springframework.stereotype.Service;

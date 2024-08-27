@@ -1,4 +1,4 @@
-package com.adregamdi.core.service;
+package com.adregamdi.media.application;
 
 import com.adregamdi.core.utils.SecureStringUtil;
 import com.amazonaws.AmazonServiceException;

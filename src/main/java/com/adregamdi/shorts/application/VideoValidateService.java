@@ -1,4 +1,4 @@
-package com.adregamdi.media.application;
+package com.adregamdi.shorts.application;
 
 import org.springframework.stereotype.Component;
 

@@ -1,7 +1,7 @@
-package com.adregamdi.media.application;
+package com.adregamdi.shorts.application;
 
-import com.adregamdi.core.service.FileUploadService;
-import com.adregamdi.media.dto.response.UploadVideoResponse;
+import com.adregamdi.media.application.FileUploadService;
+import com.adregamdi.shorts.dto.response.UploadVideoDTO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.bytedeco.javacv.FFmpegFrameGrabber;
@@ -128,7 +128,7 @@ public class VideoService {
         }
     }
 
-    public UploadVideoResponse uploadVideo(
+    public UploadVideoDTO uploadVideo(
             final MultipartFile videoFile,
             final String memberId
     ) throws EncoderException {
@@ -147,7 +147,7 @@ public class VideoService {
             String videoThumbnailUrl = fileUploadService.uploadFile(thumbnail, thumbnailKey);
 
             log.info("성공적으로 비디오가 업로드되었습니다. memberId: {}", memberId);
-            return new UploadVideoResponse(uploadedVideoUrl, videoThumbnailUrl);
+            return new UploadVideoDTO(uploadedVideoUrl, videoThumbnailUrl);
         } catch (IllegalArgumentException e) {
             log.warn("잘못된 형식의 비디오입니다. file: {} for memberId: {}", videoFile.getOriginalFilename(), memberId);
             throw e;

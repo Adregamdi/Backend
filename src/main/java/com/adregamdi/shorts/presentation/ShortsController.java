@@ -9,19 +9,32 @@ import com.adregamdi.shorts.dto.request.UpdateShortsRequest;
 import com.adregamdi.shorts.dto.response.GetShortsResponse;
 import com.adregamdi.shorts.dto.response.SaveVideoResponse;
 import com.adregamdi.shorts.dto.response.UploadVideoDTO;
+import com.amazonaws.services.s3.AmazonS3Client;
+import com.amazonaws.services.s3.model.GetObjectRequest;
+import com.amazonaws.services.s3.model.S3Object;
+import com.amazonaws.services.s3.model.S3ObjectInputStream;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.PositiveOrZero;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 import ws.schild.jave.EncoderException;
 
+import java.io.IOException;
+import java.io.InputStream;
+
+@Slf4j
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/shorts")
@@ -31,6 +44,12 @@ public class ShortsController {
     private final VideoService videoService;
 
     private static String MEMBER_ID_FOR_TEST = "memberId";
+
+
+    private final AmazonS3Client amazonS3Client;
+
+    @Value("${cloud.aws.s3.bucket}")
+    private String bucketName;
 
     @GetMapping("/list")
     @MemberAuthorize
@@ -67,6 +86,35 @@ public class ShortsController {
                         .data(response)
                         .build());
     }
+
+    @GetMapping("/stream/{shorts_id}")
+    @MemberAuthorize
+    public ResponseEntity<StreamingResponseBody> streamShort(@PathVariable(value = "shorts_id") Long shortsId) {
+
+        String s3Key = shortsService.getS3KeyByShortId(shortsId);
+        log.info("{} 스트리밍을 시작합니다.", s3Key);
+        S3Object s3Object = amazonS3Client.getObject(new GetObjectRequest(bucketName, s3Key));
+        S3ObjectInputStream inputStream = s3Object.getObjectContent();
+
+        StreamingResponseBody responseBody = outputStream -> {
+            byte[] buffer = new byte[1024];
+            int bytesRead;
+            try {
+                while ((bytesRead = inputStream.read(buffer)) != -1) {
+                    outputStream.write(buffer, 0, bytesRead);
+                    outputStream.flush();
+                }
+            } finally {
+                // 스트림을 안전하게 닫기 위해 try-finally 사용
+                inputStream.close();  // InputStream은 명시적으로 닫아줍니다.
+            }
+        };
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_OCTET_STREAM_VALUE)
+                .body(responseBody);
+    }
+
 
     @PostMapping("/upload-video")
     @MemberAuthorize

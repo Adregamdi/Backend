@@ -12,6 +12,6 @@ public interface ShortsService {
     void saveShorts(String memberId, CreateShortsRequest request);
     void updateShorts(String memberId, UpdateShortsRequest request);
     void deleteShorts(String memberId, Long shortsId);
-
     SaveVideoResponse saveVideo(UploadVideoDTO videoUrls, String memberId);
+    String getS3KeyByShortId(Long shortsId);
 }

@@ -41,6 +41,14 @@ public class ShortsServiceImpl implements ShortsService {
     }
 
     @Override
+    public String getS3KeyByShortId(Long shortsId) {
+        Shorts shorts = shortsRepository.findById(shortsId)
+                .orElseThrow(() -> new ShortsException.ShortsNotFoundException(shortsId));
+
+        return fileUploadService.extractKeyFromUrl(shorts.getShortsVideoUrl());
+    }
+
+    @Override
     public SaveVideoResponse saveVideo(UploadVideoDTO videoUrls, String memberId) {
 
         Shorts savedShorts = shortsRepository.save(

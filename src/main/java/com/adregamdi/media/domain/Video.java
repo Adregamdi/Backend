@@ -1,18 +1,19 @@
 package com.adregamdi.media.domain;
 
+import com.adregamdi.core.entity.BaseTime;
 import com.adregamdi.media.enumtype.MediaType;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.Comment;
 
-import java.time.LocalDateTime;
-
 @Entity
 @Getter
 @NoArgsConstructor
-public class Video {
+@AllArgsConstructor
+public class Video extends BaseTime {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -31,18 +32,8 @@ public class Video {
     @Comment(value = "대상 식별 값")
     private Long targetId;
 
-    @Column(name = "create_at", updatable = false)
-    @Comment(value = "생성 날짜")
-    private LocalDateTime createAt;
-
-    @PrePersist
-    protected void onCreate() {
-        this.createAt = LocalDateTime.now();
-    }
-
     @Builder
-    public Video(Long id, String url, MediaType mediaType, Long targetId) {
-        this.id = id;
+    public Video(String url, MediaType mediaType, Long targetId) {
         this.url = url;
         this.mediaType = mediaType;
         this.targetId = targetId;
@@ -54,6 +45,10 @@ public class Video {
 
     public void updateTargetId(Long targetId) {
         this.targetId = targetId;
+    }
+
+    public void updateUrl(String url) {
+        this.url = url;
     }
 
 }

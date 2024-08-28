@@ -3,8 +3,8 @@ package com.adregamdi.core.handler;
 import com.adregamdi.member.exception.MemberException;
 import com.adregamdi.notification.exception.NotificationException;
 import com.adregamdi.place.exception.PlaceException;
-import com.adregamdi.shorts.exception.ShortsException;
 import com.adregamdi.schedule.exception.ScheduleException;
+import com.adregamdi.shorts.exception.ShortsException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -65,9 +65,9 @@ public class GlobalExceptionHandler {
             MemberException.MemberNotFoundException.class,
             NotificationException.NotificationNotFoundException.class,
             PlaceException.PlaceNotFoundException.class,
+            ScheduleException.ScheduleNotFoundException.class,
+            ScheduleException.SchedulePlaceNotFoundException.class,
             ShortsException.ShortsNotFoundException.class
-            PlaceException.PlaceNotFoundException.class,
-            ScheduleException.ScheduleNotFoundException.class
     })
     public ResponseEntity<ErrorResponse> handleNotFoundException(final RuntimeException exception) {
         log.warn(exception.getMessage());
@@ -80,7 +80,7 @@ public class GlobalExceptionHandler {
     // 존재 예외
     @ExceptionHandler(value = {
             PlaceException.PlaceExistException.class,
-            ShortsException.ShortsExistException.class,
+            ShortsException.ShortsExistException.class
     })
     public ResponseEntity<ErrorResponse> handleExistException(final RuntimeException exception) {
         log.warn(exception.getMessage());
@@ -98,16 +98,16 @@ public class GlobalExceptionHandler {
         log.warn(exception.getMessage());
 
         return ResponseEntity
-                .status(HttpStatus.BAD_REQUEST)
-                .body(new ErrorResponse(HttpStatus.BAD_REQUEST, exception.getMessage()));
+                .status(HttpStatus.BAD_REQUEST.value())
+                .body(new ErrorResponse(HttpStatus.BAD_REQUEST.value(), exception.getMessage()));
     }
 
     @ExceptionHandler(EncoderException.class)
     public ResponseEntity<ErrorResponse> handleEncoderException(final EncoderException exception) {
         log.warn(exception.getMessage());
         return ResponseEntity
-                .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(new ErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, "파일을 인코딩하는 과정에서 에러가 발생하였습니다. 재업로드 해주세요."));
+                .status(HttpStatus.INTERNAL_SERVER_ERROR.value())
+                .body(new ErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR.value(), "파일을 인코딩하는 과정에서 에러가 발생하였습니다. 재업로드 해주세요."));
     }
 
     @ExceptionHandler(RuntimeException.class)

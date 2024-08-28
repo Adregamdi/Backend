@@ -31,7 +31,7 @@ public class ScheduleService {
     @Transactional(readOnly = true)
     public GetMyScheduleResponse getMySchedule(final List<GetMyScheduleRequest> requests, final String memberId) {
         List<Schedule> schedules = new ArrayList<>();
-        List<SchedulePlace> schedulePlaces = new ArrayList<>();
+        List<List<SchedulePlace>> schedulePlaces = new ArrayList<>();
 
         for (GetMyScheduleRequest request : requests) {
             Schedule schedule = scheduleRepository.findByScheduleIdAndMemberId(request.scheduleId(), memberId)
@@ -39,7 +39,7 @@ public class ScheduleService {
             schedules.add(schedule);
         }
         for (Schedule schedule : schedules) {
-            SchedulePlace schedulePlace = schedulePlaceRepository.findByScheduleId(schedule.getScheduleId())
+            List<SchedulePlace> schedulePlace = schedulePlaceRepository.findByScheduleId(schedule.getScheduleId())
                     .orElseThrow(() -> new SchedulePlaceNotFoundException(schedule.getScheduleId()));
             schedulePlaces.add(schedulePlace);
         }

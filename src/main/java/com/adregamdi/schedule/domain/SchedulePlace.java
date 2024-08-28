@@ -27,4 +27,10 @@ public class SchedulePlace extends BaseTime {
         this.placeId = scheduleListDTO.getPlaceId();
         this.order = scheduleListDTO.getOrder();
     }
+
+    public void updateSchedulePlace(Long scheduleId, ScheduleListDTO scheduleListDTO) {
+        this.scheduleId = scheduleId;
+        this.placeId = scheduleListDTO.getPlaceId();
+        this.order = scheduleListDTO.getOrder();
+    }
 }

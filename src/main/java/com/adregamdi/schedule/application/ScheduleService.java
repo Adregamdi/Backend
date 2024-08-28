@@ -2,6 +2,7 @@ package com.adregamdi.schedule.application;
 
 import com.adregamdi.schedule.domain.Schedule;
 import com.adregamdi.schedule.domain.SchedulePlace;
+import com.adregamdi.schedule.dto.ScheduleListDTO;
 import com.adregamdi.schedule.dto.request.CreateMyScheduleRequest;
 import com.adregamdi.schedule.dto.response.GetMyScheduleResponse;
 import com.adregamdi.schedule.exception.ScheduleException.ScheduleNotFoundException;
@@ -11,6 +12,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -23,19 +26,26 @@ public class ScheduleService {
     public GetMyScheduleResponse getMySchedule(final String memberId) {
         Schedule schedule = scheduleRepository.findByMemberId(memberId)
                 .orElseThrow(() -> new ScheduleNotFoundException(memberId));
+        List<SchedulePlace> schedulePlace = schedulePlaceRepository.findByScheduleId(schedule.getScheduleId())
+                .orElseThrow(() -> new ScheduleNotFoundException(schedule.getScheduleId()));
         return GetMyScheduleResponse.from(schedule);
     }
 
+    /*
+     * 일정 하루 단위로 등록
+     */
     @Transactional
     public void createMySchedule(final CreateMyScheduleRequest request, final String memberId) {
-        Schedule schedule = scheduleRepository.save(new Schedule(request, memberId));
+        Schedule schedule = scheduleRepository.findByMemberIdAndTitleAndDay(memberId, request.title(), request.day());
 
-        request.scheduleList().stream()
-                .map(scheduleItem -> new SchedulePlace(
-                        schedule.getScheduleId(),
-                        scheduleItem.getPlaceId(),
-                        scheduleItem.getDay()
-                ))
-                .forEach(schedulePlaceRepository::save);
+        if (schedule == null) {
+            schedule = scheduleRepository.save(new Schedule(request, memberId));
+        } else {
+            schedule.updateSchedule(request);
+        }
+
+        for (ScheduleListDTO scheduleListDTO : request.scheduleList()) {
+            schedulePlaceRepository.save(new SchedulePlace(schedule.getScheduleId(), scheduleListDTO));
+        }
     }
 }

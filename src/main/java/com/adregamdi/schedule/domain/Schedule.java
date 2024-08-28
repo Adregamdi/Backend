@@ -20,11 +20,11 @@ public class Schedule extends BaseTime {
     @Column
     private String memberId; // 회원 id
     @Column
-    private String title; // 제목
-    @Column
     private LocalDate startDate; // 시작일
     @Column
     private LocalDate endDate; // 종료일
+    @Column
+    private String title; // 제목
     @Column
     private Integer day; // 해당 날짜
     @Column
@@ -35,5 +35,15 @@ public class Schedule extends BaseTime {
         this.startDate = request.startDate();
         this.endDate = request.endDate();
         this.title = request.title();
+        this.day = request.day();
+        this.memo = request.memo();
+    }
+
+    public void updateSchedule(CreateMyScheduleRequest request) {
+        this.startDate = request.startDate();
+        this.endDate = request.endDate();
+        this.title = request.title();
+        this.day = request.day();
+        this.memo = request.memo();
     }
 }

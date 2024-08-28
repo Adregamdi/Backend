@@ -1,6 +1,7 @@
 package com.adregamdi.schedule.domain;
 
 import com.adregamdi.core.entity.BaseTime;
+import com.adregamdi.schedule.dto.ScheduleListDTO;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -19,11 +20,11 @@ public class SchedulePlace extends BaseTime {
     @Column
     private Long placeId; // 장소 id
     @Column
-    private Integer day; // 해당 날짜
+    private Integer order; // 순서
 
-    public SchedulePlace(Long scheduleId, Long placeId, int day) {
+    public SchedulePlace(Long scheduleId, ScheduleListDTO scheduleListDTO) {
         this.scheduleId = scheduleId;
-        this.placeId = placeId;
-        this.day = day;
+        this.placeId = scheduleListDTO.getPlaceId();
+        this.order = scheduleListDTO.getOrder();
     }
 }

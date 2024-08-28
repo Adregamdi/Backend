@@ -10,6 +10,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ScheduleListDTO {
-    private Integer day;
     private Long placeId;
+    private Integer order;
 }

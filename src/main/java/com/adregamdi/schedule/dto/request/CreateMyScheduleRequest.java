@@ -2,21 +2,23 @@ package com.adregamdi.schedule.dto.request;
 
 import com.adregamdi.schedule.dto.ScheduleListDTO;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 
 import java.time.LocalDate;
 import java.util.List;
 
 public record CreateMyScheduleRequest(
-        @NotBlank
+        @NotNull
         LocalDate startDate,
-        @NotBlank
+        @NotNull
         LocalDate endDate,
         @NotBlank
         String title,
-        @NotBlank
+        @Positive
         Integer day,
         String memo,
-        @NotBlank
+        @NotNull
         List<ScheduleListDTO> scheduleList
 ) {
 }

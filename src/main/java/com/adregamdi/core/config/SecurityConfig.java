@@ -32,7 +32,8 @@ public class SecurityConfig {
     private final String[] ALLOWED_URLS = {
             "/",
             "/index.html",
-            "/api/oauth2/login"
+            "/api/oauth2/login",
+            "/api/shorts"
     };
 
     @Bean

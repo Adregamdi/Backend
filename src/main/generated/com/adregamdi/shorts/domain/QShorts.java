@@ -43,7 +43,7 @@ public class QShorts extends EntityPathBase<Shorts> {
     //inherited
     public final DateTimePath<java.time.LocalDateTime> updatedAt = _super.updatedAt;
 
-    public final NumberPath<Long> viewCount = createNumber("viewCount", Long.class);
+    public final NumberPath<Integer> viewCount = createNumber("viewCount", Integer.class);
 
     public QShorts(String variable) {
         super(Shorts.class, forVariable(variable));

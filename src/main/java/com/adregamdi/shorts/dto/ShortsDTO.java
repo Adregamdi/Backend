@@ -20,6 +20,8 @@ public class ShortsDTO {
     private Long placeNo;
     private Long travelReviewNo;
     private String shortsVideoUrl;
+    private String thumbnailUrl;
+    private int viewCount;
 
     public static ShortsDTO of(Shorts shorts) {
         return new ShortsDTO(
@@ -28,7 +30,9 @@ public class ShortsDTO {
                 shorts.getMemberId(),
                 shorts.getPlaceNo(),
                 shorts.getTravelReviewNo(),
-                "set"
+                shorts.getShortsVideoUrl(),
+                shorts.getThumbnailUrl(),
+                shorts.getViewCount()
         );
     }
 }

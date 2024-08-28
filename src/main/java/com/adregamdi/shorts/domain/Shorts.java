@@ -56,7 +56,7 @@ public class Shorts extends BaseTime {
 
     @Column(name = "view_count")
     @Comment(value = "조회 수")
-    private long viewCount;
+    private int viewCount;
 
     @Builder
     public Shorts(Long id, String title, UUID memberId, Long placeNo, Long travelReviewNo, String shortsVideoUrl, String thumbnailUrl) {
@@ -69,7 +69,7 @@ public class Shorts extends BaseTime {
         this.thumbnailUrl = thumbnailUrl;
         this.assignedStatus = false;
 //        this.isDeleted = false;
-        this.viewCount = 0L;
+        this.viewCount = 0;
     }
 
     public void update(UpdateShortsRequest request) {

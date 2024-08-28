@@ -14,7 +14,6 @@ import com.amazonaws.services.s3.model.GetObjectRequest;
 import com.amazonaws.services.s3.model.S3Object;
 import com.amazonaws.services.s3.model.S3ObjectInputStream;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.PositiveOrZero;
 import lombok.RequiredArgsConstructor;
@@ -31,9 +30,6 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 import ws.schild.jave.EncoderException;
 
-import java.io.IOException;
-import java.io.InputStream;
-
 @Slf4j
 @RestController
 @RequiredArgsConstructor
@@ -43,7 +39,7 @@ public class ShortsController {
     private final ShortsService shortsService;
     private final VideoService videoService;
 
-    private static String MEMBER_ID_FOR_TEST = "memberId";
+    private static String MEMBER_ID_FOR_TEST = "8a00e980-971a-4e17-9189-93dc61cfad63";
 
 
     private final AmazonS3Client amazonS3Client;
@@ -59,6 +55,8 @@ public class ShortsController {
             @RequestParam(value = "size", defaultValue = "10") @Positive final int size
     ) {
 
+        log.info("shortsId: {}", lastShortsId);
+        log.info("size: {}", size);
 //        String memberId = userDetails.getUsername();
         GetShortsResponse response = shortsService.getShorts(MEMBER_ID_FOR_TEST, lastShortsId, size);
 
@@ -77,8 +75,7 @@ public class ShortsController {
             @RequestParam(value = "shorts_id", required = false, defaultValue = "0") @PositiveOrZero final Long lastShortsId,
             @RequestParam(value = "size", defaultValue = "10") @Positive final int size
     ) {
-        //        String memberId = userDetails.getUsername();
-        GetShortsResponse response = shortsService.getUserShorts(MEMBER_ID_FOR_TEST, lastShortsId, size);
+        GetShortsResponse response = shortsService.getUserShorts(userDetails.getUsername(), lastShortsId, size);
         return ResponseEntity
                 .ok()
                 .body(ApiResponse.<GetShortsResponse>builder()
@@ -88,7 +85,7 @@ public class ShortsController {
     }
 
     @GetMapping("/stream/{shorts_id}")
-    @MemberAuthorize
+//    @MemberAuthorize
     public ResponseEntity<StreamingResponseBody> streamShort(@PathVariable(value = "shorts_id") Long shortsId) {
 
         String s3Key = shortsService.getS3KeyByShortId(shortsId);
@@ -120,12 +117,11 @@ public class ShortsController {
     @MemberAuthorize
     public ResponseEntity<ApiResponse<SaveVideoResponse>> uploadVideo(
             @AuthenticationPrincipal UserDetails userDetails,
-            @RequestPart("shorts") final MultipartFile videoFile
+            @RequestPart("shorts") MultipartFile videoFile
     ) throws EncoderException {
 
-//        String memberId = userDetails.getUsername();
-        UploadVideoDTO videoUrlDTO = videoService.uploadVideo(videoFile, MEMBER_ID_FOR_TEST);
-        SaveVideoResponse response = shortsService.saveVideo(videoUrlDTO, MEMBER_ID_FOR_TEST);
+        UploadVideoDTO videoUrlDTO = videoService.uploadVideo(videoFile, userDetails.getUsername());
+        SaveVideoResponse response = shortsService.saveVideo(videoUrlDTO, userDetails.getUsername());
 
         return ResponseEntity.ok()
                 .body(ApiResponse.<SaveVideoResponse>builder()
@@ -134,13 +130,14 @@ public class ShortsController {
                         .build());
     }
 
-    @PostMapping
+    @PostMapping("")
     @MemberAuthorize
     public ResponseEntity<ApiResponse<Void>> createShorts(
             @AuthenticationPrincipal UserDetails userDetails,
             @Valid @RequestBody CreateShortsRequest request
     ) {
 
+        log.info("shortsId : {}", request);
 //        shortsService.saveShorts(userDetails.getUsername(), request);
         shortsService.saveShorts(MEMBER_ID_FOR_TEST, request);
         return ResponseEntity.ok()
@@ -168,11 +165,11 @@ public class ShortsController {
     @MemberAuthorize
     public ResponseEntity<ApiResponse<Void>> deleteShort(
             @AuthenticationPrincipal UserDetails userDetails,
-            @PathVariable(value = "shorts_id") @NotEmpty(message = "쇼츠 값이 필요합니다.") Long shortsId
-            ) {
+            @PathVariable(value = "shorts_id") Long shortsId
+    ) {
 
-        String memberId = userDetails.getUsername();
-        shortsService.deleteShorts(MEMBER_ID_FOR_TEST, shortsId);
+        log.info("shortsId: {}", shortsId);
+        shortsService.deleteShorts(userDetails.getUsername(), shortsId);
         return ResponseEntity.ok()
                 .body(ApiResponse.<Void>builder()
                         .statusCode(HttpStatus.OK.value())

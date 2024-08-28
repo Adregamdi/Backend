@@ -4,6 +4,7 @@ import com.adregamdi.schedule.domain.Schedule;
 import com.adregamdi.schedule.domain.SchedulePlace;
 import com.adregamdi.schedule.dto.ScheduleListDTO;
 import com.adregamdi.schedule.dto.request.CreateMyScheduleRequest;
+import com.adregamdi.schedule.dto.request.GetMyScheduleRequest;
 import com.adregamdi.schedule.dto.response.GetMyScheduleResponse;
 import com.adregamdi.schedule.exception.ScheduleException.ScheduleNotFoundException;
 import com.adregamdi.schedule.exception.ScheduleException.SchedulePlaceNotFoundException;
@@ -14,6 +15,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
@@ -27,12 +29,21 @@ public class ScheduleService {
      * 일정 조회
      * */
     @Transactional(readOnly = true)
-    public GetMyScheduleResponse getMySchedule(final String memberId) {
-        List<Schedule> schedule = scheduleRepository.findByMemberId(memberId)
-                .orElseThrow(() -> new ScheduleNotFoundException(memberId));
-        List<SchedulePlace> schedulePlace = schedulePlaceRepository.findByScheduleId(schedule.getScheduleId())
-                .orElseThrow(() -> new ScheduleNotFoundException(schedule.getScheduleId()));
-        return GetMyScheduleResponse.from(schedule);
+    public GetMyScheduleResponse getMySchedule(final List<GetMyScheduleRequest> requests, final String memberId) {
+        List<Schedule> schedules = new ArrayList<>();
+        List<SchedulePlace> schedulePlaces = new ArrayList<>();
+
+        for (GetMyScheduleRequest request : requests) {
+            Schedule schedule = scheduleRepository.findByScheduleIdAndMemberId(request.scheduleId(), memberId)
+                    .orElseThrow(ScheduleNotFoundException::new);
+            schedules.add(schedule);
+        }
+        for (Schedule schedule : schedules) {
+            SchedulePlace schedulePlace = schedulePlaceRepository.findByScheduleId(schedule.getScheduleId())
+                    .orElseThrow(() -> new SchedulePlaceNotFoundException(schedule.getScheduleId()));
+            schedulePlaces.add(schedulePlace);
+        }
+        return GetMyScheduleResponse.from(schedules, schedulePlaces);
     }
 
     /*

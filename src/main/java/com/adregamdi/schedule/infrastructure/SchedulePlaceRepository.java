@@ -9,5 +9,5 @@ import java.util.Optional;
 public interface SchedulePlaceRepository extends JpaRepository<SchedulePlace, Long>, ScheduleCustomRepository {
     Optional<List<SchedulePlace>> findByScheduleId(Long scheduleId);
 
-    Optional<SchedulePlace> findByScheduleIdAndPlaceOrder(Long scheduleId, Integer order);
+    SchedulePlace findByScheduleIdAndPlaceOrder(Long scheduleId, Integer order);
 }

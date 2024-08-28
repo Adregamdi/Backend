@@ -3,6 +3,7 @@ package com.adregamdi.core.handler;
 import com.adregamdi.member.exception.MemberException;
 import com.adregamdi.notification.exception.NotificationException;
 import com.adregamdi.place.exception.PlaceException;
+import com.adregamdi.shorts.exception.ShortsException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -11,6 +12,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import ws.schild.jave.EncoderException;
 
 import java.time.DateTimeException;
 import java.util.Random;
@@ -61,7 +63,8 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(value = {
             MemberException.MemberNotFoundException.class,
             NotificationException.NotificationNotFoundException.class,
-            PlaceException.PlaceNotFoundException.class
+            PlaceException.PlaceNotFoundException.class,
+            ShortsException.ShortsNotFoundException.class
     })
     public ResponseEntity<ErrorResponse> handleNotFoundException(final RuntimeException exception) {
         log.warn(exception.getMessage());
@@ -73,7 +76,8 @@ public class GlobalExceptionHandler {
 
     // 존재 예외
     @ExceptionHandler(value = {
-            PlaceException.PlaceExistException.class
+            PlaceException.PlaceExistException.class,
+            ShortsException.ShortsExistException.class,
     })
     public ResponseEntity<ErrorResponse> handleExistException(final RuntimeException exception) {
         log.warn(exception.getMessage());
@@ -82,16 +86,26 @@ public class GlobalExceptionHandler {
                 .status(HttpStatus.CONFLICT.value())
                 .body(new ErrorResponse(HttpStatus.CONFLICT.value(), exception.getMessage()));
     }
-//
-//    // 커스텀 예외
-//    @ExceptionHandler(value = {})
-//    public ResponseEntity<ErrorResponse> handleCustomBadRequestException(final RuntimeException exception) {
-//        log.warn(exception.getMessage());
-//
-//        return ResponseEntity
-//                .status(HttpStatus.BAD_REQUEST)
-//                .body(new ErrorResponse(HttpStatus.BAD_REQUEST, exception.getMessage()));
-//    }
+
+    // 커스텀 예외
+    @ExceptionHandler(value = {
+            ShortsException.ShortsNOTWRITERException.class
+    })
+    public ResponseEntity<ErrorResponse> handleCustomBadRequestException(final RuntimeException exception) {
+        log.warn(exception.getMessage());
+
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(new ErrorResponse(HttpStatus.BAD_REQUEST, exception.getMessage()));
+    }
+
+    @ExceptionHandler(EncoderException.class)
+    public ResponseEntity<ErrorResponse> handleEncoderException(final EncoderException exception) {
+        log.warn(exception.getMessage());
+        return ResponseEntity
+                .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(new ErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, "파일을 인코딩하는 과정에서 에러가 발생하였습니다. 재업로드 해주세요."));
+    }
 
     @ExceptionHandler(RuntimeException.class)
     public ResponseEntity<ErrorResponse> handleRuntimeException(final RuntimeException exception) {

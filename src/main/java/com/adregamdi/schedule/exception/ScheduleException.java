@@ -14,4 +14,14 @@ public class ScheduleException extends RuntimeException {
             super(String.format("일정이 존재하지 않습니다. - request info => %s", object));
         }
     }
+
+    public static class SchedulePlaceNotFoundException extends ScheduleException {
+        public SchedulePlaceNotFoundException() {
+            super("해당 일정에 대한 장소가 존재하지 않습니다.");
+        }
+
+        public SchedulePlaceNotFoundException(final Object object) {
+            super(String.format("해당 일정에 대한 장소가 존재하지 않습니다. - request info => %s", object));
+        }
+    }
 }

@@ -2,9 +2,8 @@ package com.adregamdi.schedule.dto.response;
 
 import com.adregamdi.schedule.domain.Schedule;
 import com.adregamdi.schedule.domain.SchedulePlace;
-import lombok.AllArgsConstructor;
+import com.adregamdi.schedule.dto.ScheduleDTO;
 import lombok.Builder;
-import lombok.NoArgsConstructor;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -23,12 +22,5 @@ public record GetMyScheduleResponse(
                 .schedules(scheduleDTOs)
                 .build();
     }
-
-    @Builder
-    @NoArgsConstructor
-    @AllArgsConstructor
-    public static class ScheduleDTO {
-        Schedule schedule;
-        List<SchedulePlace> schedulePlaces;
-    }
 }
+

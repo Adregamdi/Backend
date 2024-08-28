@@ -60,8 +60,8 @@ public class ScheduleService {
         }
 
         for (ScheduleListDTO scheduleListDTO : request.scheduleList()) {
-            SchedulePlace schedulePlace = schedulePlaceRepository.findByScheduleIdAndPlaceOrder(schedule.getScheduleId(), scheduleListDTO.getPlaceOrder())
-                    .orElseThrow(SchedulePlaceNotFoundException::new);
+            SchedulePlace schedulePlace = schedulePlaceRepository.findByScheduleIdAndPlaceOrder(schedule.getScheduleId(), scheduleListDTO.getPlaceOrder());
+
             if (schedulePlace == null) {
                 schedulePlaceRepository.save(new SchedulePlace(schedule.getScheduleId(), scheduleListDTO));
             } else {

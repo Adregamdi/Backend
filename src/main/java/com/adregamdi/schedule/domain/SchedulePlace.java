@@ -20,17 +20,17 @@ public class SchedulePlace extends BaseTime {
     @Column
     private Long placeId; // 장소 id
     @Column
-    private Integer order; // 순서
+    private Integer placeOrder; // 순서
 
     public SchedulePlace(Long scheduleId, ScheduleListDTO scheduleListDTO) {
         this.scheduleId = scheduleId;
         this.placeId = scheduleListDTO.getPlaceId();
-        this.order = scheduleListDTO.getOrder();
+        this.placeOrder = scheduleListDTO.getPlaceOrder();
     }
 
     public void updateSchedulePlace(Long scheduleId, ScheduleListDTO scheduleListDTO) {
         this.scheduleId = scheduleId;
         this.placeId = scheduleListDTO.getPlaceId();
-        this.order = scheduleListDTO.getOrder();
+        this.placeOrder = scheduleListDTO.getPlaceOrder();
     }
 }

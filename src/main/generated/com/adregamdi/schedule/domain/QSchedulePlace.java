@@ -26,9 +26,9 @@ public class QSchedulePlace extends EntityPathBase<SchedulePlace> {
 
     public final NumberPath<Long> id = createNumber("id", Long.class);
 
-    public final NumberPath<Integer> order = createNumber("order", Integer.class);
-
     public final NumberPath<Long> placeId = createNumber("placeId", Long.class);
+
+    public final NumberPath<Integer> placeOrder = createNumber("placeOrder", Integer.class);
 
     public final NumberPath<Long> scheduleId = createNumber("scheduleId", Long.class);
 

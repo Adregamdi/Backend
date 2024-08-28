@@ -11,5 +11,5 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class ScheduleListDTO {
     private Long placeId;
-    private Integer order;
+    private Integer placeOrder;
 }

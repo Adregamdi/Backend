@@ -33,4 +33,14 @@ public class AppleOAuth2UserInfo extends OAuth2UserInfo {
     public String getGender() {
         return null;
     }
+
+    @Override
+    public String getName() {
+        Map<String, Object> nameAttributes = (Map<String, Object>) attributes.get("name");
+
+        if (nameAttributes == null) {
+            return null;
+        }
+        return nameAttributes.get("firstName") + (String) nameAttributes.get("lastName");
+    }
 }

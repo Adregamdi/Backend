@@ -30,13 +30,17 @@ public class QMember extends EntityPathBase<Member> {
 
     public final StringPath gender = createString("gender");
 
+    public final StringPath handle = createString("handle");
+
     public final ComparablePath<java.util.UUID> memberId = createComparable("memberId", java.util.UUID.class);
 
     public final BooleanPath memberStatus = createBoolean("memberStatus");
 
-    public final StringPath nickname = createString("nickname");
+    public final StringPath name = createString("name");
 
     public final StringPath password = createString("password");
+
+    public final StringPath profile = createString("profile");
 
     public final StringPath refreshToken = createString("refreshToken");
 

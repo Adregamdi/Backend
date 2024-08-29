@@ -5,6 +5,7 @@ import com.adregamdi.notification.exception.NotificationException;
 import com.adregamdi.place.exception.PlaceException;
 import com.adregamdi.shorts.exception.ShortsException;
 import com.adregamdi.travel.exception.TravelException;
+import com.adregamdi.travelogue.exception.TravelogueException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -67,6 +68,7 @@ public class GlobalExceptionHandler {
             PlaceException.PlaceNotFoundException.class,
             TravelException.TravelNotFoundException.class,
             TravelException.TravelPlaceNotFoundException.class,
+            TravelogueException.TravelogueNotFoundException.class,
             ShortsException.ShortsNotFoundException.class
     })
     public ResponseEntity<ErrorResponse> handleNotFoundException(final RuntimeException exception) {

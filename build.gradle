@@ -91,3 +91,12 @@ sourceSets {
 clean {
     delete file(generated)
 }
+
+//// submodule 폴더 내 변동사항 현 플젝에 적용 task
+task copyPrivate(type: Copy) {
+    copy{
+        from './BackEnd-Config'
+        include "application.yml"
+        into 'src/main/resources'
+    }
+}

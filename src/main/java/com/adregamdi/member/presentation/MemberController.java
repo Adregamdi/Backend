@@ -28,7 +28,7 @@ public class MemberController {
                         .build());
     }
 
-    @PostMapping()
+    @PostMapping("/me")
     @MemberAuthorize
     public ResponseEntity<ApiResponse<Void>> update(
             @RequestBody final UpdateMyMemberRequest request,

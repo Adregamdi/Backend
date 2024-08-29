@@ -3,7 +3,9 @@ package com.adregamdi.member.presentation;
 import com.adregamdi.core.annotation.MemberAuthorize;
 import com.adregamdi.core.handler.ApiResponse;
 import com.adregamdi.member.application.MemberService;
+import com.adregamdi.member.dto.request.UpdateMyMemberRequest;
 import com.adregamdi.member.dto.response.GetMyMemberResponse;
+import com.adregamdi.member.dto.response.UpdateMyMemberResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -27,6 +29,19 @@ public class MemberController {
                         .build());
     }
 
+    @PostMapping()
+    @MemberAuthorize
+    public ResponseEntity<ApiResponse<UpdateMyMemberResponse>> update(
+            @RequestBody final UpdateMyMemberRequest request,
+            @AuthenticationPrincipal final UserDetails userDetails
+    ) {
+        memberService.update(request, userDetails.getUsername());
+        return ResponseEntity.ok()
+                .body(ApiResponse.<UpdateMyMemberResponse>builder()
+                        .statusCode(HttpStatus.OK.value())
+                        .build());
+    }
+
     @PostMapping("/logout")
     @MemberAuthorize
     public ResponseEntity<ApiResponse<Void>> logout(@AuthenticationPrincipal final UserDetails userDetails) {
@@ -43,7 +58,7 @@ public class MemberController {
         memberService.delete(userDetails.getUsername());
         return ResponseEntity.ok()
                 .body(ApiResponse.<Void>builder()
-                        .statusCode(HttpStatus.NO_CONTENT.value())
+                        .statusCode(HttpStatus.OK.value())
                         .build());
     }
 }

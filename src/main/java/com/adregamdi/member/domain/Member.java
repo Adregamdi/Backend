@@ -18,6 +18,8 @@ public class Member extends BaseTime {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID memberId;
     @Column
+    private String name; // 이름
+    @Column
     private String nickname; // 닉네임
     @Column
     private String email; // 이메일

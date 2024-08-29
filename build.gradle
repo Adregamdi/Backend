@@ -96,7 +96,6 @@ clean {
 task copyPrivate(type: Copy) {
     copy{
         from './BackEnd-Config'
-        include "application.yml"
         into 'src/main/resources'
     }
 }

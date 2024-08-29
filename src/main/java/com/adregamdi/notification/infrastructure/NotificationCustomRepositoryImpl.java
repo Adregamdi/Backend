@@ -9,7 +9,6 @@ import org.springframework.stereotype.Repository;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 import static com.adregamdi.notification.domain.QNotification.notification;
 
@@ -21,7 +20,7 @@ public class NotificationCustomRepositoryImpl implements NotificationCustomRepos
 
     @Override
     public Optional<List<Notification>> findByMemberId(
-            final UUID memberId,
+            final String memberId,
             final LocalDateTime date,
             final Long lastId
     ) {

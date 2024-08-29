@@ -5,7 +5,6 @@ import com.adregamdi.core.handler.ApiResponse;
 import com.adregamdi.member.application.MemberService;
 import com.adregamdi.member.dto.request.UpdateMyMemberRequest;
 import com.adregamdi.member.dto.response.GetMyMemberResponse;
-import com.adregamdi.member.dto.response.UpdateMyMemberResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -31,13 +30,13 @@ public class MemberController {
 
     @PostMapping()
     @MemberAuthorize
-    public ResponseEntity<ApiResponse<UpdateMyMemberResponse>> update(
+    public ResponseEntity<ApiResponse<Void>> update(
             @RequestBody final UpdateMyMemberRequest request,
             @AuthenticationPrincipal final UserDetails userDetails
     ) {
         memberService.update(request, userDetails.getUsername());
         return ResponseEntity.ok()
-                .body(ApiResponse.<UpdateMyMemberResponse>builder()
+                .body(ApiResponse.<Void>builder()
                         .statusCode(HttpStatus.OK.value())
                         .build());
     }

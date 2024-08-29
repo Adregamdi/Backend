@@ -7,7 +7,6 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDateTime;
-import java.util.UUID;
 
 public interface NotificationRepository extends JpaRepository<Notification, Long>, NotificationCustomRepository {
     @Modifying
@@ -17,5 +16,5 @@ public interface NotificationRepository extends JpaRepository<Notification, Long
             """)
     void deleteByCreatedAt(@Param("date") final LocalDateTime date);
 
-    void deleteByMemberId(UUID id);
+    void deleteByMemberId(String id);
 }

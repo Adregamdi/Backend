@@ -3,6 +3,7 @@ package com.adregamdi.member.application;
 import com.adregamdi.member.domain.Member;
 import com.adregamdi.member.domain.Role;
 import com.adregamdi.member.domain.SocialType;
+import com.adregamdi.member.dto.request.UpdateMyMemberRequest;
 import com.adregamdi.member.dto.response.GetMyMemberResponse;
 import com.adregamdi.member.exception.MemberException.MemberNotFoundException;
 import com.adregamdi.member.infrastructure.MemberRepository;
@@ -27,7 +28,7 @@ public class MemberService {
     private final WebClient webClient;
     private final MemberRepository memberRepository;
 
-    /**
+    /*
      * [내 정보 조회]
      */
     @Transactional
@@ -38,7 +39,18 @@ public class MemberService {
         return GetMyMemberResponse.from(member);
     }
 
-    /**
+    /*
+     * [내 정보 수정]
+     */
+    @Transactional
+    public void update(final UpdateMyMemberRequest request, final String username) {
+        Member member = memberRepository.findById(UUID.fromString(username))
+                .orElseThrow(() -> new MemberNotFoundException(username));
+
+        member.updateMember(request);
+    }
+
+    /*
      * [로그아웃]
      */
     @Transactional
@@ -49,7 +61,7 @@ public class MemberService {
         member.updateRefreshTokenStatus(false);
     }
 
-    /**
+    /*
      * [소프트 탈퇴]
      */
     @Transactional
@@ -62,7 +74,7 @@ public class MemberService {
         member.updateRefreshTokenStatus(false);
     }
 
-    /**
+    /*
      * [완전 탈퇴]
      */
     @Scheduled(cron = "0 0 0 * * ?")
@@ -88,7 +100,7 @@ public class MemberService {
 
     }
 
-    /**
+    /*
      * [연결 끊기]
      */
     private void unlink(
@@ -104,7 +116,7 @@ public class MemberService {
         throw new RuntimeException();
     }
 
-    /**
+    /*
      * [카카오 연결 끊기]
      */
     private Mono<String> unlinkKakao(
@@ -122,7 +134,7 @@ public class MemberService {
                 .bodyToMono(String.class);
     }
 
-    /**
+    /*
      * [구글 연결 끊기]
      */
     private Mono<String> unlinkGoogle(final String accessToken) {

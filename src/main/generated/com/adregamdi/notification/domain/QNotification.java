@@ -28,7 +28,7 @@ public class QNotification extends EntityPathBase<Notification> {
 
     public final BooleanPath isRead = createBoolean("isRead");
 
-    public final ComparablePath<java.util.UUID> memberId = createComparable("memberId", java.util.UUID.class);
+    public final StringPath memberId = createString("memberId");
 
     public final NumberPath<Long> notificationId = createNumber("notificationId", Long.class);
 

@@ -9,7 +9,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class SignUpDTO {
-    private String nickname;
+    private String name;
+    private String handle;
     private String email;
     private String age;
     private String gender;

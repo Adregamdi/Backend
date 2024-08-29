@@ -20,6 +20,8 @@ public class Member extends BaseTime {
     @Column
     private String name; // 이름
     @Column
+    private String profile; // 프로필 사진
+    @Column
     private String handle; // 핸들
     @Column
     private String email; // 이메일

@@ -47,12 +47,15 @@ public class Member extends BaseTime {
     private Role role; // 회원 권한
 
     public Member(SignUpDTO signUpDTO) {
+        this.name = signUpDTO.getName();
+        this.handle = signUpDTO.getHandle();
         this.email = signUpDTO.getEmail();
         this.age = signUpDTO.getAge();
         this.gender = signUpDTO.getGender();
         this.socialId = signUpDTO.getSocialId();
         this.socialType = signUpDTO.getSocialType();
         this.role = Role.MEMBER;
+        this.refreshTokenStatus = false;
         this.memberStatus = true;
     }
 

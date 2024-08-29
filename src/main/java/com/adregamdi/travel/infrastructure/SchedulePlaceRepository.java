@@ -1,6 +1,6 @@
-package com.adregamdi.schedule.infrastructure;
+package com.adregamdi.travel.infrastructure;
 
-import com.adregamdi.schedule.domain.SchedulePlace;
+import com.adregamdi.travel.domain.SchedulePlace;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;

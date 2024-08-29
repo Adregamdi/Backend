@@ -1,15 +1,15 @@
-package com.adregamdi.schedule.application;
+package com.adregamdi.travel.application;
 
-import com.adregamdi.schedule.domain.Schedule;
-import com.adregamdi.schedule.domain.SchedulePlace;
-import com.adregamdi.schedule.dto.ScheduleListDTO;
-import com.adregamdi.schedule.dto.request.CreateMyScheduleRequest;
-import com.adregamdi.schedule.dto.request.GetMyScheduleRequest;
-import com.adregamdi.schedule.dto.response.GetMyScheduleResponse;
-import com.adregamdi.schedule.exception.ScheduleException.ScheduleNotFoundException;
-import com.adregamdi.schedule.exception.ScheduleException.SchedulePlaceNotFoundException;
-import com.adregamdi.schedule.infrastructure.SchedulePlaceRepository;
-import com.adregamdi.schedule.infrastructure.ScheduleRepository;
+import com.adregamdi.travel.domain.Schedule;
+import com.adregamdi.travel.domain.SchedulePlace;
+import com.adregamdi.travel.dto.ScheduleListDTO;
+import com.adregamdi.travel.dto.request.CreateMyScheduleRequest;
+import com.adregamdi.travel.dto.request.GetMyScheduleRequest;
+import com.adregamdi.travel.dto.response.GetMyScheduleResponse;
+import com.adregamdi.travel.exception.ScheduleException.ScheduleNotFoundException;
+import com.adregamdi.travel.exception.ScheduleException.SchedulePlaceNotFoundException;
+import com.adregamdi.travel.infrastructure.SchedulePlaceRepository;
+import com.adregamdi.travel.infrastructure.ScheduleRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

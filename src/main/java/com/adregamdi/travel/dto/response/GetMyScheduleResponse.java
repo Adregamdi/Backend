@@ -1,8 +1,8 @@
-package com.adregamdi.schedule.dto.response;
+package com.adregamdi.travel.dto.response;
 
-import com.adregamdi.schedule.domain.Schedule;
-import com.adregamdi.schedule.domain.SchedulePlace;
-import com.adregamdi.schedule.dto.ScheduleDTO;
+import com.adregamdi.travel.domain.Schedule;
+import com.adregamdi.travel.domain.SchedulePlace;
+import com.adregamdi.travel.dto.ScheduleDTO;
 import lombok.Builder;
 
 import java.util.List;

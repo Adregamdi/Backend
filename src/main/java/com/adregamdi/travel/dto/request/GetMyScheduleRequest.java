@@ -1,4 +1,4 @@
-package com.adregamdi.schedule.dto.request;
+package com.adregamdi.travel.dto.request;
 
 import jakarta.validation.constraints.Positive;
 

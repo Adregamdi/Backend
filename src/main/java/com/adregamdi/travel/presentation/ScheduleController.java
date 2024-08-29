@@ -1,11 +1,11 @@
-package com.adregamdi.schedule.presentation;
+package com.adregamdi.travel.presentation;
 
 import com.adregamdi.core.annotation.MemberAuthorize;
 import com.adregamdi.core.handler.ApiResponse;
-import com.adregamdi.schedule.application.ScheduleService;
-import com.adregamdi.schedule.dto.request.CreateMyScheduleRequest;
-import com.adregamdi.schedule.dto.request.GetMyScheduleRequest;
-import com.adregamdi.schedule.dto.response.GetMyScheduleResponse;
+import com.adregamdi.travel.application.ScheduleService;
+import com.adregamdi.travel.dto.request.CreateMyScheduleRequest;
+import com.adregamdi.travel.dto.request.GetMyScheduleRequest;
+import com.adregamdi.travel.dto.response.GetMyScheduleResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;

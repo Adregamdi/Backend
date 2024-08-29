@@ -1,7 +1,7 @@
-package com.adregamdi.schedule.dto;
+package com.adregamdi.travel.dto;
 
-import com.adregamdi.schedule.domain.Schedule;
-import com.adregamdi.schedule.domain.SchedulePlace;
+import com.adregamdi.travel.domain.Schedule;
+import com.adregamdi.travel.domain.SchedulePlace;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;

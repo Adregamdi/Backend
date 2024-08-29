@@ -1,4 +1,4 @@
-package com.adregamdi.schedule.exception;
+package com.adregamdi.travel.exception;
 
 public class ScheduleException extends RuntimeException {
     public ScheduleException(final String message) {

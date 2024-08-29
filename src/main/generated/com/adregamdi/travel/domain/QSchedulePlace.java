@@ -1,4 +1,4 @@
-package com.adregamdi.schedule.domain;
+package com.adregamdi.travel.domain;
 
 import static com.querydsl.core.types.PathMetadataFactory.*;
 

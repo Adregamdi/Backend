@@ -1,4 +1,4 @@
-package com.adregamdi.schedule.infrastructure;
+package com.adregamdi.travel.infrastructure;
 
 public interface ScheduleCustomRepository {
 }

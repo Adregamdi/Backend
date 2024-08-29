@@ -1,4 +1,4 @@
-package com.adregamdi.schedule.dto;
+package com.adregamdi.travel.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

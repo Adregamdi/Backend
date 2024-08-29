@@ -1,7 +1,7 @@
-package com.adregamdi.schedule.domain;
+package com.adregamdi.travel.domain;
 
 import com.adregamdi.core.entity.BaseTime;
-import com.adregamdi.schedule.dto.ScheduleListDTO;
+import com.adregamdi.travel.dto.ScheduleListDTO;
 import jakarta.persistence.*;
 import lombok.*;
 

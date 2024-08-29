@@ -1,6 +1,6 @@
-package com.adregamdi.schedule.dto.request;
+package com.adregamdi.travel.dto.request;
 
-import com.adregamdi.schedule.dto.ScheduleListDTO;
+import com.adregamdi.travel.dto.ScheduleListDTO;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;

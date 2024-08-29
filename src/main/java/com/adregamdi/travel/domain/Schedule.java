@@ -1,7 +1,7 @@
-package com.adregamdi.schedule.domain;
+package com.adregamdi.travel.domain;
 
 import com.adregamdi.core.entity.BaseTime;
-import com.adregamdi.schedule.dto.request.CreateMyScheduleRequest;
+import com.adregamdi.travel.dto.request.CreateMyScheduleRequest;
 import jakarta.persistence.*;
 import lombok.*;
 

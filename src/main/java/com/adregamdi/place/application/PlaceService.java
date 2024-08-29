@@ -10,17 +10,17 @@ public interface PlaceService {
     /*
      * [특정 장소 조회]
      * */
-    GetPlaceResponse get(Long placeId);
+    GetPlaceResponse get(final Long placeId);
 
     /*
      * [장소 리스트 조회]
      * */
-    GetPlacesResponse getPlaces(int pageNo, String name);
+    GetPlacesResponse getPlaces(final int pageNo, final String name);
 
     /*
      * [장소 등록]
      * */
-    void create(CreatePlaceRequest request);
+    void create(final CreatePlaceRequest request);
 
     /*
      * [장소 등록 By 외부 API]

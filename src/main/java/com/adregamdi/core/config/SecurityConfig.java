@@ -54,11 +54,11 @@ public class SecurityConfig {
                 .authorizeHttpRequests(request ->
                         request.requestMatchers(ALLOWED_URLS).permitAll()
                                 .anyRequest().authenticated())
-//                .oauth2Login(oauth2Login -> oauth2Login
-//                        .userInfoEndpoint(userInfo -> userInfo.userService(customOAuth2UserService))
-//                        .successHandler(oAuth2LoginSuccessHandler)
-//                        .failureHandler(oAuth2LoginFailureHandler)
-//                )
+                .oauth2Login(oauth2Login -> oauth2Login
+                        .userInfoEndpoint(userInfo -> userInfo.userService(customOAuth2UserService))
+                        .successHandler(oAuth2LoginSuccessHandler)
+                        .failureHandler(oAuth2LoginFailureHandler)
+                )
                 .addFilterAfter(jwtAuthenticationFilter(), LogoutFilter.class)
         ;
 

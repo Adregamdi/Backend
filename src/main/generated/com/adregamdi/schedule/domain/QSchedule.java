@@ -24,13 +24,17 @@ public class QSchedule extends EntityPathBase<Schedule> {
     //inherited
     public final DateTimePath<java.time.LocalDateTime> createdAt = _super.createdAt;
 
-    public final StringPath endDate = createString("endDate");
+    public final NumberPath<Integer> day = createNumber("day", Integer.class);
 
-    public final ComparablePath<java.util.UUID> memberId = createComparable("memberId", java.util.UUID.class);
+    public final DatePath<java.time.LocalDate> endDate = createDate("endDate", java.time.LocalDate.class);
+
+    public final StringPath memberId = createString("memberId");
+
+    public final StringPath memo = createString("memo");
 
     public final NumberPath<Long> scheduleId = createNumber("scheduleId", Long.class);
 
-    public final StringPath startDate = createString("startDate");
+    public final DatePath<java.time.LocalDate> startDate = createDate("startDate", java.time.LocalDate.class);
 
     public final StringPath title = createString("title");
 

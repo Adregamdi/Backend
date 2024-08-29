@@ -29,7 +29,7 @@ public class NotificationController {
     ) {
         return ResponseEntity.ok()
                 .body(ApiResponse.<GetNotificationResponse>builder()
-                        .statusCode(HttpStatus.OK)
+                        .statusCode(HttpStatus.OK.value())
                         .data(notificationService.get(lastId, userDetails.getUsername()))
                         .build()
                 );
@@ -41,7 +41,7 @@ public class NotificationController {
         notificationService.update(requests);
         return ResponseEntity.ok()
                 .body(ApiResponse.<Void>builder()
-                        .statusCode(HttpStatus.NO_CONTENT)
+                        .statusCode(HttpStatus.NO_CONTENT.value())
                         .build()
                 );
     }

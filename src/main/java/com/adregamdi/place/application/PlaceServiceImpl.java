@@ -36,7 +36,7 @@ public class PlaceServiceImpl implements PlaceService {
 
     @Override
     @Transactional(readOnly = true)
-    public GetPlaceResponse get(Long placeId) {
+    public GetPlaceResponse get(final Long placeId) {
         Place place = placeRepository.findById(placeId)
                 .orElseThrow(() -> new PlaceNotFoundException(placeId));
         return GetPlaceResponse.from(place);
@@ -44,7 +44,7 @@ public class PlaceServiceImpl implements PlaceService {
 
     @Override
     @Transactional(readOnly = true)
-    public GetPlacesResponse getPlaces(int pageNo, String name) {
+    public GetPlacesResponse getPlaces(final int pageNo, final String name) {
         Slice<Place> places = placeRepository.findByNameStartingWith(generatePageAsc(pageNo, NORMAL_PAGE_SIZE, "name"), name)
                 .orElseThrow(() -> new PlaceNotFoundException(name));
         return GetPlacesResponse.from(
@@ -57,7 +57,7 @@ public class PlaceServiceImpl implements PlaceService {
 
     @Override
     @Transactional
-    public void create(CreatePlaceRequest request) {
+    public void create(final CreatePlaceRequest request) {
         if (placeRepository.findByTitleAndContentsLabel(request.title(), request.contentsLabel()).isPresent()) {
             throw new PlaceExistException(request);
         }
@@ -111,7 +111,7 @@ public class PlaceServiceImpl implements PlaceService {
         });
     }
 
-    private String formatTags(String tag) {
+    private String formatTags(final String tag) {
         String[] tags = tag.split(",");
         StringBuilder formattedTags = new StringBuilder();
         for (String t : tags) {

@@ -1,10 +1,11 @@
 package com.adregamdi.schedule.domain;
 
 import com.adregamdi.core.entity.BaseTime;
+import com.adregamdi.schedule.dto.request.CreateMyScheduleRequest;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.util.UUID;
+import java.time.LocalDate;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -17,11 +18,32 @@ public class Schedule extends BaseTime {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long scheduleId;
     @Column
-    private UUID memberId; // 회원 id
+    private String memberId; // 회원 id
     @Column
-    private String startDate; // 시작일
+    private LocalDate startDate; // 시작일
     @Column
-    private String endDate; // 종료일
+    private LocalDate endDate; // 종료일
     @Column
     private String title; // 제목
+    @Column
+    private Integer day; // 해당 날짜
+    @Column
+    private String memo; // 메모
+
+    public Schedule(CreateMyScheduleRequest request, String memberId) {
+        this.memberId = memberId;
+        this.startDate = request.startDate();
+        this.endDate = request.endDate();
+        this.title = request.title();
+        this.day = request.day();
+        this.memo = request.memo();
+    }
+
+    public void updateSchedule(CreateMyScheduleRequest request) {
+        this.startDate = request.startDate();
+        this.endDate = request.endDate();
+        this.title = request.title();
+        this.day = request.day();
+        this.memo = request.memo();
+    }
 }

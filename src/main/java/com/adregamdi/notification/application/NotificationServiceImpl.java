@@ -15,7 +15,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.UUID;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -38,7 +37,7 @@ public class NotificationServiceImpl implements NotificationService {
     @Override
     @Transactional(readOnly = true)
     public GetNotificationResponse get(final Long lastId, final String memberId) {
-        List<Notification> notifications = notificationRepository.findByMemberId(UUID.fromString(memberId), LocalDateTime.now().minusDays(31), lastId)
+        List<Notification> notifications = notificationRepository.findByMemberId(memberId, LocalDateTime.now().minusDays(31), lastId)
                 .orElseThrow(() -> new NotificationNotFoundException(memberId));
 
         return GetNotificationResponse.of(

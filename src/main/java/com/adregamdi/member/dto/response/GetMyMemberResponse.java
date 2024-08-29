@@ -7,7 +7,9 @@ import lombok.Builder;
 
 @Builder
 public record GetMyMemberResponse(
-        String nickname,
+        String name,
+        String profile,
+        String handle,
         String email,
         String age,
         String gender,
@@ -16,7 +18,9 @@ public record GetMyMemberResponse(
 ) {
     public static GetMyMemberResponse from(Member member) {
         return GetMyMemberResponse.builder()
-                .nickname(member.getNickname())
+                .name(member.getName())
+                .profile(member.getProfile())
+                .handle(member.getHandle())
                 .email(member.getEmail())
                 .age(member.getAge())
                 .gender(member.getGender())

@@ -2,6 +2,7 @@ package com.adregamdi.member.domain;
 
 import com.adregamdi.core.entity.BaseTime;
 import com.adregamdi.core.oauth2.dto.SignUpDTO;
+import com.adregamdi.member.dto.request.UpdateMyMemberRequest;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -18,7 +19,11 @@ public class Member extends BaseTime {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID memberId;
     @Column
-    private String nickname; // 닉네임
+    private String name; // 이름
+    @Column
+    private String profile; // 프로필 사진
+    @Column
+    private String handle; // 핸들
     @Column
     private String email; // 이메일
     @Column
@@ -45,13 +50,22 @@ public class Member extends BaseTime {
     private Role role; // 회원 권한
 
     public Member(SignUpDTO signUpDTO) {
+        this.name = signUpDTO.getName();
+        this.handle = signUpDTO.getHandle();
         this.email = signUpDTO.getEmail();
         this.age = signUpDTO.getAge();
         this.gender = signUpDTO.getGender();
         this.socialId = signUpDTO.getSocialId();
         this.socialType = signUpDTO.getSocialType();
         this.role = Role.MEMBER;
+        this.refreshTokenStatus = false;
         this.memberStatus = true;
+    }
+
+    public void updateMember(UpdateMyMemberRequest request) {
+        this.name = request.name();
+        this.profile = request.profile();
+        this.handle = request.handle();
     }
 
     public void updateSocialAccessToken(String socialAccessToken) {
@@ -73,5 +87,4 @@ public class Member extends BaseTime {
     public void updateMemberStatus(Boolean status) {
         this.memberStatus = status;
     }
-
 }

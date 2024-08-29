@@ -48,4 +48,14 @@ public class KakaoOAuth2UserInfo extends OAuth2UserInfo {
         }
         return (String) response.get("gender");
     }
+
+    @Override
+    public String getName() {
+        Map<String, Object> properties = (Map<String, Object>) attributes.get("properties");
+
+        if (properties == null) {
+            return null;
+        }
+        return (String) properties.get("nickname");
+    }
 }

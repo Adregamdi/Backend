@@ -13,7 +13,7 @@ import com.querydsl.core.types.Path;
  * QSchedule is a Querydsl query type for Schedule
  */
 @Generated("com.querydsl.codegen.DefaultEntitySerializer")
-public class QSchedule extends EntityPathBase<Schedule> {
+public class QSchedule extends EntityPathBase<Travel> {
 
     private static final long serialVersionUID = 96321667L;
 
@@ -42,15 +42,15 @@ public class QSchedule extends EntityPathBase<Schedule> {
     public final DateTimePath<java.time.LocalDateTime> updatedAt = _super.updatedAt;
 
     public QSchedule(String variable) {
-        super(Schedule.class, forVariable(variable));
+        super(Travel.class, forVariable(variable));
     }
 
-    public QSchedule(Path<? extends Schedule> path) {
+    public QSchedule(Path<? extends Travel> path) {
         super(path.getType(), path.getMetadata());
     }
 
     public QSchedule(PathMetadata metadata) {
-        super(Schedule.class, metadata);
+        super(Travel.class, metadata);
     }
 
 }

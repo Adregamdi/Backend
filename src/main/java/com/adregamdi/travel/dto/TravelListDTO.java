@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ScheduleListDTO {
+public class TravelListDTO {
     private Long placeId;
     private Integer placeOrder;
 }

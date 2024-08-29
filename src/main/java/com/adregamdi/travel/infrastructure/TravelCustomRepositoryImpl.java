@@ -5,5 +5,5 @@ import org.springframework.stereotype.Repository;
 
 @RequiredArgsConstructor
 @Repository
-public class ScheduleCustomRepositoryImpl implements ScheduleCustomRepository {
+public class TravelCustomRepositoryImpl implements TravelCustomRepository {
 }

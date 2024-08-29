@@ -1,6 +1,6 @@
 package com.adregamdi.travel.dto.request;
 
-import com.adregamdi.travel.dto.ScheduleListDTO;
+import com.adregamdi.travel.dto.TravelListDTO;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
@@ -8,7 +8,7 @@ import jakarta.validation.constraints.Positive;
 import java.time.LocalDate;
 import java.util.List;
 
-public record CreateMyScheduleRequest(
+public record CreateMyTravelRequest(
         @NotNull
         LocalDate startDate,
         @NotNull
@@ -19,6 +19,6 @@ public record CreateMyScheduleRequest(
         Integer day,
         String memo,
         @NotNull
-        List<ScheduleListDTO> scheduleList
+        List<TravelListDTO> travelList
 ) {
 }

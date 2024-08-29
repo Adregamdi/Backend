@@ -2,10 +2,10 @@ package com.adregamdi.travel.presentation;
 
 import com.adregamdi.core.annotation.MemberAuthorize;
 import com.adregamdi.core.handler.ApiResponse;
-import com.adregamdi.travel.application.ScheduleService;
-import com.adregamdi.travel.dto.request.CreateMyScheduleRequest;
-import com.adregamdi.travel.dto.request.GetMyScheduleRequest;
-import com.adregamdi.travel.dto.response.GetMyScheduleResponse;
+import com.adregamdi.travel.application.TravelService;
+import com.adregamdi.travel.dto.request.CreateMyTravelRequest;
+import com.adregamdi.travel.dto.request.GetMyTravelRequest;
+import com.adregamdi.travel.dto.response.GetMyTravelResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -17,32 +17,32 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RequiredArgsConstructor
-@RequestMapping("/api/schedule")
+@RequestMapping("/api/travel")
 @RestController
-public class ScheduleController {
-    private final ScheduleService scheduleService;
+public class TravelController {
+    private final TravelService travelService;
 
     @GetMapping
     @MemberAuthorize
-    public ResponseEntity<ApiResponse<GetMyScheduleResponse>> getMySchedule(
-            @RequestBody @Valid List<GetMyScheduleRequest> requests,
+    public ResponseEntity<ApiResponse<GetMyTravelResponse>> getMyTravel(
+            @RequestBody @Valid List<GetMyTravelRequest> requests,
             @AuthenticationPrincipal final UserDetails userDetails
     ) {
         return ResponseEntity.ok()
-                .body(ApiResponse.<GetMyScheduleResponse>builder()
+                .body(ApiResponse.<GetMyTravelResponse>builder()
                         .statusCode(HttpStatus.OK.value())
-                        .data(scheduleService.getMySchedule(requests, userDetails.getUsername()))
+                        .data(travelService.getMyTravel(requests, userDetails.getUsername()))
                         .build()
                 );
     }
 
     @PostMapping
     @MemberAuthorize
-    public ResponseEntity<ApiResponse<Void>> createMySchedule(
-            @RequestBody @Valid final CreateMyScheduleRequest request,
+    public ResponseEntity<ApiResponse<Void>> createMyTravel(
+            @RequestBody @Valid final CreateMyTravelRequest request,
             @AuthenticationPrincipal final UserDetails userDetails
     ) {
-        scheduleService.createMySchedule(request, userDetails.getUsername());
+        travelService.createMyTravel(request, userDetails.getUsername());
         return ResponseEntity.ok()
                 .body(ApiResponse.<Void>builder()
                         .statusCode(HttpStatus.CREATED.value())

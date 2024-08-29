@@ -2,8 +2,8 @@ package com.adregamdi.travel.dto.request;
 
 import jakarta.validation.constraints.Positive;
 
-public record GetMyScheduleRequest(
+public record GetMyTravelRequest(
         @Positive
-        Long scheduleId
+        Long travelId
 ) {
 }

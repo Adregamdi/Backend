@@ -20,7 +20,7 @@ public class Member extends BaseTime {
     @Column
     private String name; // 이름
     @Column
-    private String nickname; // 닉네임
+    private String handle; // 핸들
     @Column
     private String email; // 이메일
     @Column

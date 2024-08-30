@@ -56,7 +56,7 @@ public class TravelService {
      * */
     @Transactional(readOnly = true)
     public GetMyTravelResponse getMyTravel(final Long travelId, final String memberId) {
-        List<TravelPlace> travelPlaces = new ArrayList<>();
+        List<List<TravelPlace>> travelPlaces = new ArrayList<>();
 
         Travel travel = travelRepository.findByTravelIdAndMemberId(travelId, memberId)
                 .orElseThrow(() -> new TravelNotFoundException(memberId));
@@ -65,8 +65,9 @@ public class TravelService {
                 .orElseThrow(() -> new TravelDayNotFoundException(travelId));
 
         for (TravelDay travelDay : travelDays) {
-            travelPlaces = travelPlaceRepository.findByTravelDayId(travelDay.getTravelDayId())
+            List<TravelPlace> travelPlaceList = travelPlaceRepository.findByTravelDayId(travelDay.getTravelDayId())
                     .orElseThrow(() -> new TravelPlaceNotFoundException(travel.getTravelId()));
+            travelPlaces.add(travelPlaceList);
         }
 
         return GetMyTravelResponse.from(travel, travelDays, travelPlaces);

@@ -19,18 +19,15 @@ public record GetMyTravelResponse(
     public static GetMyTravelResponse from(
             final Travel travel,
             final List<TravelDay> travelDays,
-            final List<TravelPlace> travelPlaces
+            final List<List<TravelPlace>> travelPlaces
     ) {
-        Map<Integer, List<TravelPlace>> placesByDay = travelPlaces.stream()
-                .collect(Collectors.groupingBy(place -> travelDays.stream()
-                        .filter(day -> day.getTravelDayId().equals(place.getTravelDayId()))
-                        .findFirst()
-                        .map(TravelDay::getDay)
-                        .orElse(0)));
+        Map<Long, List<TravelPlace>> placesByDayId = travelPlaces.stream()
+                .flatMap(List::stream)
+                .collect(Collectors.groupingBy(TravelPlace::getTravelDayId));
 
         List<Day> dayList = travelDays.stream()
                 .map(travelDay -> {
-                    List<Place> places = placesByDay.getOrDefault(travelDay.getDay(), Collections.emptyList())
+                    List<Place> places = placesByDayId.getOrDefault(travelDay.getTravelDayId(), Collections.emptyList())
                             .stream()
                             .map(travelPlace -> Place.builder()
                                     .placeId(travelPlace.getPlaceId())

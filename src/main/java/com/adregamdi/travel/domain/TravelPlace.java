@@ -14,22 +14,22 @@ import lombok.*;
 public class TravelPlace extends BaseTime {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Long travelPlaceId;
     @Column
-    private Long travelId; // 일정 id
+    private Long travelDayId; // 날짜 별 일정 id
     @Column
     private Long placeId; // 장소 id
     @Column
     private Integer placeOrder; // 순서
 
-    public TravelPlace(Long travelId, TravelListDTO travelListDTO) {
-        this.travelId = travelId;
+    public TravelPlace(Long travelDayId, TravelListDTO travelListDTO) {
+        this.travelDayId = travelDayId;
         this.placeId = travelListDTO.getPlaceId();
         this.placeOrder = travelListDTO.getPlaceOrder();
     }
 
-    public void updateTravelPlace(Long travelId, TravelListDTO travelListDTO) {
-        this.travelId = travelId;
+    public void updateTravelPlace(Long travelDayId, TravelListDTO travelListDTO) {
+        this.travelDayId = travelDayId;
         this.placeId = travelListDTO.getPlaceId();
         this.placeOrder = travelListDTO.getPlaceOrder();
     }

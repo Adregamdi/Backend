@@ -7,11 +7,21 @@ public class TravelException extends RuntimeException {
 
     public static class TravelNotFoundException extends TravelException {
         public TravelNotFoundException() {
-            super("일정이 존재하지 않습니다.");
+            super("해당 회원의 일정이 존재하지 않습니다.");
         }
 
         public TravelNotFoundException(final Object object) {
-            super(String.format("일정이 존재하지 않습니다. - request info => %s", object));
+            super(String.format("해당 회원의 일정이 존재하지 않습니다. - request info => %s", object));
+        }
+    }
+
+    public static class TravelDayNotFoundException extends TravelException {
+        public TravelDayNotFoundException() {
+            super("해당 일정이 존재하지 않습니다.");
+        }
+
+        public TravelDayNotFoundException(final Object object) {
+            super(String.format("해당 일정이 존재하지 않습니다. - request info => %s", object));
         }
     }
 

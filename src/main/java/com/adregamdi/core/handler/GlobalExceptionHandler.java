@@ -67,6 +67,7 @@ public class GlobalExceptionHandler {
             NotificationException.NotificationNotFoundException.class,
             PlaceException.PlaceNotFoundException.class,
             TravelException.TravelNotFoundException.class,
+            TravelException.TravelDayNotFoundException.class,
             TravelException.TravelPlaceNotFoundException.class,
             TravelogueException.TravelogueNotFoundException.class,
             ShortsException.ShortsNotFoundException.class

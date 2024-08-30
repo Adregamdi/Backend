@@ -3,12 +3,9 @@ package com.adregamdi.travel.application;
 import com.adregamdi.travel.domain.Travel;
 import com.adregamdi.travel.domain.TravelDay;
 import com.adregamdi.travel.domain.TravelPlace;
-import com.adregamdi.travel.dto.TravelListDTO;
 import com.adregamdi.travel.dto.request.CreateMyTravelRequest;
 import com.adregamdi.travel.dto.response.GetMyTravelResponse;
-import com.adregamdi.travel.exception.TravelException.TravelDayNotFoundException;
-import com.adregamdi.travel.exception.TravelException.TravelNotFoundException;
-import com.adregamdi.travel.exception.TravelException.TravelPlaceNotFoundException;
+import com.adregamdi.travel.exception.TravelException.*;
 import com.adregamdi.travel.infrastructure.TravelDayRepository;
 import com.adregamdi.travel.infrastructure.TravelPlaceRepository;
 import com.adregamdi.travel.infrastructure.TravelRepository;
@@ -17,6 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -29,25 +27,26 @@ public class TravelService {
     private final TravelPlaceRepository travelPlaceRepository;
 
     /*
-     * 일정 등록/수정
+     * 일정 등록
      * */
     @Transactional
     public void createMyTravel(final CreateMyTravelRequest request, final String memberId) {
-        Travel travel = travelRepository.findByMemberIdAndTitleAndDay(memberId, request.title());
-
-        if (travel == null) {
-            travel = travelRepository.save(new Travel(request, memberId));
-        } else {
-            travel.updateTravel(request);
+        if (request.startDate().isAfter(request.endDate())) {
+            throw new InvalidTravelDateException(request);
         }
 
-        for (TravelListDTO travelListDTO : request.travelList()) {
-            TravelPlace travelPlace = travelPlaceRepository.findByTravelDayIdAndPlaceOrder(travel.getTravelDayId(), travelListDTO.getPlaceOrder());
+        Travel travel = travelRepository.save(new Travel(request, memberId));
 
-            if (travelPlace == null) {
-                travelPlaceRepository.save(new TravelPlace(travel.getTravelId(), travelListDTO));
-            } else {
-                travelPlace.updateTravelPlace(travel.getTravelId(), travelListDTO);
+        for (CreateMyTravelRequest.DayInfo dayInfo : request.dayList()) {
+            LocalDate dayDate = request.startDate().plusDays(dayInfo.day() - 1);
+            if (dayDate.isAfter(request.endDate())) {
+                throw new InvalidTravelDayException(dayInfo.day(), dayInfo);
+            }
+
+            TravelDay travelDay = travelDayRepository.save(new TravelDay(travel.getTravelId(), dayInfo.day(), dayInfo.memo()));
+
+            for (CreateMyTravelRequest.PlaceInfo placeInfo : dayInfo.placeList()) {
+                travelPlaceRepository.save(new TravelPlace(travelDay.getTravelDayId(), placeInfo.placeId(), placeInfo.placeOrder()));
             }
         }
     }

@@ -19,4 +19,10 @@ public class TravelDay {
     private Integer day; // 해당 날짜
     @Column
     private String memo; // 메모
+
+    public TravelDay(Long travelId, Integer day, String memo) {
+        this.travelId = travelId;
+        this.day = day;
+        this.memo = memo;
+    }
 }

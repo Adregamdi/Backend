@@ -1,7 +1,6 @@
 package com.adregamdi.travel.domain;
 
 import com.adregamdi.core.entity.BaseTime;
-import com.adregamdi.travel.dto.TravelListDTO;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -22,15 +21,10 @@ public class TravelPlace extends BaseTime {
     @Column
     private Integer placeOrder; // 순서
 
-    public TravelPlace(Long travelDayId, TravelListDTO travelListDTO) {
-        this.travelDayId = travelDayId;
-        this.placeId = travelListDTO.getPlaceId();
-        this.placeOrder = travelListDTO.getPlaceOrder();
-    }
 
-    public void updateTravelPlace(Long travelDayId, TravelListDTO travelListDTO) {
+    public TravelPlace(Long travelDayId, Long placeId, Integer placeOrder) {
         this.travelDayId = travelDayId;
-        this.placeId = travelListDTO.getPlaceId();
-        this.placeOrder = travelListDTO.getPlaceOrder();
+        this.placeId = placeId;
+        this.placeOrder = placeOrder;
     }
 }

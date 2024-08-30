@@ -32,10 +32,4 @@ public class Travel extends BaseTime {
         this.endDate = request.endDate();
         this.title = request.title();
     }
-
-    public void updateTravel(CreateMyTravelRequest request) {
-        this.startDate = request.startDate();
-        this.endDate = request.endDate();
-        this.title = request.title();
-    }
 }

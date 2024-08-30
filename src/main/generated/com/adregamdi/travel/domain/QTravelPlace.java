@@ -24,13 +24,13 @@ public class QTravelPlace extends EntityPathBase<TravelPlace> {
     //inherited
     public final DateTimePath<java.time.LocalDateTime> createdAt = _super.createdAt;
 
-    public final NumberPath<Long> id = createNumber("id", Long.class);
-
     public final NumberPath<Long> placeId = createNumber("placeId", Long.class);
 
     public final NumberPath<Integer> placeOrder = createNumber("placeOrder", Integer.class);
 
-    public final NumberPath<Long> travelId = createNumber("travelId", Long.class);
+    public final NumberPath<Long> travelDayId = createNumber("travelDayId", Long.class);
+
+    public final NumberPath<Long> travelPlaceId = createNumber("travelPlaceId", Long.class);
 
     //inherited
     public final DateTimePath<java.time.LocalDateTime> updatedAt = _super.updatedAt;

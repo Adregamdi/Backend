@@ -14,7 +14,7 @@ public class TravelDay {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long travelDayId;
     @Column
-    private Long travelId; // 날짜 별 일정 id
+    private Long travelId; // 일정 id
     @Column
     private Integer day; // 해당 날짜
     @Column

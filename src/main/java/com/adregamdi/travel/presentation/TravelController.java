@@ -37,7 +37,7 @@ public class TravelController {
     @GetMapping
     @MemberAuthorize
     public ResponseEntity<ApiResponse<GetMyTravelResponse>> getMyTravel(
-            @RequestParam @Positive Long travelId,
+            @RequestParam("travel_id") @Positive Long travelId,
             @AuthenticationPrincipal final UserDetails userDetails
     ) {
         return ResponseEntity.ok()

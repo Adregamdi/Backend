@@ -20,20 +20,6 @@ import org.springframework.web.bind.annotation.*;
 public class TravelController {
     private final TravelService travelService;
 
-    @GetMapping
-    @MemberAuthorize
-    public ResponseEntity<ApiResponse<GetMyTravelResponse>> getMyTravel(
-            @RequestParam @Positive Long travelId,
-            @AuthenticationPrincipal final UserDetails userDetails
-    ) {
-        return ResponseEntity.ok()
-                .body(ApiResponse.<GetMyTravelResponse>builder()
-                        .statusCode(HttpStatus.OK.value())
-                        .data(travelService.getMyTravel(travelId, userDetails.getUsername()))
-                        .build()
-                );
-    }
-
     @PostMapping
     @MemberAuthorize
     public ResponseEntity<ApiResponse<Void>> createMyTravel(
@@ -44,6 +30,20 @@ public class TravelController {
         return ResponseEntity.ok()
                 .body(ApiResponse.<Void>builder()
                         .statusCode(HttpStatus.CREATED.value())
+                        .build()
+                );
+    }
+
+    @GetMapping
+    @MemberAuthorize
+    public ResponseEntity<ApiResponse<GetMyTravelResponse>> getMyTravel(
+            @RequestParam @Positive Long travelId,
+            @AuthenticationPrincipal final UserDetails userDetails
+    ) {
+        return ResponseEntity.ok()
+                .body(ApiResponse.<GetMyTravelResponse>builder()
+                        .statusCode(HttpStatus.OK.value())
+                        .data(travelService.getMyTravel(travelId, userDetails.getUsername()))
                         .build()
                 );
     }

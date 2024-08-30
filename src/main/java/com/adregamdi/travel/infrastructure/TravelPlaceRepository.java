@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Optional;
 
 public interface TravelPlaceRepository extends JpaRepository<TravelPlace, Long>, TravelCustomRepository {
-    Optional<List<TravelPlace>> findByTravelId(Long travelId);
+    Optional<List<TravelPlace>> findByTravelDayId(Long travelDayId);
 
-    TravelPlace findByTravelIdAndPlaceOrder(Long travelId, Integer order);
+    TravelPlace findByTravelDayIdAndPlaceOrder(Long travelDayId, Integer order);
 }

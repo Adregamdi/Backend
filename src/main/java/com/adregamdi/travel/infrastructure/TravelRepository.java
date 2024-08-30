@@ -8,5 +8,5 @@ import java.util.Optional;
 public interface TravelRepository extends JpaRepository<Travel, Long>, TravelCustomRepository {
     Optional<Travel> findByTravelIdAndMemberId(Long travelId, String memberId);
 
-    Travel findByMemberIdAndTitleAndDay(String memberId, String title, Integer day);
+    Travel findByMemberIdAndTitle(String memberId, String title);
 }

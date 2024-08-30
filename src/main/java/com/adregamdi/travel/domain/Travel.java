@@ -25,25 +25,17 @@ public class Travel extends BaseTime {
     private LocalDate endDate; // 종료일
     @Column
     private String title; // 제목
-    @Column
-    private Integer day; // 해당 날짜
-    @Column
-    private String memo; // 메모
 
     public Travel(CreateMyTravelRequest request, String memberId) {
         this.memberId = memberId;
         this.startDate = request.startDate();
         this.endDate = request.endDate();
         this.title = request.title();
-        this.day = request.day();
-        this.memo = request.memo();
     }
 
     public void updateTravel(CreateMyTravelRequest request) {
         this.startDate = request.startDate();
         this.endDate = request.endDate();
         this.title = request.title();
-        this.day = request.day();
-        this.memo = request.memo();
     }
 }

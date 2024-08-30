@@ -95,6 +95,8 @@ public class GlobalExceptionHandler {
 
     // 커스텀 예외
     @ExceptionHandler(value = {
+            TravelException.InvalidTravelDateException.class,
+            TravelException.InvalidTravelDayException.class,
             ShortsException.ShortsNOTWRITERException.class
     })
     public ResponseEntity<ErrorResponse> handleCustomBadRequestException(final RuntimeException exception) {

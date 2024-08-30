@@ -1,13 +1,15 @@
 package com.adregamdi.travel.application;
 
 import com.adregamdi.travel.domain.Travel;
+import com.adregamdi.travel.domain.TravelDay;
 import com.adregamdi.travel.domain.TravelPlace;
 import com.adregamdi.travel.dto.TravelListDTO;
 import com.adregamdi.travel.dto.request.CreateMyTravelRequest;
-import com.adregamdi.travel.dto.request.GetMyTravelRequest;
 import com.adregamdi.travel.dto.response.GetMyTravelResponse;
+import com.adregamdi.travel.exception.TravelException.TravelDayNotFoundException;
 import com.adregamdi.travel.exception.TravelException.TravelNotFoundException;
 import com.adregamdi.travel.exception.TravelException.TravelPlaceNotFoundException;
+import com.adregamdi.travel.infrastructure.TravelDayRepository;
 import com.adregamdi.travel.infrastructure.TravelPlaceRepository;
 import com.adregamdi.travel.infrastructure.TravelRepository;
 import lombok.RequiredArgsConstructor;
@@ -23,35 +25,15 @@ import java.util.List;
 @Service
 public class TravelService {
     private final TravelRepository travelRepository;
+    private final TravelDayRepository travelDayRepository;
     private final TravelPlaceRepository travelPlaceRepository;
 
     /*
-     * 일정 조회
-     * */
-    @Transactional(readOnly = true)
-    public GetMyTravelResponse getMyTravel(final List<GetMyTravelRequest> requests, final String memberId) {
-        List<Travel> travels = new ArrayList<>();
-        List<List<TravelPlace>> travelPlaces = new ArrayList<>();
-
-        for (GetMyTravelRequest request : requests) {
-            Travel travel = travelRepository.findByTravelIdAndMemberId(request.travelId(), memberId)
-                    .orElseThrow(TravelNotFoundException::new);
-            travels.add(travel);
-        }
-        for (Travel travel : travels) {
-            List<TravelPlace> travelPlace = travelPlaceRepository.findByTravelId(travel.getTravelId())
-                    .orElseThrow(() -> new TravelPlaceNotFoundException(travel.getTravelId()));
-            travelPlaces.add(travelPlace);
-        }
-        return GetMyTravelResponse.from(travels, travelPlaces);
-    }
-
-    /*
-     * 일정 하루 단위로 등록/수정
+     * 일정 등록/수정
      * */
     @Transactional
     public void createMyTravel(final CreateMyTravelRequest request, final String memberId) {
-        Travel travel = travelRepository.findByMemberIdAndTitleAndDay(memberId, request.title(), request.day());
+        Travel travel = travelRepository.findByMemberIdAndTitleAndDay(memberId, request.title());
 
         if (travel == null) {
             travel = travelRepository.save(new Travel(request, memberId));
@@ -60,7 +42,7 @@ public class TravelService {
         }
 
         for (TravelListDTO travelListDTO : request.travelList()) {
-            TravelPlace travelPlace = travelPlaceRepository.findByTravelIdAndPlaceOrder(travel.getTravelId(), travelListDTO.getPlaceOrder());
+            TravelPlace travelPlace = travelPlaceRepository.findByTravelDayIdAndPlaceOrder(travel.getTravelDayId(), travelListDTO.getPlaceOrder());
 
             if (travelPlace == null) {
                 travelPlaceRepository.save(new TravelPlace(travel.getTravelId(), travelListDTO));
@@ -68,5 +50,26 @@ public class TravelService {
                 travelPlace.updateTravelPlace(travel.getTravelId(), travelListDTO);
             }
         }
+    }
+
+    /*
+     * 일정 조회
+     * */
+    @Transactional(readOnly = true)
+    public GetMyTravelResponse getMyTravel(final Long travelId, final String memberId) {
+        List<TravelPlace> travelPlaces = new ArrayList<>();
+
+        Travel travel = travelRepository.findByTravelIdAndMemberId(travelId, memberId)
+                .orElseThrow(() -> new TravelNotFoundException(memberId));
+
+        List<TravelDay> travelDays = travelDayRepository.findByTravelId(travelId)
+                .orElseThrow(() -> new TravelDayNotFoundException(travelId));
+
+        for (TravelDay travelDay : travelDays) {
+            travelPlaces = travelPlaceRepository.findByTravelDayId(travelDay.getTravelDayId())
+                    .orElseThrow(() -> new TravelPlaceNotFoundException(travel.getTravelId()));
+        }
+
+        return GetMyTravelResponse.from(travel, travelDays, travelPlaces);
     }
 }

@@ -10,43 +10,41 @@ import com.querydsl.core.types.Path;
 
 
 /**
- * QTravelogue is a Querydsl query type for Travelogue
+ * QTravelogueDay is a Querydsl query type for TravelogueDay
  */
 @Generated("com.querydsl.codegen.DefaultEntitySerializer")
-public class QTravelogue extends EntityPathBase<Travelogue> {
+public class QTravelogueDay extends EntityPathBase<TravelogueDay> {
 
-    private static final long serialVersionUID = 1977041497L;
+    private static final long serialVersionUID = 1156775555L;
 
-    public static final QTravelogue travelogue = new QTravelogue("travelogue");
+    public static final QTravelogueDay travelogueDay = new QTravelogueDay("travelogueDay");
 
     public final com.adregamdi.core.entity.QBaseTime _super = new com.adregamdi.core.entity.QBaseTime(this);
+
+    public final StringPath content = createString("content");
 
     //inherited
     public final DateTimePath<java.time.LocalDateTime> createdAt = _super.createdAt;
 
-    public final StringPath introduction = createString("introduction");
+    public final NumberPath<Integer> day = createNumber("day", Integer.class);
 
-    public final StringPath memberId = createString("memberId");
-
-    public final StringPath title = createString("title");
-
-    public final NumberPath<Long> travelId = createNumber("travelId", Long.class);
+    public final NumberPath<Long> travelogueDayId = createNumber("travelogueDayId", Long.class);
 
     public final NumberPath<Long> travelogueId = createNumber("travelogueId", Long.class);
 
     //inherited
     public final DateTimePath<java.time.LocalDateTime> updatedAt = _super.updatedAt;
 
-    public QTravelogue(String variable) {
-        super(Travelogue.class, forVariable(variable));
+    public QTravelogueDay(String variable) {
+        super(TravelogueDay.class, forVariable(variable));
     }
 
-    public QTravelogue(Path<? extends Travelogue> path) {
+    public QTravelogueDay(Path<? extends TravelogueDay> path) {
         super(path.getType(), path.getMetadata());
     }
 
-    public QTravelogue(PathMetadata metadata) {
-        super(Travelogue.class, metadata);
+    public QTravelogueDay(PathMetadata metadata) {
+        super(TravelogueDay.class, metadata);
     }
 
 }

@@ -9,7 +9,7 @@ name: PR Build and Test
 
 on:
   pull_request:
-    branches: [ "dev" ]
+    branches: [ "develop" ]
 
 permissions:
   contents: read

@@ -1,9 +1,9 @@
-name: Deploy On Merge
+name: Deploy Develop Server On Merge
 
 on:
   push:
     branches:
-      - develop
+      - prod
 
 permissions:
   contents: read
@@ -11,6 +11,7 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
+    environment: prod
     steps:
       - uses: actions/checkout@v3
       - name: Set up JDK 17
@@ -34,6 +35,9 @@ jobs:
           mkdir -p ./src/main/resources
           echo "${{ secrets.APPLICATION_YML }}" > ./src/main/resources/application.yml
 
+      - name: Setup application-prod.yml
+        run: echo "${{ secrets.PROD_APPLICATION_YML }}" > ./src/main/resources/application-dev.yml
+
       - name: Add permission to make gradlew executable
         run: chmod +x gradlew
 
@@ -49,24 +53,24 @@ jobs:
       - name: Add remote server to known hosts
         run: |
           mkdir -p ~/.ssh
-          ssh-keyscan ${{ secrets.DEV_SERVER_HOST }} >> ~/.ssh/known_hosts
+          ssh-keyscan ${{ secrets.SERVER_HOST }} >> ~/.ssh/known_hosts
 
       # 서버에 jar파일을 보내기 위해 scp 명령어를 사용합니다.
       - name: SCP transfer
         run: |
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > /tmp/private_key
           chmod 400 /tmp/private_key
-          scp -i /tmp/private_key ./build/libs/*.jar ${{ secrets.DEV_SERVER_USERNAME }}@${{ secrets.DEV_SERVER_HOST }}:/home/ubuntu
+          scp -i /tmp/private_key ./build/libs/*.jar ${{ secrets.SERVER_USERNAME }}@${{ secrets.SERVER_HOST }}:/home/ubuntu
 
       # 서버에 통신하기 위한 SSH를 설정합니다.
       - name: Setup SSH
         uses: appleboy/ssh-action@v0.1.8
         with:
-          host: ${{ secrets.DEV_SERVER_HOST }}
-          username: ${{ secrets.DEV_SERVER_USERNAME }}
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.ERVER_USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
             # 서버 원격으로 명령어를 실행합니다. 서버 포트를 확인하고 실행중이면 종료합니다. 빌드된 jar파일을 실행합니다.
-            sudo fuser -k ${{ secrets.DEV_SERVER_PORT }}/tcp || true; 
+            sudo fuser -k ${{ secrets.SERVER_PORT }}/tcp || true; 
             sudo mkdir -p /home/ubuntu/logs
             sudo nohup java -jar ./*.jar > /home/ubuntu/logs/nohup.out 2>&1 &

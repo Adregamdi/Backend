@@ -63,7 +63,7 @@ jobs:
           scp -i /tmp/private_key ./build/libs/*.jar ${{ secrets.SERVER_USERNAME }}@${{ secrets.SERVER_HOST }}:/home/ubuntu
 
       # 서버에 통신하기 위한 SSH를 설정합니다.
-      - name: Setup SSH
+      - name: Setup SSH and Deploy
         uses: appleboy/ssh-action@v0.1.8
         with:
           host: ${{ secrets.SERVER_HOST }}
@@ -71,6 +71,22 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
             # 서버 원격으로 명령어를 실행합니다. 서버 포트를 확인하고 실행중이면 종료합니다. 빌드된 jar파일을 실행합니다.
-            sudo fuser -k ${{ secrets.SERVER_PORT }}/tcp || true; 
+            sudo fuser -k ${{ secrets.SERVER_PORT }}/tcp || true;
             sudo mkdir -p /home/ubuntu/logs
             sudo nohup java -jar ./*.jar > /home/ubuntu/logs/nohup.out 2>&1 &
+            
+            # 프로세스가 실행 중인지 확인
+            sleep 20
+            if ! pgrep -f "java -jar" > /dev/null; then
+            echo "Application failed to start"
+            exit 1
+            fi
+            
+            # 로그에서 오류 확인
+            if grep -i "error" /home/ubuntu/logs/nohup.out; then
+            echo "Errors found in application log"
+            exit 1
+            fi
+            
+            echo "Application started successfully"
+            exit 0

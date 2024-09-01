@@ -43,7 +43,7 @@ public class TravelService {
                 throw new InvalidTravelDayException(dayInfo.day(), dayInfo);
             }
 
-            TravelDay travelDay = travelDayRepository.save(new TravelDay(travel.getTravelId(), dayInfo.day(), dayInfo.memo()));
+            TravelDay travelDay = travelDayRepository.save(new TravelDay(travel.getTravelId(), dayInfo.date(), dayInfo.day(), dayInfo.memo()));
 
             for (CreateMyTravelRequest.PlaceInfo placeInfo : dayInfo.placeList()) {
                 travelPlaceRepository.save(new TravelPlace(travelDay.getTravelDayId(), placeInfo.placeId(), placeInfo.placeOrder()));

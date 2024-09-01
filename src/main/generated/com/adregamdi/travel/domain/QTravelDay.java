@@ -19,6 +19,8 @@ public class QTravelDay extends EntityPathBase<TravelDay> {
 
     public static final QTravelDay travelDay = new QTravelDay("travelDay");
 
+    public final DatePath<java.time.LocalDate> date = createDate("date", java.time.LocalDate.class);
+
     public final NumberPath<Integer> day = createNumber("day", Integer.class);
 
     public final StringPath memo = createString("memo");

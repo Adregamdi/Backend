@@ -32,6 +32,8 @@ public class QPlaceReview extends EntityPathBase<PlaceReview> {
 
     public final NumberPath<Long> placeReviewId = createNumber("placeReviewId", Long.class);
 
+    public final NumberPath<Long> travelogueId = createNumber("travelogueId", Long.class);
+
     //inherited
     public final DateTimePath<java.time.LocalDateTime> updatedAt = _super.updatedAt;
 

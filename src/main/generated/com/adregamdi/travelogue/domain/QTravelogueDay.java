@@ -26,6 +26,8 @@ public class QTravelogueDay extends EntityPathBase<TravelogueDay> {
     //inherited
     public final DateTimePath<java.time.LocalDateTime> createdAt = _super.createdAt;
 
+    public final DatePath<java.time.LocalDate> date = createDate("date", java.time.LocalDate.class);
+
     public final NumberPath<Integer> day = createNumber("day", Integer.class);
 
     public final NumberPath<Long> travelogueDayId = createNumber("travelogueDayId", Long.class);

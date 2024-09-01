@@ -19,9 +19,9 @@ public class TravelogueDay extends BaseTime {
     @Column
     private Long travelogueId; // 여행기 id
     @Column
-    private LocalDate date; // 해당 날
+    private LocalDate date; // 해당 날짜
     @Column
-    private Integer day; // 해당 날짜
+    private Integer day; // 해당 날
     @Column
     private String content; // 내용
 

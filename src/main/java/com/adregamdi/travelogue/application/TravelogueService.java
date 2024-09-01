@@ -2,6 +2,8 @@ package com.adregamdi.travelogue.application;
 
 import com.adregamdi.place.domain.PlaceReview;
 import com.adregamdi.place.domain.PlaceReviewImage;
+import com.adregamdi.place.exception.PlaceException.PlaceReviewImageNotFoundException;
+import com.adregamdi.place.exception.PlaceException.PlaceReviewNotFoundException;
 import com.adregamdi.place.infrastructure.PlaceReviewImageRepository;
 import com.adregamdi.place.infrastructure.PlaceReviewRepository;
 import com.adregamdi.travelogue.domain.Travelogue;
@@ -9,6 +11,9 @@ import com.adregamdi.travelogue.domain.TravelogueDay;
 import com.adregamdi.travelogue.domain.TravelogueImage;
 import com.adregamdi.travelogue.dto.request.CreateMyTravelogueRequest;
 import com.adregamdi.travelogue.dto.response.GetTravelogueResponse;
+import com.adregamdi.travelogue.exception.TravelogueException.TravelogueDayNotFoundException;
+import com.adregamdi.travelogue.exception.TravelogueException.TravelogueImageNotFoundException;
+import com.adregamdi.travelogue.exception.TravelogueException.TravelogueNotFoundException;
 import com.adregamdi.travelogue.infrastructure.TravelogueDayRepository;
 import com.adregamdi.travelogue.infrastructure.TravelogueImageRepository;
 import com.adregamdi.travelogue.infrastructure.TravelogueRepository;
@@ -18,6 +23,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -30,6 +36,9 @@ public class TravelogueService {
     private final PlaceReviewRepository placeReviewRepository;
     private final PlaceReviewImageRepository placeReviewImageRepository;
 
+    /*
+     * 여행기 등록
+     */
     @Transactional
     public void createMyTravelogue(final CreateMyTravelogueRequest request, final String memberId) {
         Travelogue travelogue = createTravelogue(request, memberId);
@@ -37,17 +46,37 @@ public class TravelogueService {
         saveTravelogueDaysAndReviews(request.dayList(), travelogue.getTravelogueId(), memberId);
     }
 
-    public GetTravelogueResponse get(Long travelogueId) {
-        return null;
+    /*
+     * 여행기 조회
+     */
+    @Transactional(readOnly = true)
+    public GetTravelogueResponse get(final Long travelogueId) {
+        Travelogue travelogue = travelogueRepository.findById(travelogueId)
+                .orElseThrow(() -> new TravelogueNotFoundException(travelogueId));
+
+        List<TravelogueImage> travelogueImages = travelogueImageRepository.findByTravelogueId(travelogueId)
+                .orElseThrow(() -> new TravelogueImageNotFoundException(travelogueId));
+
+        List<TravelogueDay> travelogueDays = travelogueDayRepository.findByTravelogueIdOrderByDay(travelogueId)
+                .orElseThrow(() -> new TravelogueDayNotFoundException(travelogueId));
+
+        List<PlaceReview> placeReviews = placeReviewRepository.findByTravelogueId(travelogueId)
+                .orElseThrow(() -> new PlaceReviewNotFoundException(travelogueId));
+
+        Function<Long, List<PlaceReviewImage>> placeReviewImagesFetcher = (reviewId) ->
+                placeReviewImageRepository.findByPlaceReviewId(reviewId)
+                        .orElseThrow(() -> new PlaceReviewImageNotFoundException(reviewId));
+
+        return GetTravelogueResponse.of(travelogue, travelogueImages, travelogueDays, placeReviews, placeReviewImagesFetcher);
     }
 
-    private Travelogue createTravelogue(CreateMyTravelogueRequest request, String memberId) {
+    private Travelogue createTravelogue(final CreateMyTravelogueRequest request, final String memberId) {
         return travelogueRepository.save(
                 new Travelogue(memberId, request.travelId(), request.title(), request.introduction())
         );
     }
 
-    private void saveTravelogueImages(List<CreateMyTravelogueRequest.TravelogueImage> images, Long travelogueId) {
+    private void saveTravelogueImages(final List<CreateMyTravelogueRequest.TravelogueImage> images, final Long travelogueId) {
         if (images == null) return;
 
         List<TravelogueImage> travelogueImages = images.stream()
@@ -57,7 +86,7 @@ public class TravelogueService {
         travelogueImageRepository.saveAll(travelogueImages);
     }
 
-    private void saveTravelogueDaysAndReviews(List<CreateMyTravelogueRequest.DayInfo> dayList, Long travelogueId, String memberId) {
+    private void saveTravelogueDaysAndReviews(final List<CreateMyTravelogueRequest.DayInfo> dayList, final Long travelogueId, String memberId) {
         if (dayList == null) return;
 
         for (CreateMyTravelogueRequest.DayInfo dayInfo : dayList) {
@@ -68,7 +97,7 @@ public class TravelogueService {
         }
     }
 
-    private void savePlaceReviewsAndImages(CreateMyTravelogueRequest.DayInfo dayInfo, String memberId) {
+    private void savePlaceReviewsAndImages(final CreateMyTravelogueRequest.DayInfo dayInfo, final String memberId) {
         if (dayInfo.placeReviewList() == null) return;
 
         for (CreateMyTravelogueRequest.PlaceReview reviewInfo : dayInfo.placeReviewList()) {
@@ -79,7 +108,7 @@ public class TravelogueService {
         }
     }
 
-    private void savePlaceReviewImages(List<CreateMyTravelogueRequest.PlaceReviewImage> images, Long placeReviewId) {
+    private void savePlaceReviewImages(final List<CreateMyTravelogueRequest.PlaceReviewImage> images, final Long placeReviewId) {
         if (images == null) return;
 
         List<PlaceReviewImage> placeReviewImages = images.stream()

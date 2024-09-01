@@ -66,10 +66,14 @@ public class GlobalExceptionHandler {
             MemberException.MemberNotFoundException.class,
             NotificationException.NotificationNotFoundException.class,
             PlaceException.PlaceNotFoundException.class,
+            PlaceException.PlaceReviewNotFoundException.class,
+            PlaceException.PlaceReviewImageNotFoundException.class,
             TravelException.TravelNotFoundException.class,
             TravelException.TravelDayNotFoundException.class,
             TravelException.TravelPlaceNotFoundException.class,
             TravelogueException.TravelogueNotFoundException.class,
+            TravelogueException.TravelogueImageNotFoundException.class,
+            TravelogueException.TravelogueDayNotFoundException.class,
             ShortsException.ShortsNotFoundException.class
     })
     public ResponseEntity<ErrorResponse> handleNotFoundException(final RuntimeException exception) {

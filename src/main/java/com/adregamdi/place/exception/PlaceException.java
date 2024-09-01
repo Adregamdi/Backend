@@ -24,4 +24,24 @@ public class PlaceException extends RuntimeException {
             super(String.format("이미 장소가 존재합니다. - request info => %s", object));
         }
     }
+
+    public static class PlaceReviewNotFoundException extends PlaceException {
+        public PlaceReviewNotFoundException() {
+            super("장소 리뷰가 존재하지 않습니다.");
+        }
+
+        public PlaceReviewNotFoundException(final Object object) {
+            super(String.format("장소 리뷰가 존재하지 않습니다. - request info => %s", object));
+        }
+    }
+
+    public static class PlaceReviewImageNotFoundException extends PlaceException {
+        public PlaceReviewImageNotFoundException() {
+            super("장소 리뷰 이미지가 존재하지 않습니다.");
+        }
+
+        public PlaceReviewImageNotFoundException(final Object object) {
+            super(String.format("장소 리뷰 이미지가 존재하지 않습니다. - request info => %s", object));
+        }
+    }
 }

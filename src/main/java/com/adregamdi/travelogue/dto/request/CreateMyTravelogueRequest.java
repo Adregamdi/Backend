@@ -13,10 +13,10 @@ public record CreateMyTravelogueRequest(
         @NotNull
         String title,
         String introduction,
-        List<TravelogueImage> travelogueImageList,
+        List<TravelogueImageInfo> travelogueImageList,
         List<DayInfo> dayList
 ) {
-    public record TravelogueImage(
+    public record TravelogueImageInfo(
             String url
     ) {
     }
@@ -28,21 +28,21 @@ public record CreateMyTravelogueRequest(
             @Positive
             Integer day,
             String content,
-            List<PlaceReviewImage> placeReviewImageList,
-            List<PlaceReview> placeReviewList
+            List<PlaceReviewInfo> placeReviewList
     ) {
     }
 
-    public record PlaceReviewImage(
-            String url
-    ) {
-    }
-
-    public record PlaceReview(
+    public record PlaceReviewInfo(
             @NotNull
             @Positive
             Long placeId,
-            String content
+            String content,
+            List<PlaceReviewImageInfo> placeReviewImageList
+    ) {
+    }
+
+    public record PlaceReviewImageInfo(
+            String url
     ) {
     }
 }

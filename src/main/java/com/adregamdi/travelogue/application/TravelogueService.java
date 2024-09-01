@@ -22,6 +22,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -41,7 +42,7 @@ public class TravelogueService {
      */
     @Transactional
     public void createMyTravelogue(final CreateMyTravelogueRequest request, final String memberId) {
-        Travelogue travelogue = createTravelogue(request, memberId);
+        Travelogue travelogue = travelogueRepository.save(new Travelogue(memberId, request.travelId(), request.title(), request.introduction()));
         saveTravelogueImages(request.travelogueImageList(), travelogue.getTravelogueId());
         saveTravelogueDaysAndReviews(request.dayList(), travelogue.getTravelogueId(), memberId);
     }
@@ -70,51 +71,41 @@ public class TravelogueService {
         return GetTravelogueResponse.of(travelogue, travelogueImages, travelogueDays, placeReviews, placeReviewImagesFetcher);
     }
 
-    private Travelogue createTravelogue(final CreateMyTravelogueRequest request, final String memberId) {
-        return travelogueRepository.save(
-                new Travelogue(memberId, request.travelId(), request.title(), request.introduction())
-        );
-    }
+    private void saveTravelogueImages(final List<CreateMyTravelogueRequest.TravelogueImageInfo> images, final Long travelogueId) {
+        List<CreateMyTravelogueRequest.TravelogueImageInfo> imageList = (images != null) ? images : Collections.emptyList();
 
-    private void saveTravelogueImages(final List<CreateMyTravelogueRequest.TravelogueImage> images, final Long travelogueId) {
-        if (images == null) return;
-
-        List<TravelogueImage> travelogueImages = images.stream()
-                .filter(img -> img.url() != null && !img.url().isEmpty())
+        List<TravelogueImage> travelogueImages = imageList.stream()
                 .map(img -> new TravelogueImage(travelogueId, img.url()))
                 .collect(Collectors.toList());
+
         travelogueImageRepository.saveAll(travelogueImages);
     }
 
-    private void saveTravelogueDaysAndReviews(final List<CreateMyTravelogueRequest.DayInfo> dayList, final Long travelogueId, String memberId) {
-        if (dayList == null) return;
+    private void saveTravelogueDaysAndReviews(final List<CreateMyTravelogueRequest.DayInfo> dayList, final Long travelogueId, final String memberId) {
+        List<CreateMyTravelogueRequest.DayInfo> days = (dayList != null) ? dayList : Collections.emptyList();
 
-        for (CreateMyTravelogueRequest.DayInfo dayInfo : dayList) {
-            travelogueDayRepository.save(
-                    new TravelogueDay(travelogueId, dayInfo.date(), dayInfo.day(), dayInfo.content())
-            );
-            savePlaceReviewsAndImages(dayInfo, memberId);
+        for (CreateMyTravelogueRequest.DayInfo dayInfo : days) {
+            travelogueDayRepository.save(new TravelogueDay(travelogueId, dayInfo.date(), dayInfo.day(), dayInfo.content()));
+            savePlaceReviews(dayInfo.placeReviewList(), travelogueId, memberId);
         }
     }
 
-    private void savePlaceReviewsAndImages(final CreateMyTravelogueRequest.DayInfo dayInfo, final String memberId) {
-        if (dayInfo.placeReviewList() == null) return;
+    private void savePlaceReviews(final List<CreateMyTravelogueRequest.PlaceReviewInfo> placeReviews, final Long travelogueId, final String memberId) {
+        List<CreateMyTravelogueRequest.PlaceReviewInfo> reviews = (placeReviews != null) ? placeReviews : Collections.emptyList();
 
-        for (CreateMyTravelogueRequest.PlaceReview reviewInfo : dayInfo.placeReviewList()) {
-            PlaceReview placeReview = placeReviewRepository.save(
-                    new PlaceReview(memberId, reviewInfo.placeId(), reviewInfo.content())
-            );
-            savePlaceReviewImages(dayInfo.placeReviewImageList(), placeReview.getPlaceReviewId());
+        for (CreateMyTravelogueRequest.PlaceReviewInfo reviewInfo : reviews) {
+            PlaceReview placeReview = placeReviewRepository.save(new PlaceReview(memberId, reviewInfo.placeId(), travelogueId, reviewInfo.content()));
+            savePlaceReviewImages(reviewInfo.placeReviewImageList(), placeReview.getPlaceReviewId());
         }
     }
 
-    private void savePlaceReviewImages(final List<CreateMyTravelogueRequest.PlaceReviewImage> images, final Long placeReviewId) {
-        if (images == null) return;
+    private void savePlaceReviewImages(final List<CreateMyTravelogueRequest.PlaceReviewImageInfo> images, final Long placeReviewId) {
+        List<CreateMyTravelogueRequest.PlaceReviewImageInfo> imageList = (images != null) ? images : Collections.emptyList();
 
-        List<PlaceReviewImage> placeReviewImages = images.stream()
-                .filter(img -> img.url() != null && !img.url().isEmpty())
+        List<PlaceReviewImage> placeReviewImages = imageList.stream()
                 .map(img -> new PlaceReviewImage(placeReviewId, img.url()))
                 .collect(Collectors.toList());
+
         placeReviewImageRepository.saveAll(placeReviewImages);
     }
 }

@@ -23,9 +23,10 @@ public class PlaceReview extends BaseTime {
     @Column
     private String content; // 내용
 
-    public PlaceReview(String memberId, Long placeId, String content) {
+    public PlaceReview(String memberId, Long placeId, Long travelogueId, String content) {
         this.memberId = memberId;
         this.placeId = placeId;
+        this.travelogueId = travelogueId;
         this.content = content;
     }
 }

@@ -70,6 +70,6 @@ public class TravelService {
             travelPlaces.add(travelPlaceList);
         }
 
-        return GetMyTravelResponse.from(travel, travelDays, travelPlaces);
+        return GetMyTravelResponse.of(travel, travelDays, travelPlaces);
     }
 }

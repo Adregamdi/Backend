@@ -16,7 +16,7 @@ import java.util.stream.Collectors;
 public record GetMyTravelResponse(
         TravelInfo travel
 ) {
-    public static GetMyTravelResponse from(
+    public static GetMyTravelResponse of(
             final Travel travel,
             final List<TravelDay> travelDays,
             final List<List<TravelPlace>> travelPlaces

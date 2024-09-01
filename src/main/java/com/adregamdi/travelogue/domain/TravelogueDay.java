@@ -24,4 +24,11 @@ public class TravelogueDay extends BaseTime {
     private Integer day; // 해당 날짜
     @Column
     private String content; // 내용
+
+    public TravelogueDay(Long travelogueId, LocalDate date, Integer day, String content) {
+        this.travelogueId = travelogueId;
+        this.date = date;
+        this.day = day;
+        this.content = content;
+    }
 }

@@ -22,4 +22,11 @@ public class Travelogue extends BaseTime {
     private String title; // 제목
     @Column
     private String introduction; // 소개
+
+    public Travelogue(String memberId, Long travelId, String title, String introduction) {
+        this.memberId = memberId;
+        this.travelId = travelId;
+        this.title = title;
+        this.introduction = introduction;
+    }
 }

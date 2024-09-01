@@ -18,4 +18,9 @@ public class TravelogueImage extends BaseTime {
     private Long travelogueId; // 여행기 id
     @Column
     private String url; // 이미지 url
+
+    public TravelogueImage(Long travelogueId, String url) {
+        this.travelogueId = travelogueId;
+        this.url = url;
+    }
 }

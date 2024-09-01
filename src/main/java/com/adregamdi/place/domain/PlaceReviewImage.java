@@ -18,4 +18,9 @@ public class PlaceReviewImage extends BaseTime {
     private Long placeReviewId; // 장소 리뷰 id
     @Column
     private String url; // 이미지 url
+
+    public PlaceReviewImage(Long placeReviewId, String url) {
+        this.placeReviewId = placeReviewId;
+        this.url = url;
+    }
 }

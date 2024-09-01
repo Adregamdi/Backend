@@ -8,6 +8,9 @@ import java.util.List;
 
 public record CreateMyTravelogueRequest(
         @NotNull
+        @Positive
+        Long travelId,
+        @NotNull
         String title,
         String introduction,
         List<TravelogueImage> travelogueImageList,

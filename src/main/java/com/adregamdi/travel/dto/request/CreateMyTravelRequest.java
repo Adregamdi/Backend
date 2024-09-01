@@ -21,6 +21,8 @@ public record CreateMyTravelRequest(
 ) {
     public record DayInfo(
             @NotNull
+            LocalDate date,
+            @NotNull
             @Positive
             Integer day,
 

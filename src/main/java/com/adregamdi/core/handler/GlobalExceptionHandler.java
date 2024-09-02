@@ -3,8 +3,9 @@ package com.adregamdi.core.handler;
 import com.adregamdi.member.exception.MemberException;
 import com.adregamdi.notification.exception.NotificationException;
 import com.adregamdi.place.exception.PlaceException;
-import com.adregamdi.schedule.exception.ScheduleException;
 import com.adregamdi.shorts.exception.ShortsException;
+import com.adregamdi.travel.exception.TravelException;
+import com.adregamdi.travelogue.exception.TravelogueException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -65,8 +66,14 @@ public class GlobalExceptionHandler {
             MemberException.MemberNotFoundException.class,
             NotificationException.NotificationNotFoundException.class,
             PlaceException.PlaceNotFoundException.class,
-            ScheduleException.ScheduleNotFoundException.class,
-            ScheduleException.SchedulePlaceNotFoundException.class,
+            PlaceException.PlaceReviewNotFoundException.class,
+            PlaceException.PlaceReviewImageNotFoundException.class,
+            TravelException.TravelNotFoundException.class,
+            TravelException.TravelDayNotFoundException.class,
+            TravelException.TravelPlaceNotFoundException.class,
+            TravelogueException.TravelogueNotFoundException.class,
+            TravelogueException.TravelogueImageNotFoundException.class,
+            TravelogueException.TravelogueDayNotFoundException.class,
             ShortsException.ShortsNotFoundException.class
     })
     public ResponseEntity<ErrorResponse> handleNotFoundException(final RuntimeException exception) {
@@ -92,6 +99,8 @@ public class GlobalExceptionHandler {
 
     // 커스텀 예외
     @ExceptionHandler(value = {
+            TravelException.InvalidTravelDateException.class,
+            TravelException.InvalidTravelDayException.class,
             ShortsException.ShortsNOTWRITERException.class
     })
     public ResponseEntity<ErrorResponse> handleCustomBadRequestException(final RuntimeException exception) {

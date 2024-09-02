@@ -16,5 +16,5 @@ public interface NotificationRepository extends JpaRepository<Notification, Long
             """)
     void deleteByCreatedAt(@Param("date") final LocalDateTime date);
 
-//    void deleteByMemberId(UUID id);
+    void deleteByMemberId(String id);
 }

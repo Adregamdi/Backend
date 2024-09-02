@@ -1,5 +1,6 @@
 package com.adregamdi.search.presentation;
 
+import com.adregamdi.core.annotation.MemberAuthorize;
 import com.adregamdi.core.handler.ApiResponse;
 import com.adregamdi.search.application.SearchService;
 import com.adregamdi.search.dto.SearchType;
@@ -22,7 +23,7 @@ public class SearchController {
     private final SearchService searchService;
 
     @GetMapping
-//    @MemberAuthorize
+    @MemberAuthorize
     public ResponseEntity<ApiResponse<SearchResponse>> search(
             @RequestParam(required = false) final String keyword,
             @RequestParam(defaultValue = "0") final int page,

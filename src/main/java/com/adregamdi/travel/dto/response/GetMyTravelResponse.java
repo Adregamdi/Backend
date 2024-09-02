@@ -25,24 +25,25 @@ public record GetMyTravelResponse(
                 .flatMap(List::stream)
                 .collect(Collectors.groupingBy(TravelPlace::getTravelDayId));
 
-        List<Day> dayList = travelDays.stream()
+        List<DayInfo> dayList = travelDays.stream()
                 .map(travelDay -> {
-                    List<Place> places = placesByDayId.getOrDefault(travelDay.getTravelDayId(), Collections.emptyList())
+                    List<PlaceInfo> places = placesByDayId.getOrDefault(travelDay.getTravelDayId(), Collections.emptyList())
                             .stream()
-                            .map(travelPlace -> Place.builder()
+                            .map(travelPlace -> PlaceInfo.builder()
                                     .placeId(travelPlace.getPlaceId())
                                     .placeOrder(travelPlace.getPlaceOrder())
                                     .build())
-                            .sorted(Comparator.comparing(Place::placeOrder))
+                            .sorted(Comparator.comparing(PlaceInfo::placeOrder))
                             .collect(Collectors.toList());
 
-                    return Day.builder()
+                    return DayInfo.builder()
+                            .date(travelDay.getDate())
                             .day(travelDay.getDay())
                             .memo(travelDay.getMemo())
                             .placeList(places)
                             .build();
                 })
-                .sorted(Comparator.comparing(Day::day))
+                .sorted(Comparator.comparing(DayInfo::day))
                 .collect(Collectors.toList());
 
         TravelInfo travelData = TravelInfo.builder()
@@ -53,7 +54,9 @@ public record GetMyTravelResponse(
                 .dayList(dayList)
                 .build();
 
-        return new GetMyTravelResponse(travelData);
+        return GetMyTravelResponse.builder()
+                .travel(travelData)
+                .build();
     }
 
     @Builder
@@ -62,20 +65,21 @@ public record GetMyTravelResponse(
             LocalDate startDate,
             LocalDate endDate,
             String title,
-            List<Day> dayList
+            List<DayInfo> dayList
     ) {
     }
 
     @Builder
-    public record Day(
+    public record DayInfo(
+            LocalDate date,
             Integer day,
             String memo,
-            List<Place> placeList
+            List<PlaceInfo> placeList
     ) {
     }
 
     @Builder
-    public record Place(
+    public record PlaceInfo(
             Long placeId,
             Integer placeOrder
     ) {

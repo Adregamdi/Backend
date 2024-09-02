@@ -7,6 +7,7 @@ import com.adregamdi.travelogue.domain.TravelogueDay;
 import com.adregamdi.travelogue.domain.TravelogueImage;
 import lombok.Builder;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -40,44 +41,49 @@ public record GetTravelogueResponse(
                                         .map(image -> new PlaceReviewImageInfo(image.getUrl()))
                                         .collect(Collectors.toList());
 
-                                return new PlaceReviewInfo(
-                                        review.getPlaceId(),
-                                        review.getContent(),
-                                        placeReviewImageInfos
-                                );
+                                return PlaceReviewInfo.builder()
+                                        .placeId(review.getPlaceId())
+                                        .content(review.getContent())
+                                        .placeReviewImageList(placeReviewImageInfos)
+                                        .build();
                             })
                             .collect(Collectors.toList());
 
-                    return new DayInfo(
-                            day.getDay(),
-                            day.getContent(),
-                            placeReviewInfos
-                    );
+                    return DayInfo.builder()
+                            .date(day.getDate())
+                            .day(day.getDay())
+                            .content(day.getContent())
+                            .placeReviewList(placeReviewInfos)
+                            .build();
                 })
                 .collect(Collectors.toList());
 
-        return new GetTravelogueResponse(
-                travelogue.getTravelogueId(),
-                travelogue.getTravelId(),
-                travelogue.getTitle(),
-                travelogue.getIntroduction(),
-                travelogueImageInfos,
-                dayInfos
-        );
+        return GetTravelogueResponse.builder()
+                .travelogueId(travelogue.getTravelogueId())
+                .travelId(travelogue.getTravelId())
+                .title(travelogue.getTitle())
+                .introduction(travelogue.getIntroduction())
+                .travelogueImageList(travelogueImageInfos)
+                .dayList(dayInfos)
+                .build();
     }
 
+    @Builder
     public record TravelogueImageInfo(
             String url
     ) {
     }
 
+    @Builder
     public record DayInfo(
+            LocalDate date,
             Integer day,
             String content,
             List<PlaceReviewInfo> placeReviewList
     ) {
     }
 
+    @Builder
     public record PlaceReviewInfo(
             Long placeId,
             String content,
@@ -85,6 +91,7 @@ public record GetTravelogueResponse(
     ) {
     }
 
+    @Builder
     public record PlaceReviewImageInfo(
             String url
     ) {

@@ -4,6 +4,7 @@ import com.adregamdi.core.annotation.MemberAuthorize;
 import com.adregamdi.core.handler.ApiResponse;
 import com.adregamdi.media.application.ImageService;
 import com.adregamdi.media.domain.ImageTarget;
+import com.adregamdi.media.dto.request.DeleteImagesRequest;
 import com.adregamdi.media.dto.response.CreateImageListResponse;
 import com.adregamdi.media.dto.response.CreateImageResponse;
 import jakarta.validation.constraints.Pattern;
@@ -70,10 +71,10 @@ public class ImageController {
     @DeleteMapping
     @MemberAuthorize
     public ResponseEntity<ApiResponse<Void>> deleteImages(
-            @RequestPart("images") List<String> imageUrlList
+            @RequestBody() DeleteImagesRequest request
     ) {
 
-        imageService.deleteImageList(imageUrlList);
+        imageService.deleteImageList(request.images());
 
         return ResponseEntity.ok()
                 .body(ApiResponse.<Void>builder()

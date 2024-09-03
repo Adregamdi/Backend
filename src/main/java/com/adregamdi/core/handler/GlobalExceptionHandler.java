@@ -1,5 +1,6 @@
 package com.adregamdi.core.handler;
 
+import com.adregamdi.media.exception.ImageException;
 import com.adregamdi.member.exception.MemberException;
 import com.adregamdi.notification.exception.NotificationException;
 import com.adregamdi.place.exception.PlaceException;
@@ -74,7 +75,8 @@ public class GlobalExceptionHandler {
             TravelogueException.TravelogueNotFoundException.class,
             TravelogueException.TravelogueImageNotFoundException.class,
             TravelogueException.TravelogueDayNotFoundException.class,
-            ShortsException.ShortsNotFoundException.class
+            ShortsException.ShortsNotFoundException.class,
+            ImageException.ImageNotFoundException.class
     })
     public ResponseEntity<ErrorResponse> handleNotFoundException(final RuntimeException exception) {
         log.warn(exception.getMessage());
@@ -101,7 +103,10 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(value = {
             TravelException.InvalidTravelDateException.class,
             TravelException.InvalidTravelDayException.class,
-            ShortsException.ShortsNOTWRITERException.class
+            ShortsException.ShortsNOTWRITERException.class,
+            ImageException.UnSupportedImageTypeException.class,
+            ImageException.InvalidFileNameException.class,
+            ImageException.InvalidImageLengthException.class
     })
     public ResponseEntity<ErrorResponse> handleCustomBadRequestException(final RuntimeException exception) {
         log.warn(exception.getMessage());

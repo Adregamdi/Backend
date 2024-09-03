@@ -1,40 +1,35 @@
 package com.adregamdi.media.application;
 
-import lombok.RequiredArgsConstructor;
-import org.imgscalr.Scalr;
-import org.springframework.stereotype.Service;
+import com.adregamdi.media.domain.ImageTarget;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.imageio.ImageIO;
-import java.awt.image.BufferedImage;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-import java.util.Objects;
+import java.util.List;
 
-@Service
-@RequiredArgsConstructor
-public class ImageService {
+public interface ImageService {
 
-    private final FileUploadService fileUploadService;
+    String uploadImage(MultipartFile image, String memberId, ImageTarget imageTarget) throws IOException;
 
-    private final static int IMAGE_RESIZE_TARGET_WIDTH = 650;
+    List<String> uploadImages(List<MultipartFile> imageList, String memberId, ImageTarget imageTarget) throws IOException;
 
-    public String getEncodedFileName(String key) {
-        return URLEncoder.encode(key, StandardCharsets.UTF_8).replaceAll("\\+", "%20");
-    }
+    void saveImage(String imageUrl, ImageTarget imageTarget);
 
-    public byte[] resizeImage(MultipartFile multipartFile) throws IOException {
-        BufferedImage originalImage = ImageIO.read(multipartFile.getInputStream());
-        BufferedImage resizedImage =
-                Scalr.resize(originalImage, Scalr.Method.QUALITY, Scalr.Mode.FIT_TO_WIDTH, IMAGE_RESIZE_TARGET_WIDTH, Scalr.THRESHOLD_QUALITY_BALANCED);
-        String fileExtension = fileUploadService.extractFileExtension(Objects.requireNonNull(multipartFile));
+    void saveImages(List<String> imageUrlList, ImageTarget imageTarget);
 
-        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        ImageIO.write(resizedImage, fileExtension, outputStream);
+    void saveTargetNo(List<String> imageUrlList, ImageTarget imageTarget, Long targetNo);
 
-        return outputStream.toByteArray();
-    }
+    void saveTargetNo(String imageUrl, ImageTarget imageTarget, Long targetNo);
+
+    void updateImage(String newImageUrl, ImageTarget imageTarget, Long targetNo);
+
+    void deleteImageList(List<String> imageUrlList);
+
+    void deleteImageFromStorage(String imageUrl);
+
+    void deleteImageFromDB(String imageUrl);
+
+    void deleteUnassignedImages();
+
+    byte[] resizeImage(MultipartFile multipartFile) throws IOException;
 
 }

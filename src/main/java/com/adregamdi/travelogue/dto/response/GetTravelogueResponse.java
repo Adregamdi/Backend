@@ -35,6 +35,7 @@ public record GetTravelogueResponse(
         List<DayInfo> dayInfos = travelogueDays.stream()
                 .map(day -> {
                     List<PlaceReviewInfo> placeReviewInfos = placeReviews.stream()
+                            .filter(review -> review.getTravelogueDayId().equals(day.getTravelogueDayId()))
                             .map(review -> {
                                 List<PlaceReviewImage> reviewImages = placeReviewImagesFetcher.apply(review.getPlaceReviewId());
                                 List<PlaceReviewImageInfo> placeReviewImageInfos = reviewImages.stream()

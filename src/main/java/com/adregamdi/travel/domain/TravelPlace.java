@@ -21,7 +21,6 @@ public class TravelPlace extends BaseTime {
     @Column
     private Integer placeOrder; // 순서
 
-
     public TravelPlace(Long travelDayId, Long placeId, Integer placeOrder) {
         this.travelDayId = travelDayId;
         this.placeId = placeId;

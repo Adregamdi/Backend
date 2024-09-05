@@ -10,7 +10,6 @@ import com.adregamdi.shorts.dto.response.GetShortsResponse;
 import com.adregamdi.shorts.dto.response.SaveVideoResponse;
 import com.adregamdi.shorts.dto.response.UploadVideoDTO;
 import com.amazonaws.services.s3.AmazonS3Client;
-import com.amazonaws.services.s3.model.AmazonS3Exception;
 import com.amazonaws.services.s3.model.GetObjectRequest;
 import com.amazonaws.services.s3.model.S3Object;
 import com.amazonaws.services.s3.model.S3ObjectInputStream;
@@ -88,47 +87,38 @@ public class ShortsController {
 
     @GetMapping("/stream/{shorts_id}")
     public ResponseEntity<StreamingResponseBody> streamShort(@PathVariable(value = "shorts_id") Long shortsId) {
-        try {
-            String s3Key = shortsService.getS3KeyByShortId(shortsId);
-            log.info("{} 스트리밍을 시작합니다.", s3Key);
+        String s3Key = shortsService.getS3KeyByShortId(shortsId);
+        log.info("{} 스트리밍을 시작합니다.", s3Key);
 
-            S3Object s3Object = amazonS3Client.getObject(new GetObjectRequest(bucketName, s3Key));
-            long contentLength = s3Object.getObjectMetadata().getContentLength();
+        S3Object s3Object = amazonS3Client.getObject(new GetObjectRequest(bucketName, s3Key));
+        long contentLength = s3Object.getObjectMetadata().getContentLength();
 
-            StreamingResponseBody responseBody = outputStream -> {
-                try (S3ObjectInputStream inputStream = s3Object.getObjectContent()) {
-                    byte[] buffer = new byte[8192]; // 8KB 청크
-                    int bytesRead;
-                    long totalBytesRead = 0;
-                    while ((bytesRead = inputStream.read(buffer)) != -1) {
-                        outputStream.write(buffer, 0, bytesRead);
-                        outputStream.flush();
-                        totalBytesRead += bytesRead;
+        StreamingResponseBody responseBody = outputStream -> {
+            try (S3ObjectInputStream inputStream = s3Object.getObjectContent()) {
+                byte[] buffer = new byte[8192]; // 8KB 청크
+                int bytesRead;
+                long totalBytesRead = 0;
+                while ((bytesRead = inputStream.read(buffer)) != -1) {
+                    outputStream.write(buffer, 0, bytesRead);
+                    outputStream.flush();
+                    totalBytesRead += bytesRead;
 
-                        // 진행 상황 로깅 (예: 10% 단위로)
-                        if (totalBytesRead % (contentLength / 10) < 8192) {
-                            log.info("{}% 스트리밍 완료", (totalBytesRead * 100) / contentLength);
-                        }
+                    if (totalBytesRead % (contentLength / 10) < 8192) {
+                        log.info("{}% 스트리밍 완료", (totalBytesRead * 100) / contentLength);
                     }
-                } catch (IOException e) {
-                    log.error("스트리밍 중 오류 발생", e);
                 }
-            };
+            } catch (IOException e) {
+                log.error("스트리밍 중 오류 발생", e);
+            }
+        };
 
-            HttpHeaders responseHeaders = new HttpHeaders();
-            responseHeaders.set(HttpHeaders.CONTENT_TYPE, "video/mp4");
-            responseHeaders.set(HttpHeaders.TRANSFER_ENCODING, "chunked");
+        HttpHeaders responseHeaders = new HttpHeaders();
+        responseHeaders.set(HttpHeaders.CONTENT_TYPE, "video/mp4");
+        responseHeaders.set(HttpHeaders.TRANSFER_ENCODING, "chunked");
 
-            return ResponseEntity.ok()
-                    .headers(responseHeaders)
-                    .body(responseBody);
-        } catch (AmazonS3Exception e) {
-            log.error("S3에서 객체를 가져오는 중 오류 발생: {}", e.getMessage());
-            return ResponseEntity.notFound().build();
-        } catch (Exception e) {
-            log.error("예기치 않은 오류 발생: {}", e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        }
+        return ResponseEntity.ok()
+                .headers(responseHeaders)
+                .body(responseBody);
     }
 
     @PostMapping("/upload-video")

@@ -1,13 +1,21 @@
 package com.adregamdi.search.infrastructure;
 
-import com.adregamdi.search.dto.SearchItemDTO;
-import com.adregamdi.search.dto.SearchType;
+import com.adregamdi.search.dto.PlaceSearchDTO;
+import com.adregamdi.search.dto.ShortsSearchDTO;
+import com.adregamdi.search.dto.TravelogueSearchDTO;
 
 import java.util.List;
-import java.util.Set;
 
 public interface SearchRepository {
-    List<SearchItemDTO> search(final String keyword, final int page, final int pageSize, final Set<SearchType> types);
+    List<TravelogueSearchDTO> searchTravelogues(String keyword, int page, int pageSize);
 
-    long countTotal(final String keyword);
+    List<ShortsSearchDTO> searchShorts(String keyword, int page, int pageSize);
+
+    List<PlaceSearchDTO> searchPlaces(String keyword, int page, int pageSize);
+
+    long countTravelogues(String keyword);
+
+    long countShorts(String keyword);
+
+    long countPlaces(String keyword);
 }

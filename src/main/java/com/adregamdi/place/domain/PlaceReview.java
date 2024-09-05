@@ -21,6 +21,8 @@ public class PlaceReview extends BaseTime {
     @Column
     private Long travelogueId; // 여행기 id
     @Column
+    private Long travelogueDayId; // 여행기 날짜 id
+    @Column
     private String content; // 내용
 
     public PlaceReview(String memberId, Long placeId, Long travelogueId, String content) {

@@ -32,6 +32,8 @@ public class QPlaceReview extends EntityPathBase<PlaceReview> {
 
     public final NumberPath<Long> placeReviewId = createNumber("placeReviewId", Long.class);
 
+    public final NumberPath<Long> travelogueDayId = createNumber("travelogueDayId", Long.class);
+
     public final NumberPath<Long> travelogueId = createNumber("travelogueId", Long.class);
 
     //inherited

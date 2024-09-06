@@ -86,6 +86,12 @@ public class TravelService {
     public GetMyTravelsResponse getMyTravels(final int page, final String memberId) {
         Slice<TravelDTO> travels = travelRepository.findByMemberId(memberId, generatePageDesc(page, LARGE_PAGE_SIZE, "travelId"));
 
-        return GetMyTravelsResponse.from(travels.getContent());
+        return GetMyTravelsResponse.of(
+                LARGE_PAGE_SIZE,
+                page,
+                travels.getNumberOfElements(),
+                travels.hasNext(),
+                travels.getContent()
+        );
     }
 }

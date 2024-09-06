@@ -4,6 +4,7 @@ import com.adregamdi.core.annotation.MemberAuthorize;
 import com.adregamdi.core.handler.ApiResponse;
 import com.adregamdi.travelogue.application.TravelogueService;
 import com.adregamdi.travelogue.dto.request.CreateMyTravelogueRequest;
+import com.adregamdi.travelogue.dto.response.GetMyTraveloguesResponse;
 import com.adregamdi.travelogue.dto.response.GetTravelogueResponse;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
@@ -41,6 +42,20 @@ public class TravelogueController {
                 .body(ApiResponse.<GetTravelogueResponse>builder()
                         .statusCode(HttpStatus.OK.value())
                         .data(travelogueService.get(travelogueId))
+                        .build()
+                );
+    }
+
+    @GetMapping("/list")
+    @MemberAuthorize
+    public ResponseEntity<ApiResponse<GetMyTraveloguesResponse>> getMyTravelogues(
+            @RequestParam(defaultValue = "0") final int page,
+            @AuthenticationPrincipal final UserDetails userDetails
+    ) {
+        return ResponseEntity.ok()
+                .body(ApiResponse.<GetMyTraveloguesResponse>builder()
+                        .statusCode(HttpStatus.OK.value())
+                        .data(travelogueService.getMyTravelogues(page, userDetails.getUsername()))
                         .build()
                 );
     }

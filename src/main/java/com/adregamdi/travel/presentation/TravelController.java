@@ -5,6 +5,7 @@ import com.adregamdi.core.handler.ApiResponse;
 import com.adregamdi.travel.application.TravelService;
 import com.adregamdi.travel.dto.request.CreateMyTravelRequest;
 import com.adregamdi.travel.dto.response.GetMyTravelResponse;
+import com.adregamdi.travel.dto.response.GetMyTravelsResponse;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
@@ -37,13 +38,27 @@ public class TravelController {
     @GetMapping
     @MemberAuthorize
     public ResponseEntity<ApiResponse<GetMyTravelResponse>> getMyTravel(
-            @RequestParam("travel_id") @Positive Long travelId,
+            @RequestParam("travel_id") @Positive final Long travelId,
             @AuthenticationPrincipal final UserDetails userDetails
     ) {
         return ResponseEntity.ok()
                 .body(ApiResponse.<GetMyTravelResponse>builder()
                         .statusCode(HttpStatus.OK.value())
                         .data(travelService.getMyTravel(travelId, userDetails.getUsername()))
+                        .build()
+                );
+    }
+
+    @GetMapping("/list")
+    @MemberAuthorize
+    public ResponseEntity<ApiResponse<GetMyTravelsResponse>> getMyTravels(
+            @RequestParam(defaultValue = "0") final int page,
+            @AuthenticationPrincipal final UserDetails userDetails
+    ) {
+        return ResponseEntity.ok()
+                .body(ApiResponse.<GetMyTravelsResponse>builder()
+                        .statusCode(HttpStatus.OK.value())
+                        .data(travelService.getMyTravels(page, userDetails.getUsername()))
                         .build()
                 );
     }

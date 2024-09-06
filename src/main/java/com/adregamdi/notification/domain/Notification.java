@@ -5,6 +5,8 @@ import com.adregamdi.notification.dto.request.CreateNotificationRequest;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.UUID;
+
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
@@ -16,7 +18,7 @@ public class Notification extends BaseTime {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long notificationId;
     @Column
-    private String memberId; // 회원 id
+    private UUID memberId; // 회원 id
     @Column
     private String content; // 내용
     @Column
@@ -28,7 +30,7 @@ public class Notification extends BaseTime {
     private NotificationType type; // 알림 종류 (좋아요, 일정)
 
     public Notification(CreateNotificationRequest request) {
-        this.memberId = request.memberId();
+        this.memberId = UUID.fromString(request.memberId());
         this.content = request.content();
         this.uri = request.uri();
         this.isRead = false;

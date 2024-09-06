@@ -32,7 +32,7 @@ public class SearchController {
         return ResponseEntity.ok()
                 .body(ApiResponse.<SearchResponse>builder()
                         .statusCode(HttpStatus.OK.value())
-                        .data(searchService.search(keyword, page, types != null ? types : EnumSet.allOf(SearchType.class)))
+                        .data(searchService.search(keyword == null ? "" : keyword, page, types != null ? types : EnumSet.allOf(SearchType.class)))
                         .build()
                 );
     }

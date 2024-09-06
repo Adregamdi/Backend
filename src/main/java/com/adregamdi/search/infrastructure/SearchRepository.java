@@ -3,15 +3,15 @@ package com.adregamdi.search.infrastructure;
 import com.adregamdi.search.dto.PlaceSearchDTO;
 import com.adregamdi.search.dto.ShortsSearchDTO;
 import com.adregamdi.search.dto.TravelogueSearchDTO;
-
-import java.util.List;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 
 public interface SearchRepository {
-    List<TravelogueSearchDTO> searchTravelogues(String keyword, int page, int pageSize);
+    Slice<TravelogueSearchDTO> searchTravelogues(String keyword, Pageable pageable);
 
-    List<ShortsSearchDTO> searchShorts(String keyword, int page, int pageSize);
+    Slice<ShortsSearchDTO> searchShorts(String keyword, Pageable pageable);
 
-    List<PlaceSearchDTO> searchPlaces(String keyword, int page, int pageSize);
+    Slice<PlaceSearchDTO> searchPlaces(String keyword, Pageable pageable);
 
     long countTravelogues(String keyword);
 

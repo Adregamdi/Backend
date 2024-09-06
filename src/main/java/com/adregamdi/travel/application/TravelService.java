@@ -3,20 +3,27 @@ package com.adregamdi.travel.application;
 import com.adregamdi.travel.domain.Travel;
 import com.adregamdi.travel.domain.TravelDay;
 import com.adregamdi.travel.domain.TravelPlace;
+import com.adregamdi.travel.dto.TravelDTO;
 import com.adregamdi.travel.dto.request.CreateMyTravelRequest;
 import com.adregamdi.travel.dto.response.GetMyTravelResponse;
+import com.adregamdi.travel.dto.response.GetMyTravelsResponse;
 import com.adregamdi.travel.exception.TravelException.*;
 import com.adregamdi.travel.infrastructure.TravelDayRepository;
 import com.adregamdi.travel.infrastructure.TravelPlaceRepository;
 import com.adregamdi.travel.infrastructure.TravelRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
+
+import static com.adregamdi.core.constant.Constant.LARGE_PAGE_SIZE;
+import static com.adregamdi.core.utils.PageUtil.generatePageDesc;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -52,13 +59,13 @@ public class TravelService {
     }
 
     /*
-     * 일정 조회
+     * 내 특정 일정 조회
      * */
     @Transactional(readOnly = true)
     public GetMyTravelResponse getMyTravel(final Long travelId, final String memberId) {
         List<List<TravelPlace>> travelPlaces = new ArrayList<>();
 
-        Travel travel = travelRepository.findByTravelIdAndMemberId(travelId, memberId)
+        Travel travel = travelRepository.findByTravelIdAndMemberId(travelId, UUID.fromString(memberId))
                 .orElseThrow(() -> new TravelNotFoundException(memberId));
 
         List<TravelDay> travelDays = travelDayRepository.findByTravelId(travelId)
@@ -71,5 +78,21 @@ public class TravelService {
         }
 
         return GetMyTravelResponse.of(travel, travelDays, travelPlaces);
+    }
+
+    /*
+     * 내 전체 일정 조회
+     * */
+    @Transactional(readOnly = true)
+    public GetMyTravelsResponse getMyTravels(final int page, final String memberId) {
+        Slice<TravelDTO> travels = travelRepository.findByMemberId(memberId, generatePageDesc(page, LARGE_PAGE_SIZE, "travelId"));
+
+        return GetMyTravelsResponse.of(
+                LARGE_PAGE_SIZE,
+                page,
+                travels.getNumberOfElements(),
+                travels.hasNext(),
+                travels.getContent()
+        );
     }
 }

@@ -4,6 +4,8 @@ import com.adregamdi.core.entity.BaseTime;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.UUID;
+
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
@@ -15,16 +17,18 @@ public class PlaceReview extends BaseTime {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long placeReviewId;
     @Column
-    private String memberId; // 회원 id
+    private UUID memberId; // 회원 id
     @Column
     private Long placeId; // 장소 id
     @Column
     private Long travelogueId; // 여행기 id
     @Column
+    private Long travelogueDayId; // 여행기 날짜 id
+    @Column
     private String content; // 내용
 
     public PlaceReview(String memberId, Long placeId, Long travelogueId, String content) {
-        this.memberId = memberId;
+        this.memberId = UUID.fromString(memberId);
         this.placeId = placeId;
         this.travelogueId = travelogueId;
         this.content = content;

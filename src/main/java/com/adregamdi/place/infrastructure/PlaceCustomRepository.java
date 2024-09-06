@@ -8,5 +8,5 @@ import org.springframework.data.domain.Slice;
 import java.util.Optional;
 
 public interface PlaceCustomRepository {
-    Optional<Slice<Place>> findByNameStartingWith(final Pageable pageable, final String name);
+    Optional<Slice<Place>> findByTitleStartingWith(String title, Pageable pageable);
 }

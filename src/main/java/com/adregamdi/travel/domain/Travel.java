@@ -6,6 +6,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDate;
+import java.util.UUID;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -18,7 +19,7 @@ public class Travel extends BaseTime {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long travelId;
     @Column
-    private String memberId; // 회원 id
+    private UUID memberId; // 회원 id
     @Column
     private LocalDate startDate; // 시작일
     @Column
@@ -27,7 +28,7 @@ public class Travel extends BaseTime {
     private String title; // 제목
 
     public Travel(CreateMyTravelRequest request, String memberId) {
-        this.memberId = memberId;
+        this.memberId = UUID.fromString(memberId);
         this.startDate = request.startDate();
         this.endDate = request.endDate();
         this.title = request.title();

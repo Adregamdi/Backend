@@ -8,11 +8,18 @@ import com.adregamdi.search.dto.response.SearchResponse;
 import com.adregamdi.search.infrastructure.SearchRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Slice;
+import org.springframework.data.domain.SliceImpl;
 import org.springframework.stereotype.Service;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.EnumMap;
+import java.util.Map;
+import java.util.Set;
 
 import static com.adregamdi.core.constant.Constant.LARGE_PAGE_SIZE;
+import static com.adregamdi.core.utils.PageUtil.generatePageAsc;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -22,33 +29,40 @@ public class SearchService {
 
     public SearchResponse search(String keyword, int page, Set<SearchType> types) {
         int pageSize = LARGE_PAGE_SIZE;
-        List<TravelogueSearchDTO> travelogues = new ArrayList<>();
-        List<ShortsSearchDTO> shorts = new ArrayList<>();
-        List<PlaceSearchDTO> places = new ArrayList<>();
+        Slice<TravelogueSearchDTO> travelogues = emptySlice(page, pageSize);
+        Slice<ShortsSearchDTO> shorts = emptySlice(page, pageSize);
+        Slice<PlaceSearchDTO> places = emptySlice(page, pageSize);
         Map<SearchType, Long> totalCounts = new EnumMap<>(SearchType.class);
 
         if (types.contains(SearchType.TRAVELOGUE)) {
-            travelogues = searchRepository.searchTravelogues(keyword, page, pageSize);
+            travelogues = searchRepository.searchTravelogues(keyword, generatePageAsc(page, pageSize, "title"));
             totalCounts.put(SearchType.TRAVELOGUE, searchRepository.countTravelogues(keyword));
         }
         if (types.contains(SearchType.SHORTS)) {
-            shorts = searchRepository.searchShorts(keyword, page, pageSize);
+            shorts = searchRepository.searchShorts(keyword, generatePageAsc(page, pageSize, "title"));
             totalCounts.put(SearchType.SHORTS, searchRepository.countShorts(keyword));
         }
         if (types.contains(SearchType.PLACE)) {
-            places = searchRepository.searchPlaces(keyword, page, pageSize);
+            places = searchRepository.searchPlaces(keyword, generatePageAsc(page, pageSize, "title"));
             totalCounts.put(SearchType.PLACE, searchRepository.countPlaces(keyword));
         }
 
         return SearchResponse.of(
-                travelogues,
-                shorts,
-                places,
+                travelogues.getContent(),
+                shorts.getContent(),
+                places.getContent(),
                 page,
                 pageSize,
+                travelogues.hasNext(),
+                shorts.hasNext(),
+                places.hasNext(),
                 totalCounts.getOrDefault(SearchType.TRAVELOGUE, 0L),
                 totalCounts.getOrDefault(SearchType.SHORTS, 0L),
                 totalCounts.getOrDefault(SearchType.PLACE, 0L)
         );
+    }
+
+    private <T> Slice<T> emptySlice(int page, int pageSize) {
+        return new SliceImpl<>(Collections.emptyList(), PageRequest.of(page, pageSize), false);
     }
 }

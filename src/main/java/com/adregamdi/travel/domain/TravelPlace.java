@@ -15,12 +15,11 @@ public class TravelPlace extends BaseTime {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long travelPlaceId;
     @Column
-    private Long travelDayId; // 날짜 별 일정 id
+    private Long travelDayId; // 일정 날짜 id
     @Column
     private Long placeId; // 장소 id
     @Column
     private Integer placeOrder; // 순서
-
 
     public TravelPlace(Long travelDayId, Long placeId, Integer placeOrder) {
         this.travelDayId = travelDayId;

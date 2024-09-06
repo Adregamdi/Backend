@@ -3,19 +3,27 @@ package com.adregamdi.search.infrastructure;
 import com.adregamdi.search.dto.PlaceSearchDTO;
 import com.adregamdi.search.dto.ShortsSearchDTO;
 import com.adregamdi.search.dto.TravelogueSearchDTO;
-import com.querydsl.core.Tuple;
+import com.querydsl.core.types.Predicate;
 import com.querydsl.core.types.Projections;
+import com.querydsl.core.types.dsl.EntityPathBase;
+import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Slice;
+import org.springframework.data.domain.SliceImpl;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Repository;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
+import static com.adregamdi.core.utils.RepositoryUtil.makeOrderSpecifiers;
 import static com.adregamdi.member.domain.QMember.member;
 import static com.adregamdi.place.domain.QPlace.place;
 import static com.adregamdi.place.domain.QPlaceReview.placeReview;
@@ -24,138 +32,159 @@ import static com.adregamdi.shorts.domain.QShorts.shorts;
 import static com.adregamdi.travelogue.domain.QTravelogue.travelogue;
 import static com.adregamdi.travelogue.domain.QTravelogueImage.travelogueImage;
 
+@Slf4j
 @Repository
 @RequiredArgsConstructor
 public class SearchRepositoryImpl implements SearchRepository {
     private final JPAQueryFactory queryFactory;
 
     @Override
-    public List<TravelogueSearchDTO> searchTravelogues(String keyword, int page, int pageSize) {
-        List<Tuple> results = queryFactory
-                .select(
+    public Slice<TravelogueSearchDTO> searchTravelogues(String keyword, int page, int pageSize) {
+        PageRequest pageRequest = PageRequest.of(page, pageSize, Sort.by("title").ascending());
+
+        List<TravelogueSearchDTO> results = queryFactory
+                .select(Projections.constructor(TravelogueSearchDTO.class,
                         travelogue.travelogueId,
                         travelogue.title,
-                        member.handle
-                )
+                        member.handle,
+                        Expressions.constant(new ArrayList<String>())))
                 .from(travelogue)
-                .join(member).on(travelogue.memberId.eq(String.valueOf(member.memberId)))
-                .where(travelogue.title.containsIgnoreCase(keyword))
-                .offset((long) page * pageSize)
-                .limit(pageSize)
+                .leftJoin(member).on(travelogue.memberId.eq(String.valueOf(member.memberId)))
+                .where(travelogue.title.startsWith(keyword))
+                .orderBy(makeOrderSpecifiers(travelogue, pageRequest))
+                .offset(pageRequest.getOffset())
+                .limit(pageRequest.getPageSize() + 1)
                 .fetch();
+
+        boolean hasNext = results.size() > pageRequest.getPageSize();
+        List<TravelogueSearchDTO> content = hasNext ? results.subList(0, pageRequest.getPageSize()) : results;
+
+        content = fetchAndSetTravelogueImageUrls(content);
+
+        return new SliceImpl<>(content, pageRequest, hasNext);
+    }
+
+    private List<TravelogueSearchDTO> fetchAndSetTravelogueImageUrls(List<TravelogueSearchDTO> travelogues) {
+        if (travelogues.isEmpty()) {
+            return travelogues;
+        }
+
+        List<Long> travelogueIds = travelogues.stream()
+                .map(TravelogueSearchDTO::travelogueId)
+                .collect(Collectors.toList());
 
         Map<Long, List<String>> imageUrlMap = queryFactory
                 .select(travelogueImage.travelogueId, travelogueImage.url)
                 .from(travelogueImage)
-                .where(travelogueImage.travelogueId.in(
-                        results.stream().map(tuple -> tuple.get(travelogue.travelogueId)).collect(Collectors.toList())
-                ))
+                .where(travelogueImage.travelogueId.in(travelogueIds))
                 .fetch()
                 .stream()
                 .collect(Collectors.groupingBy(
-                        tuple -> Optional.ofNullable(tuple.get(travelogueImage.travelogueId)).orElse(0L),
-                        Collectors.mapping(
-                                tuple -> Optional.ofNullable(tuple.get(travelogueImage.url)).orElse(""),
-                                Collectors.toList()
-                        )
+                        tuple -> tuple.get(travelogueImage.travelogueId),
+                        Collectors.mapping(tuple -> tuple.get(travelogueImage.url), Collectors.toList())
                 ));
 
-        return results.stream()
-                .map(tuple -> new TravelogueSearchDTO(
-                        tuple.get(travelogue.travelogueId),
-                        tuple.get(travelogue.title),
-                        tuple.get(member.handle),
-                        imageUrlMap.getOrDefault(tuple.get(travelogue.travelogueId), Collections.emptyList())
+        return travelogues.stream()
+                .map(dto -> new TravelogueSearchDTO(
+                        dto.travelogueId(),
+                        dto.title(),
+                        dto.memberHandle(),
+                        imageUrlMap.getOrDefault(dto.travelogueId(), Collections.emptyList())
                 ))
                 .collect(Collectors.toList());
     }
 
     @Override
-    public List<ShortsSearchDTO> searchShorts(String keyword, int page, int pageSize) {
-        return queryFactory
+    public Slice<ShortsSearchDTO> searchShorts(String keyword, int page, int pageSize) {
+        List<ShortsSearchDTO> results = queryFactory
                 .select(Projections.constructor(ShortsSearchDTO.class,
                         shorts.id,
                         shorts.title,
-                        shorts.thumbnailUrl
-                ))
+                        shorts.thumbnailUrl))
                 .from(shorts)
-                .where(shorts.title.containsIgnoreCase(keyword))
+                .where(shorts.title.startsWith(keyword))
                 .offset((long) page * pageSize)
-                .limit(pageSize)
+                .limit(pageSize + 1)
                 .fetch();
+
+        boolean hasNext = results.size() > pageSize;
+        List<ShortsSearchDTO> content = hasNext ? results.subList(0, pageSize) : results;
+
+        return new SliceImpl<>(content, PageRequest.of(page, pageSize), hasNext);
     }
 
     @Override
-    public List<PlaceSearchDTO> searchPlaces(String keyword, int page, int pageSize) {
-        List<Tuple> results = queryFactory
-                .select(
+    public Slice<PlaceSearchDTO> searchPlaces(String keyword, int page, int pageSize) {
+        List<PlaceSearchDTO> results = queryFactory
+                .select(Projections.constructor(PlaceSearchDTO.class,
                         place.placeId,
                         place.title,
                         place.contentsLabel,
+                        Expressions.constant(new ArrayList<String>()), // 임시 빈 리스트
                         JPAExpressions.select(placeReview.count()).from(placeReview)
                                 .where(placeReview.placeId.eq(place.placeId)),
                         JPAExpressions.select(shorts.count()).from(shorts)
-                                .where(shorts.placeNo.eq(place.placeId))
-                )
+                                .where(shorts.placeNo.eq(place.placeId))))
                 .from(place)
-                .where(place.title.containsIgnoreCase(keyword))
+                .where(place.title.startsWith(keyword))
                 .offset((long) page * pageSize)
-                .limit(pageSize)
+                .limit(pageSize + 1)
                 .fetch();
 
+        boolean hasNext = results.size() > pageSize;
+        List<PlaceSearchDTO> content = hasNext ? results.subList(0, pageSize) : results;
+
+        content = fetchPlaceImageUrls(content);
+
+        return new SliceImpl<>(content, PageRequest.of(page, pageSize), hasNext);
+    }
+
+    private List<PlaceSearchDTO> fetchPlaceImageUrls(List<PlaceSearchDTO> places) {
         Map<Long, List<String>> imageUrlMap = queryFactory
                 .select(placeReview.placeId, placeReviewImage.url)
                 .from(placeReviewImage)
                 .join(placeReview).on(placeReviewImage.placeReviewId.eq(placeReview.placeReviewId))
-                .where(placeReview.placeId.in(
-                        results.stream().map(tuple -> tuple.get(place.placeId)).collect(Collectors.toList())
-                ))
+                .where(placeReview.placeId.in(places.stream().map(PlaceSearchDTO::placeId).collect(Collectors.toList())))
                 .fetch()
                 .stream()
                 .collect(Collectors.groupingBy(
-                        tuple -> Optional.ofNullable(tuple.get(placeReview.placeId)).orElse(0L),
-                        Collectors.mapping(
-                                tuple -> Optional.ofNullable(tuple.get(placeReviewImage.url)).orElse(""),
-                                Collectors.toList()
-                        )
+                        tuple -> tuple.get(placeReview.placeId),
+                        Collectors.mapping(tuple -> tuple.get(placeReviewImage.url), Collectors.toList())
                 ));
 
-        return results.stream()
-                .map(tuple -> new PlaceSearchDTO(
-                        tuple.get(place.placeId),
-                        tuple.get(place.title),
-                        tuple.get(place.contentsLabel),
-                        imageUrlMap.getOrDefault(tuple.get(place.placeId), Collections.emptyList()),
-                        tuple.get(3, Long.class),
-                        tuple.get(4, Long.class)
+        return places.stream()
+                .map(dto -> new PlaceSearchDTO(
+                        dto.placeId(),
+                        dto.title(),
+                        dto.contentsLabel(),
+                        imageUrlMap.getOrDefault(dto.placeId(), Collections.emptyList()),
+                        dto.photoReviewCount(),
+                        dto.shortsCount()
                 ))
                 .collect(Collectors.toList());
     }
 
     @Override
     public long countTravelogues(String keyword) {
-        return Optional.ofNullable(queryFactory
-                .select(travelogue.count())
-                .from(travelogue)
-                .where(travelogue.title.containsIgnoreCase(keyword))
-                .fetchOne()).orElse(0L);
+        return executeCountQuery(travelogue, travelogue.title.startsWith(keyword));
     }
 
     @Override
     public long countShorts(String keyword) {
-        return Optional.ofNullable(queryFactory
-                .select(shorts.count())
-                .from(shorts)
-                .where(shorts.title.containsIgnoreCase(keyword))
-                .fetchOne()).orElse(0L);
+        return executeCountQuery(shorts, shorts.title.startsWith(keyword));
     }
 
     @Override
     public long countPlaces(String keyword) {
-        return Optional.ofNullable(queryFactory
-                .select(place.count())
-                .from(place)
-                .where(place.title.containsIgnoreCase(keyword))
-                .fetchOne()).orElse(0L);
+        return executeCountQuery(place, place.title.startsWith(keyword));
+    }
+
+    private long executeCountQuery(EntityPathBase<?> entity, Predicate condition) {
+        Long count = queryFactory
+                .select(entity.count())
+                .from(entity)
+                .where(condition)
+                .fetchOne();
+        return count != null ? count : 0L;
     }
 }

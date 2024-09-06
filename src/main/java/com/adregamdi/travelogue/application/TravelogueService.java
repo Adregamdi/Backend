@@ -9,7 +9,9 @@ import com.adregamdi.place.infrastructure.PlaceReviewRepository;
 import com.adregamdi.travelogue.domain.Travelogue;
 import com.adregamdi.travelogue.domain.TravelogueDay;
 import com.adregamdi.travelogue.domain.TravelogueImage;
+import com.adregamdi.travelogue.dto.TravelogueDTO;
 import com.adregamdi.travelogue.dto.request.CreateMyTravelogueRequest;
+import com.adregamdi.travelogue.dto.response.GetMyTraveloguesResponse;
 import com.adregamdi.travelogue.dto.response.GetTravelogueResponse;
 import com.adregamdi.travelogue.exception.TravelogueException.TravelogueDayNotFoundException;
 import com.adregamdi.travelogue.exception.TravelogueException.TravelogueImageNotFoundException;
@@ -19,6 +21,7 @@ import com.adregamdi.travelogue.infrastructure.TravelogueImageRepository;
 import com.adregamdi.travelogue.infrastructure.TravelogueRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,6 +29,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+
+import static com.adregamdi.core.constant.Constant.LARGE_PAGE_SIZE;
+import static com.adregamdi.core.utils.PageUtil.generatePageDesc;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -69,6 +75,23 @@ public class TravelogueService {
                         .orElseThrow(() -> new PlaceReviewImageNotFoundException(reviewId));
 
         return GetTravelogueResponse.of(travelogue, travelogueImages, travelogueDays, placeReviews, placeReviewImagesFetcher);
+    }
+
+
+    /*
+     * 내 전체 여행기 조회
+     * */
+    @Transactional(readOnly = true)
+    public GetMyTraveloguesResponse getMyTravelogues(final int page, final String memberId) {
+        Slice<TravelogueDTO> travelogues = travelogueRepository.findByMemberId(memberId, generatePageDesc(page, LARGE_PAGE_SIZE, "travelogueId"));
+
+        return GetMyTraveloguesResponse.of(
+                LARGE_PAGE_SIZE,
+                page,
+                travelogues.getNumberOfElements(),
+                travelogues.hasNext(),
+                travelogues.getContent()
+        );
     }
 
     private void saveTravelogueImages(final List<CreateMyTravelogueRequest.TravelogueImageInfo> images, final Long travelogueId) {

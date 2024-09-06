@@ -7,6 +7,7 @@ import com.adregamdi.place.exception.PlaceException;
 import com.adregamdi.shorts.exception.ShortsException;
 import com.adregamdi.travel.exception.TravelException;
 import com.adregamdi.travelogue.exception.TravelogueException;
+import com.amazonaws.services.s3.model.AmazonS3Exception;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -108,6 +109,7 @@ public class GlobalExceptionHandler {
             ImageException.UnSupportedImageTypeException.class,
             ImageException.InvalidFileNameException.class,
             ImageException.InvalidImageLengthException.class,
+            AmazonS3Exception.class,
             MaxUploadSizeExceededException.class
     })
     public ResponseEntity<ErrorResponse> handleCustomBadRequestException(final RuntimeException exception) {

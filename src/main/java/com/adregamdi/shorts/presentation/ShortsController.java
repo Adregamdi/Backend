@@ -21,7 +21,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -29,6 +28,8 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 import ws.schild.jave.EncoderException;
+
+import java.io.IOException;
 
 @Slf4j
 @RestController
@@ -85,33 +86,40 @@ public class ShortsController {
     }
 
     @GetMapping("/stream/{shorts_id}")
-//    @MemberAuthorize
     public ResponseEntity<StreamingResponseBody> streamShort(@PathVariable(value = "shorts_id") Long shortsId) {
-
         String s3Key = shortsService.getS3KeyByShortId(shortsId);
         log.info("{} 스트리밍을 시작합니다.", s3Key);
+
         S3Object s3Object = amazonS3Client.getObject(new GetObjectRequest(bucketName, s3Key));
-        S3ObjectInputStream inputStream = s3Object.getObjectContent();
+        long contentLength = s3Object.getObjectMetadata().getContentLength();
 
         StreamingResponseBody responseBody = outputStream -> {
-            byte[] buffer = new byte[1024];
-            int bytesRead;
-            try {
+            try (S3ObjectInputStream inputStream = s3Object.getObjectContent()) {
+                byte[] buffer = new byte[8192]; // 8KB 청크
+                int bytesRead;
+                long totalBytesRead = 0;
                 while ((bytesRead = inputStream.read(buffer)) != -1) {
                     outputStream.write(buffer, 0, bytesRead);
                     outputStream.flush();
+                    totalBytesRead += bytesRead;
+
+                    if (totalBytesRead % (contentLength / 10) < 8192) {
+                        log.info("{}% 스트리밍 완료", (totalBytesRead * 100) / contentLength);
+                    }
                 }
-            } finally {
-                // 스트림을 안전하게 닫기 위해 try-finally 사용
-                inputStream.close();  // InputStream은 명시적으로 닫아줍니다.
+            } catch (IOException e) {
+                log.error("스트리밍 중 오류 발생", e);
             }
         };
 
+        HttpHeaders responseHeaders = new HttpHeaders();
+        responseHeaders.set(HttpHeaders.CONTENT_TYPE, "video/mp4");
+        responseHeaders.set(HttpHeaders.TRANSFER_ENCODING, "chunked");
+
         return ResponseEntity.ok()
-                .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_OCTET_STREAM_VALUE)
+                .headers(responseHeaders)
                 .body(responseBody);
     }
-
 
     @PostMapping("/upload-video")
     @MemberAuthorize

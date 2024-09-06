@@ -14,6 +14,9 @@ public record SearchResponse(
         List<PlaceSearchDTO> places,
         int currentPage,
         int pageSize,
+        boolean hasNextTravelogues,
+        boolean hasNextShorts,
+        boolean hasNextPlaces,
         long totalTravelogues,
         long totalShorts,
         long totalPlaces
@@ -24,6 +27,9 @@ public record SearchResponse(
             List<PlaceSearchDTO> places,
             int currentPage,
             int pageSize,
+            boolean hasNextTravelogues,
+            boolean hasNextShorts,
+            boolean hasNextPlaces,
             long totalTravelogues,
             long totalShorts,
             long totalPlaces
@@ -34,6 +40,9 @@ public record SearchResponse(
                 .places(places)
                 .currentPage(currentPage)
                 .pageSize(pageSize)
+                .hasNextTravelogues(hasNextTravelogues)
+                .hasNextShorts(hasNextShorts)
+                .hasNextPlaces(hasNextPlaces)
                 .totalTravelogues(totalTravelogues)
                 .totalShorts(totalShorts)
                 .totalPlaces(totalPlaces)

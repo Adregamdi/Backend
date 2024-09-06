@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video Streaming Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        input, button {
+            margin: 10px 0;
+            padding: 5px;
+        }
+        video {
+            max-width: 100%;
+            margin-top: 20px;
+        }
+        #log {
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #f0f0f0;
+            border: 1px solid #ccc;
+            height: 200px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body>
+<h1>Video Streaming Test</h1>
+
+<div>
+    <label for="tokenInput">JWT Token:</label>
+    <input type="text" id="tokenInput" placeholder="Enter your JWT token">
+</div>
+
+<div>
+    <label for="shortsIdInput">Shorts ID:</label>
+    <input type="number" id="shortsIdInput" placeholder="Enter shorts ID">
+</div>
+
+<button onclick="loadVideo()">Load Video</button>
+
+<div>
+    <video id="videoPlayer" controls>
+        Your browser does not support the video tag.
+    </video>
+</div>
+
+<div id="log"></div>
+
+<script>
+    function log(message) {
+        const logElement = document.getElementById('log');
+        logElement.innerHTML += message + '<br>';
+        logElement.scrollTop = logElement.scrollHeight;
+        console.log(message);
+    }
+
+    async function loadVideo() {
+        const token = document.getElementById('tokenInput').value;
+        const shortsId = document.getElementById('shortsIdInput').value;
+        const videoPlayer = document.getElementById('videoPlayer');
+
+        if (!token || !shortsId) {
+            alert('Please enter both JWT token and shorts ID');
+            return;
+        }
+
+        const videoUrl = `/api/shorts/stream/${shortsId}`;
+
+        try {
+            log('Fetching video...');
+            const response = await fetch(videoUrl, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const reader = response.body.getReader();
+            const stream = new ReadableStream({
+                async start(controller) {
+                    while (true) {
+                        const { done, value } = await reader.read();
+                        if (done) break;
+                        controller.enqueue(value);
+                        log(`Received chunk of ${value.length} bytes`);
+                    }
+                    controller.close();
+                }
+            });
+
+            const videoBlob = await new Response(stream).blob();
+            const videoObjectUrl = URL.createObjectURL(videoBlob);
+            videoPlayer.src = videoObjectUrl;
+
+            videoPlayer.onloadedmetadata = () => {
+                log('Video metadata loaded.');
+                log(`Video duration: ${videoPlayer.duration} seconds`);
+                log(`Video dimensions: ${videoPlayer.videoWidth}x${videoPlayer.videoHeight}`);
+            };
+
+            videoPlayer.oncanplay = () => {
+                log('Video can start playing.');
+            };
+
+            videoPlayer.onerror = (e) => {
+                log(`Video error: ${videoPlayer.error.message}`);
+            };
+
+            videoPlayer.load(); // Explicitly load the video
+        } catch (error) {
+            log(`Error: ${error.message}`);
+        }
+    }
+</script>
+</body>
+</html>

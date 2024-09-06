@@ -33,6 +33,8 @@ public class SecurityConfig {
             "/",
             "/index.html",
             "/api/oauth2/login",
+            "/api/shorts/stream/**",
+            "/video-streaming.html"
     };
 
     @Bean

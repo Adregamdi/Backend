@@ -8,6 +8,4 @@ import java.util.UUID;
 
 public interface TravelRepository extends JpaRepository<Travel, Long>, TravelCustomRepository {
     Optional<Travel> findByTravelIdAndMemberId(Long travelId, UUID memberId);
-
-    Travel findByMemberIdAndTitle(UUID memberId, String title);
 }

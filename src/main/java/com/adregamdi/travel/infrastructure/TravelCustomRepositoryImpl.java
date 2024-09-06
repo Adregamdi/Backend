@@ -21,7 +21,7 @@ import static com.adregamdi.travel.domain.QTravel.travel;
 public class TravelCustomRepositoryImpl implements TravelCustomRepository {
     private final JPAQueryFactory jpaQueryFactory;
 
-    public Slice<TravelDTO> findByMemberId(String memberId, Pageable pageable) {
+    public Slice<TravelDTO> findByMemberId(final String memberId, final Pageable pageable) {
         List<TravelDTO> results = jpaQueryFactory
                 .select(Projections.constructor(TravelDTO.class,
                         travel.travelId,

@@ -44,9 +44,9 @@ public class PlaceServiceImpl implements PlaceService {
 
     @Override
     @Transactional(readOnly = true)
-    public GetPlacesResponse getPlaces(final int pageNo, final String name) {
-        Slice<Place> places = placeRepository.findByNameStartingWith(generatePageAsc(pageNo, NORMAL_PAGE_SIZE, "name"), name)
-                .orElseThrow(() -> new PlaceNotFoundException(name));
+    public GetPlacesResponse getPlaces(final int pageNo, final String title) {
+        Slice<Place> places = placeRepository.findByTitleStartingWith(title, generatePageAsc(pageNo, NORMAL_PAGE_SIZE, "title"))
+                .orElseThrow(() -> new PlaceNotFoundException(title));
         return GetPlacesResponse.from(
                 places.getContent()
                         .stream()

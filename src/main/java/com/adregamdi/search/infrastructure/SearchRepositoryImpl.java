@@ -11,10 +11,9 @@ import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.SliceImpl;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Repository;
 
 import java.util.ArrayList;
@@ -39,9 +38,7 @@ public class SearchRepositoryImpl implements SearchRepository {
     private final JPAQueryFactory queryFactory;
 
     @Override
-    public Slice<TravelogueSearchDTO> searchTravelogues(String keyword, int page, int pageSize) {
-        PageRequest pageRequest = PageRequest.of(page, pageSize, Sort.by("title").ascending());
-
+    public Slice<TravelogueSearchDTO> searchTravelogues(final String keyword, final Pageable pageable) {
         List<TravelogueSearchDTO> results = queryFactory
                 .select(Projections.constructor(TravelogueSearchDTO.class,
                         travelogue.travelogueId,
@@ -51,17 +48,17 @@ public class SearchRepositoryImpl implements SearchRepository {
                 .from(travelogue)
                 .leftJoin(member).on(travelogue.memberId.eq(member.memberId))
                 .where(travelogue.title.startsWith(keyword))
-                .orderBy(makeOrderSpecifiers(travelogue, pageRequest))
-                .offset(pageRequest.getOffset())
-                .limit(pageRequest.getPageSize() + 1)
+                .orderBy(makeOrderSpecifiers(travelogue, pageable))
+                .offset(pageable.getOffset())
+                .limit(pageable.getPageSize() + 1)
                 .fetch();
 
-        boolean hasNext = results.size() > pageRequest.getPageSize();
-        List<TravelogueSearchDTO> content = hasNext ? results.subList(0, pageRequest.getPageSize()) : results;
+        boolean hasNext = results.size() > pageable.getPageSize();
+        List<TravelogueSearchDTO> content = hasNext ? results.subList(0, pageable.getPageSize()) : results;
 
         content = fetchAndSetTravelogueImageUrls(content);
 
-        return new SliceImpl<>(content, pageRequest, hasNext);
+        return new SliceImpl<>(content, pageable, hasNext);
     }
 
     private List<TravelogueSearchDTO> fetchAndSetTravelogueImageUrls(List<TravelogueSearchDTO> travelogues) {
@@ -95,7 +92,7 @@ public class SearchRepositoryImpl implements SearchRepository {
     }
 
     @Override
-    public Slice<ShortsSearchDTO> searchShorts(String keyword, int page, int pageSize) {
+    public Slice<ShortsSearchDTO> searchShorts(final String keyword, final Pageable pageable) {
         List<ShortsSearchDTO> results = queryFactory
                 .select(Projections.constructor(ShortsSearchDTO.class,
                         shorts.id,
@@ -103,40 +100,40 @@ public class SearchRepositoryImpl implements SearchRepository {
                         shorts.thumbnailUrl))
                 .from(shorts)
                 .where(shorts.title.startsWith(keyword))
-                .offset((long) page * pageSize)
-                .limit(pageSize + 1)
+                .offset(pageable.getOffset())
+                .limit(pageable.getPageSize() + 1)
                 .fetch();
 
-        boolean hasNext = results.size() > pageSize;
-        List<ShortsSearchDTO> content = hasNext ? results.subList(0, pageSize) : results;
+        boolean hasNext = results.size() > pageable.getPageSize();
+        List<ShortsSearchDTO> content = hasNext ? results.subList(0, pageable.getPageSize()) : results;
 
-        return new SliceImpl<>(content, PageRequest.of(page, pageSize), hasNext);
+        return new SliceImpl<>(content, pageable, hasNext);
     }
 
     @Override
-    public Slice<PlaceSearchDTO> searchPlaces(String keyword, int page, int pageSize) {
+    public Slice<PlaceSearchDTO> searchPlaces(final String keyword, final Pageable pageable) {
         List<PlaceSearchDTO> results = queryFactory
                 .select(Projections.constructor(PlaceSearchDTO.class,
                         place.placeId,
                         place.title,
                         place.contentsLabel,
-                        Expressions.constant(new ArrayList<String>()), // 임시 빈 리스트
+                        Expressions.constant(new ArrayList<String>()),
                         JPAExpressions.select(placeReview.count()).from(placeReview)
                                 .where(placeReview.placeId.eq(place.placeId)),
                         JPAExpressions.select(shorts.count()).from(shorts)
                                 .where(shorts.placeNo.eq(place.placeId))))
                 .from(place)
                 .where(place.title.startsWith(keyword))
-                .offset((long) page * pageSize)
-                .limit(pageSize + 1)
+                .offset(pageable.getOffset())
+                .limit(pageable.getPageSize() + 1)
                 .fetch();
 
-        boolean hasNext = results.size() > pageSize;
-        List<PlaceSearchDTO> content = hasNext ? results.subList(0, pageSize) : results;
+        boolean hasNext = results.size() > pageable.getPageSize();
+        List<PlaceSearchDTO> content = hasNext ? results.subList(0, pageable.getPageSize()) : results;
 
         content = fetchPlaceImageUrls(content);
 
-        return new SliceImpl<>(content, PageRequest.of(page, pageSize), hasNext);
+        return new SliceImpl<>(content, pageable, hasNext);
     }
 
     private List<PlaceSearchDTO> fetchPlaceImageUrls(List<PlaceSearchDTO> places) {
@@ -165,21 +162,21 @@ public class SearchRepositoryImpl implements SearchRepository {
     }
 
     @Override
-    public long countTravelogues(String keyword) {
+    public long countTravelogues(final String keyword) {
         return executeCountQuery(travelogue, travelogue.title.startsWith(keyword));
     }
 
     @Override
-    public long countShorts(String keyword) {
+    public long countShorts(final String keyword) {
         return executeCountQuery(shorts, shorts.title.startsWith(keyword));
     }
 
     @Override
-    public long countPlaces(String keyword) {
+    public long countPlaces(final String keyword) {
         return executeCountQuery(place, place.title.startsWith(keyword));
     }
 
-    private long executeCountQuery(EntityPathBase<?> entity, Predicate condition) {
+    private long executeCountQuery(final EntityPathBase<?> entity, final Predicate condition) {
         Long count = queryFactory
                 .select(entity.count())
                 .from(entity)

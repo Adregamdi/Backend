@@ -19,6 +19,7 @@ import java.util.Map;
 import java.util.Set;
 
 import static com.adregamdi.core.constant.Constant.LARGE_PAGE_SIZE;
+import static com.adregamdi.core.utils.PageUtil.generatePageAsc;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -34,15 +35,15 @@ public class SearchService {
         Map<SearchType, Long> totalCounts = new EnumMap<>(SearchType.class);
 
         if (types.contains(SearchType.TRAVELOGUE)) {
-            travelogues = searchRepository.searchTravelogues(keyword, page, pageSize);
+            travelogues = searchRepository.searchTravelogues(keyword, generatePageAsc(page, pageSize, "title"));
             totalCounts.put(SearchType.TRAVELOGUE, searchRepository.countTravelogues(keyword));
         }
         if (types.contains(SearchType.SHORTS)) {
-            shorts = searchRepository.searchShorts(keyword, page, pageSize);
+            shorts = searchRepository.searchShorts(keyword, generatePageAsc(page, pageSize, "title"));
             totalCounts.put(SearchType.SHORTS, searchRepository.countShorts(keyword));
         }
         if (types.contains(SearchType.PLACE)) {
-            places = searchRepository.searchPlaces(keyword, page, pageSize);
+            places = searchRepository.searchPlaces(keyword, generatePageAsc(page, pageSize, "title"));
             totalCounts.put(SearchType.PLACE, searchRepository.countPlaces(keyword));
         }
 

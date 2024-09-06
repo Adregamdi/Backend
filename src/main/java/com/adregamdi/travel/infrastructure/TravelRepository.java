@@ -4,9 +4,10 @@ import com.adregamdi.travel.domain.Travel;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;
+import java.util.UUID;
 
 public interface TravelRepository extends JpaRepository<Travel, Long>, TravelCustomRepository {
-    Optional<Travel> findByTravelIdAndMemberId(Long travelId, String memberId);
+    Optional<Travel> findByTravelIdAndMemberId(Long travelId, UUID memberId);
 
-    Travel findByMemberIdAndTitle(String memberId, String title);
+    Travel findByMemberIdAndTitle(UUID memberId, String title);
 }

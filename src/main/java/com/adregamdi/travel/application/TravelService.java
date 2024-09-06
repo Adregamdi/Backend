@@ -17,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -58,7 +59,7 @@ public class TravelService {
     public GetMyTravelResponse getMyTravel(final Long travelId, final String memberId) {
         List<List<TravelPlace>> travelPlaces = new ArrayList<>();
 
-        Travel travel = travelRepository.findByTravelIdAndMemberId(travelId, memberId)
+        Travel travel = travelRepository.findByTravelIdAndMemberId(travelId, UUID.fromString(memberId))
                 .orElseThrow(() -> new TravelNotFoundException(memberId));
 
         List<TravelDay> travelDays = travelDayRepository.findByTravelId(travelId)

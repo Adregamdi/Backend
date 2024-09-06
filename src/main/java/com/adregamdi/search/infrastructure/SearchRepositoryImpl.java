@@ -49,7 +49,7 @@ public class SearchRepositoryImpl implements SearchRepository {
                         member.handle,
                         Expressions.constant(new ArrayList<String>())))
                 .from(travelogue)
-                .leftJoin(member).on(travelogue.memberId.eq(String.valueOf(member.memberId)))
+                .leftJoin(member).on(travelogue.memberId.eq(member.memberId))
                 .where(travelogue.title.startsWith(keyword))
                 .orderBy(makeOrderSpecifiers(travelogue, pageRequest))
                 .offset(pageRequest.getOffset())

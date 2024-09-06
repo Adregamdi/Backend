@@ -28,6 +28,7 @@ public class TravelCustomRepositoryImpl implements TravelCustomRepository {
     ) {
         List<TravelDTO> results = jpaQueryFactory
                 .select(Projections.constructor(TravelDTO.class,
+                        travel.travelId,
                         travel.startDate,
                         travel.endDate,
                         travel.title))

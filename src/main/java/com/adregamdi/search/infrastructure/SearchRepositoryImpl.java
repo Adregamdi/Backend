@@ -154,6 +154,7 @@ public class SearchRepositoryImpl implements SearchRepository {
                         dto.placeId(),
                         dto.title(),
                         dto.contentsLabel(),
+                        dto.regionLabel(),
                         imageUrlMap.getOrDefault(dto.placeId(), Collections.emptyList()),
                         dto.photoReviewCount(),
                         dto.shortsCount()

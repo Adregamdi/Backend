@@ -117,6 +117,7 @@ public class SearchRepositoryImpl implements SearchRepository {
                         place.placeId,
                         place.title,
                         place.contentsLabel,
+                        place.regionLabel,
                         Expressions.constant(new ArrayList<String>()),
                         JPAExpressions.select(placeReview.count()).from(placeReview)
                                 .where(placeReview.placeId.eq(place.placeId)),

@@ -9,7 +9,9 @@ public record GetSelectionBasedRecommendationPlacesResponse(
         String title,
         String contentsLabel,
         String regionLabel,
-        int reviewCount
+        String address,
+        int reviewCount,
+        String thumbnailPath
 ) {
     public static GetSelectionBasedRecommendationPlacesResponse of(Place place, int reviewCount) {
         return GetSelectionBasedRecommendationPlacesResponse.builder()
@@ -17,7 +19,9 @@ public record GetSelectionBasedRecommendationPlacesResponse(
                 .title(place.getTitle())
                 .contentsLabel(place.getContentsLabel())
                 .regionLabel(place.getRegionLabel())
+                .address(place.getRoadAddress())
                 .reviewCount(reviewCount)
+                .thumbnailPath(place.getThumbnailPath())
                 .build();
     }
 }

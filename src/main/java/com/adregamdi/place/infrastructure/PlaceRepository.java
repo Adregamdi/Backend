@@ -7,4 +7,6 @@ import java.util.Optional;
 
 public interface PlaceRepository extends JpaRepository<Place, Long>, PlaceCustomRepository {
     Optional<Place> findByTitleAndContentsLabel(String title, String ContentsLabel);
+
+    Optional<Place> findByTitle(String title);
 }

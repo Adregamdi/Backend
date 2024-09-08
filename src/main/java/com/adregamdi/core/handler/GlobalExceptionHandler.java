@@ -8,6 +8,7 @@ import com.adregamdi.shorts.exception.ShortsException;
 import com.adregamdi.travel.exception.TravelException;
 import com.adregamdi.travelogue.exception.TravelogueException;
 import com.amazonaws.services.s3.model.AmazonS3Exception;
+import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,7 +21,9 @@ import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import ws.schild.jave.EncoderException;
 
 import java.time.DateTimeException;
+import java.util.List;
 import java.util.Random;
+import java.util.stream.Collectors;
 
 @Slf4j
 @RestControllerAdvice
@@ -62,6 +65,22 @@ public class GlobalExceptionHandler {
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST.value())
                 .body(new ErrorResponse(HttpStatus.BAD_REQUEST.value(), DEFAULT_FORMAT_ERROR_MESSAGE));
+    }
+    
+    @ExceptionHandler(ConstraintViolationException.class)
+    public ResponseEntity<ErrorResponse> handleConstraintViolationException(final ConstraintViolationException exception) {
+        log.warn("Constraint violation: {}", exception.getMessage());
+
+        List<String> errors = exception.getConstraintViolations()
+                .stream()
+                .map(violation -> violation.getPropertyPath() + ": " + violation.getMessage())
+                .collect(Collectors.toList());
+
+        String errorMessage = String.join(", ", errors);
+
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST.value())
+                .body(new ErrorResponse(HttpStatus.BAD_REQUEST.value(), "입력값이 유효하지 않습니다: " + errorMessage));
     }
 
     // 존재x 예외

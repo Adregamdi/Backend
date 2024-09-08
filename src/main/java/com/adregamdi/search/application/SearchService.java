@@ -12,6 +12,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.SliceImpl;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collections;
 import java.util.EnumMap;
@@ -27,6 +28,7 @@ import static com.adregamdi.core.utils.PageUtil.generatePageAsc;
 public class SearchService {
     private final SearchRepository searchRepository;
 
+    @Transactional(readOnly = true)
     public SearchResponse search(String keyword, int page, Set<SearchType> types) {
         int pageSize = LARGE_PAGE_SIZE;
         Slice<TravelogueSearchDTO> travelogues = emptySlice(page, pageSize);

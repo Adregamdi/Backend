@@ -8,4 +8,6 @@ import java.util.Optional;
 
 public interface PlaceReviewRepository extends JpaRepository<PlaceReview, Long> {
     Optional<List<PlaceReview>> findByTravelogueId(final Long travelogueId);
+
+    int countByPlaceId(Long placeId);
 }

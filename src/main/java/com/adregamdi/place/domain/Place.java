@@ -29,11 +29,11 @@ public class Place extends BaseTime {
     private String address; // 주소
     @Column
     private String roadAddress; // 도로명 주소
-    @Column
+    @Column(length = 500)
     private String tag; // 태그
-    @Column
+    @Column(length = 1000)
     private String introduction; // 소개
-    @Column
+    @Column(length = 1000)
     private String information; // 정보
     @Column
     private Double latitude; // 위도

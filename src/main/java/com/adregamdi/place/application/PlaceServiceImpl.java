@@ -258,6 +258,7 @@ public class PlaceServiceImpl implements PlaceService {
     }
 
     @Override
+    @Transactional
     public List<GetSortingPlacesResponse> getSortingPlaces(final List<GetSortingPlacesRequest> requests) {
         return requests.stream()
                 .map(this::sortPlacesForDay)

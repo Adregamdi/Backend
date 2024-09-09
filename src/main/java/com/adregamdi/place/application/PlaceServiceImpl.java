@@ -2,15 +2,19 @@ package com.adregamdi.place.application;
 
 import com.adregamdi.place.domain.Place;
 import com.adregamdi.place.dto.KorServicePlace;
+import com.adregamdi.place.dto.PlaceCoordinate;
 import com.adregamdi.place.dto.PlaceDTO;
 import com.adregamdi.place.dto.request.CreatePlaceRequest;
+import com.adregamdi.place.dto.request.GetSortingPlacesRequest;
 import com.adregamdi.place.dto.response.GetPlaceResponse;
 import com.adregamdi.place.dto.response.GetPlacesResponse;
 import com.adregamdi.place.dto.response.GetSelectionBasedRecommendationPlacesResponse;
+import com.adregamdi.place.dto.response.GetSortingPlacesResponse;
 import com.adregamdi.place.exception.PlaceException.PlaceExistException;
 import com.adregamdi.place.exception.PlaceException.PlaceNotFoundException;
 import com.adregamdi.place.infrastructure.PlaceRepository;
 import com.adregamdi.place.infrastructure.PlaceReviewRepository;
+import com.adregamdi.place.vo.PlaceNode;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -29,6 +33,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -109,6 +114,36 @@ public class PlaceServiceImpl implements PlaceService {
     }
 
     @Override
+    @Transactional(readOnly = true)
+    public GetPlaceResponse get(final Long placeId) {
+        Place place = placeRepository.findById(placeId)
+                .orElseThrow(() -> new PlaceNotFoundException(placeId));
+        return GetPlaceResponse.from(place);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public GetPlacesResponse getPlaces(final int pageNo, final String title) {
+        Slice<Place> places = placeRepository.findByTitleStartingWith(title, generatePageAsc(pageNo, NORMAL_PAGE_SIZE, "title"))
+                .orElseThrow(() -> new PlaceNotFoundException(title));
+        return GetPlacesResponse.from(
+                places.getContent()
+                        .stream()
+                        .map(PlaceDTO::from)
+                        .toList()
+        );
+    }
+
+    private String formatTags(final String tag) {
+        String[] tags = tag.split(",");
+        StringBuilder formattedTags = new StringBuilder();
+        for (String t : tags) {
+            formattedTags.append("#").append(t).append(" ");
+        }
+        return formattedTags.toString().trim();
+    }
+
+    @Override
     @Transactional
     public List<GetSelectionBasedRecommendationPlacesResponse> getSelectionBasedRecommendationPlaces(final Double latitude, final Double longitude) throws URISyntaxException {
         String url = buildApiUrl(latitude, longitude);
@@ -156,7 +191,7 @@ public class PlaceServiceImpl implements PlaceService {
         return URLEncoder.encode(value, StandardCharsets.UTF_8);
     }
 
-    private String buildApiUrl(final Double latitude, final Double longitude) {
+    private String buildApiUrl(Double latitude, Double longitude) {
         UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl("https://apis.data.go.kr/B551011/KorService1/locationBasedList1");
 
         builder.queryParam("numOfRows", encode("5"))
@@ -172,7 +207,7 @@ public class PlaceServiceImpl implements PlaceService {
         return encodedUrl + "&serviceKey=" + korServiceKey;
     }
 
-    private GetSelectionBasedRecommendationPlacesResponse processPlace(KorServicePlace item) {
+    private GetSelectionBasedRecommendationPlacesResponse processPlace(final KorServicePlace item) {
         Place place = placeRepository.findByTitle(item.title())
                 .orElseGet(() -> saveNewPlace(item));
 
@@ -182,7 +217,7 @@ public class PlaceServiceImpl implements PlaceService {
     }
 
 
-    private Place saveNewPlace(KorServicePlace item) {
+    private Place saveNewPlace(final KorServicePlace item) {
         Place newPlace = Place.builder()
                 .title(item.title())
                 .contentsLabel(getContentsLabel(item.contenttypeid()))
@@ -223,32 +258,92 @@ public class PlaceServiceImpl implements PlaceService {
     }
 
     @Override
-    @Transactional(readOnly = true)
-    public GetPlaceResponse get(final Long placeId) {
-        Place place = placeRepository.findById(placeId)
-                .orElseThrow(() -> new PlaceNotFoundException(placeId));
-        return GetPlaceResponse.from(place);
+    public List<GetSortingPlacesResponse> getSortingPlaces(final List<GetSortingPlacesRequest> requests) {
+        return requests.stream()
+                .map(this::sortPlacesForDay)
+                .collect(Collectors.toList());
     }
 
-    @Override
-    @Transactional(readOnly = true)
-    public GetPlacesResponse getPlaces(final int pageNo, final String title) {
-        Slice<Place> places = placeRepository.findByTitleStartingWith(title, generatePageAsc(pageNo, NORMAL_PAGE_SIZE, "title"))
-                .orElseThrow(() -> new PlaceNotFoundException(title));
-        return GetPlacesResponse.from(
-                places.getContent()
-                        .stream()
-                        .map(PlaceDTO::from)
-                        .toList()
-        );
+    private GetSortingPlacesResponse sortPlacesForDay(final GetSortingPlacesRequest request) {
+        List<PlaceNode> allNodes = new ArrayList<>();
+        allNodes.add(new PlaceNode(null, 0, request.startLatitude(), request.startLongitude()));
+        allNodes.addAll(request.placeCoordinates().stream()
+                .map(p -> new PlaceNode(p.placeId(), p.order(), p.latitude(), p.longitude()))
+                .toList());
+        allNodes.add(new PlaceNode(null, allNodes.size() - 1, request.endLatitude(), request.endLongitude()));
+
+        List<PlaceNode> optimalPath = findOptimalPath(allNodes);
+
+        List<PlaceCoordinate> sortedCoordinates = optimalPath.stream()
+                .skip(1) // 시작점 제외
+                .limit(optimalPath.size() - 2) // 끝점 제외
+                .map(node -> new PlaceCoordinate(node.getPlaceId(), optimalPath.indexOf(node), node.getLatitude(), node.getLongitude()))
+                .collect(Collectors.toList());
+
+        return new GetSortingPlacesResponse(request.day(), sortedCoordinates);
     }
 
-    private String formatTags(final String tag) {
-        String[] tags = tag.split(",");
-        StringBuilder formattedTags = new StringBuilder();
-        for (String t : tags) {
-            formattedTags.append("#").append(t).append(" ");
+    private List<PlaceNode> findOptimalPath(List<PlaceNode> nodes) {
+        List<PlaceNode> bestPath = null;
+        double shortestDistance = Double.MAX_VALUE;
+        List<PlaceNode> middleNodes = nodes.subList(1, nodes.size() - 1);
+
+        for (List<PlaceNode> permutation : generatePermutations(middleNodes)) {
+            List<PlaceNode> currentPath = new ArrayList<>();
+            currentPath.add(nodes.get(0)); // 시작점
+            currentPath.addAll(permutation);
+            currentPath.add(nodes.get(nodes.size() - 1)); // 끝점
+
+            double distance = calculateTotalDistance(currentPath);
+            if (distance < shortestDistance) {
+                shortestDistance = distance;
+                bestPath = new ArrayList<>(currentPath);
+            }
         }
-        return formattedTags.toString().trim();
+
+        return bestPath;
+    }
+
+    private List<List<PlaceNode>> generatePermutations(List<PlaceNode> nodes) {
+        if (nodes.size() <= 1) {
+            return Collections.singletonList(nodes);
+        }
+
+        List<List<PlaceNode>> result = new ArrayList<>();
+        for (int i = 0; i < nodes.size(); i++) {
+            PlaceNode current = nodes.get(i);
+            List<PlaceNode> remaining = new ArrayList<>(nodes);
+            remaining.remove(i);
+
+            for (List<PlaceNode> permutation : generatePermutations(remaining)) {
+                List<PlaceNode> newPermutation = new ArrayList<>();
+                newPermutation.add(current);
+                newPermutation.addAll(permutation);
+                result.add(newPermutation);
+            }
+        }
+
+        return result;
+    }
+
+    private double calculateTotalDistance(List<PlaceNode> path) {
+        double totalDistance = 0;
+        for (int i = 0; i < path.size() - 1; i++) {
+            totalDistance += calculateDistance(path.get(i).getLatitude(), path.get(i).getLongitude(),
+                    path.get(i + 1).getLatitude(), path.get(i + 1).getLongitude());
+        }
+        return totalDistance;
+    }
+
+    private double calculateDistance(double lat1, double lon1, double lat2, double lon2) {
+        // Haversine 공식
+        double R = 6371; // 지구의 반지름 (km)
+        double dLat = Math.toRadians(lat2 - lat1);
+        double dLon = Math.toRadians(lon2 - lon1);
+        double a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                Math.cos(Math.toRadians(lat1)) * Math.cos(Math.toRadians(lat2)) *
+                        Math.sin(dLon / 2) * Math.sin(dLon / 2);
+        double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        return R * c;
     }
 }

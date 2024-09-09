@@ -2,9 +2,11 @@ package com.adregamdi.place.application;
 
 
 import com.adregamdi.place.dto.request.CreatePlaceRequest;
+import com.adregamdi.place.dto.request.GetSortingPlacesRequest;
 import com.adregamdi.place.dto.response.GetPlaceResponse;
 import com.adregamdi.place.dto.response.GetPlacesResponse;
 import com.adregamdi.place.dto.response.GetSelectionBasedRecommendationPlacesResponse;
+import com.adregamdi.place.dto.response.GetSortingPlacesResponse;
 
 import java.net.URISyntaxException;
 import java.util.List;
@@ -34,4 +36,9 @@ public interface PlaceService {
      * [선택 기반 추천 장소 리스트 조회]
      * */
     List<GetSelectionBasedRecommendationPlacesResponse> getSelectionBasedRecommendationPlaces(final Double latitude, final Double longitude) throws URISyntaxException;
+
+    /*
+     * [최적 거리 정렬]
+     * */
+    List<GetSortingPlacesResponse> getSortingPlaces(List<GetSortingPlacesRequest> requests);
 }

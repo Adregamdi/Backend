@@ -5,9 +5,12 @@ import com.adregamdi.core.annotation.MemberAuthorize;
 import com.adregamdi.core.handler.ApiResponse;
 import com.adregamdi.place.application.PlaceService;
 import com.adregamdi.place.dto.request.CreatePlaceRequest;
+import com.adregamdi.place.dto.request.GetSortingPlacesRequest;
 import com.adregamdi.place.dto.response.GetPlaceResponse;
 import com.adregamdi.place.dto.response.GetPlacesResponse;
 import com.adregamdi.place.dto.response.GetSelectionBasedRecommendationPlacesResponse;
+import com.adregamdi.place.dto.response.GetSortingPlacesResponse;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotNull;
@@ -50,20 +53,6 @@ public class PlaceController {
                 );
     }
 
-    @GetMapping("/selection-based")
-    @MemberAuthorize
-    public ResponseEntity<ApiResponse<List<GetSelectionBasedRecommendationPlacesResponse>>> getSelectionBasedRecommendationPlaces(
-            @RequestParam("latitude") @NotNull @DecimalMin("-90.0") @DecimalMax("90.0") final Double latitude,
-            @RequestParam("longitude") @NotNull @DecimalMin("-180.0") @DecimalMax("180.0") final Double longitude
-    ) throws URISyntaxException {
-        return ResponseEntity.ok()
-                .body(ApiResponse.<List<GetSelectionBasedRecommendationPlacesResponse>>builder()
-                        .statusCode(HttpStatus.OK.value())
-                        .data(placeService.getSelectionBasedRecommendationPlaces(latitude, longitude))
-                        .build()
-                );
-    }
-
     @GetMapping
     @MemberAuthorize
     public ResponseEntity<ApiResponse<GetPlaceResponse>> get(@RequestParam("place_id") @PositiveOrZero final Long placeId) {
@@ -85,6 +74,31 @@ public class PlaceController {
                 .body(ApiResponse.<GetPlacesResponse>builder()
                         .statusCode(HttpStatus.OK.value())
                         .data(placeService.getPlaces(pageNo, name))
+                        .build()
+                );
+    }
+
+    @GetMapping("/selection-based")
+    @MemberAuthorize
+    public ResponseEntity<ApiResponse<List<GetSelectionBasedRecommendationPlacesResponse>>> getSelectionBasedRecommendationPlaces(
+            @RequestParam("latitude") @NotNull @DecimalMin("-90.0") @DecimalMax("90.0") final Double latitude,
+            @RequestParam("longitude") @NotNull @DecimalMin("-180.0") @DecimalMax("180.0") final Double longitude
+    ) throws URISyntaxException {
+        return ResponseEntity.ok()
+                .body(ApiResponse.<List<GetSelectionBasedRecommendationPlacesResponse>>builder()
+                        .statusCode(HttpStatus.OK.value())
+                        .data(placeService.getSelectionBasedRecommendationPlaces(latitude, longitude))
+                        .build()
+                );
+    }
+
+    @GetMapping("/sort")
+    @MemberAuthorize
+    public ResponseEntity<ApiResponse<List<GetSortingPlacesResponse>>> getSortingPlaces(@RequestBody @Valid final List<GetSortingPlacesRequest> requests) {
+        return ResponseEntity.ok()
+                .body(ApiResponse.<List<GetSortingPlacesResponse>>builder()
+                        .statusCode(HttpStatus.OK.value())
+                        .data(placeService.getSortingPlaces(requests))
                         .build()
                 );
     }

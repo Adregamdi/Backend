@@ -51,6 +51,7 @@ public class Member extends BaseTime {
 
     public Member(SignUpDTO signUpDTO) {
         this.name = signUpDTO.getName();
+        this.profile = "https://adregamdi-dev2.s3.ap-northeast-2.amazonaws.com/profile/default_profile_image.png";
         this.handle = signUpDTO.getHandle();
         this.email = signUpDTO.getEmail();
         this.age = signUpDTO.getAge();

@@ -1,6 +1,7 @@
 package com.adregamdi.place.application;
 
 import com.adregamdi.place.domain.Place;
+import com.adregamdi.place.domain.vo.PlaceNode;
 import com.adregamdi.place.dto.KorServicePlace;
 import com.adregamdi.place.dto.PlaceCoordinate;
 import com.adregamdi.place.dto.PlaceDTO;
@@ -14,7 +15,6 @@ import com.adregamdi.place.exception.PlaceException.PlaceExistException;
 import com.adregamdi.place.exception.PlaceException.PlaceNotFoundException;
 import com.adregamdi.place.infrastructure.PlaceRepository;
 import com.adregamdi.place.infrastructure.PlaceReviewRepository;
-import com.adregamdi.place.vo.PlaceNode;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;

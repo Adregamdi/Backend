@@ -1,4 +1,4 @@
-package com.adregamdi.place.vo;
+package com.adregamdi.place.domain.vo;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

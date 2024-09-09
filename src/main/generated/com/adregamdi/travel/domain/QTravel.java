@@ -32,7 +32,7 @@ public class QTravel extends EntityPathBase<Travel> {
 
     public final StringPath title = createString("title");
 
-    public final NumberPath<Long> travelId = createNumber("travelogueId", Long.class);
+    public final NumberPath<Long> travelId = createNumber("travelId", Long.class);
 
     //inherited
     public final DateTimePath<java.time.LocalDateTime> updatedAt = _super.updatedAt;

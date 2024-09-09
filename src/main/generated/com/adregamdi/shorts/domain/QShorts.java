@@ -30,7 +30,7 @@ public class QShorts extends EntityPathBase<Shorts> {
 
     public final ComparablePath<java.util.UUID> memberId = createComparable("memberId", java.util.UUID.class);
 
-    public final NumberPath<Long> placeNo = createNumber("placeId", Long.class);
+    public final NumberPath<Long> placeId = createNumber("placeId", Long.class);
 
     public final StringPath shortsVideoUrl = createString("shortsVideoUrl");
 
@@ -38,7 +38,7 @@ public class QShorts extends EntityPathBase<Shorts> {
 
     public final StringPath title = createString("title");
 
-    public final NumberPath<Long> travelReviewNo = createNumber("travelogueId", Long.class);
+    public final NumberPath<Long> travelogueId = createNumber("travelogueId", Long.class);
 
     //inherited
     public final DateTimePath<java.time.LocalDateTime> updatedAt = _super.updatedAt;

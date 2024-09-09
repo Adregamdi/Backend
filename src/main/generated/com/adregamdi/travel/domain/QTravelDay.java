@@ -27,7 +27,7 @@ public class QTravelDay extends EntityPathBase<TravelDay> {
 
     public final NumberPath<Long> travelDayId = createNumber("travelDayId", Long.class);
 
-    public final NumberPath<Long> travelId = createNumber("travelogueId", Long.class);
+    public final NumberPath<Long> travelId = createNumber("travelId", Long.class);
 
     public QTravelDay(String variable) {
         super(TravelDay.class, forVariable(variable));

@@ -68,7 +68,7 @@ public class ShortsController {
                         .build());
     }
 
-    @GetMapping("/user-list")
+    @GetMapping("/my-list")
     @MemberAuthorize
     public ResponseEntity<ApiResponse<GetShortsResponse>> getUserShorts(
             @AuthenticationPrincipal final UserDetails userDetails,

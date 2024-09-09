@@ -11,6 +11,7 @@ import com.adregamdi.shorts.dto.response.SaveVideoResponse;
 import com.adregamdi.shorts.dto.response.UploadVideoDTO;
 import com.amazonaws.services.s3.AmazonS3Client;
 import com.amazonaws.services.s3.model.GetObjectRequest;
+import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.S3Object;
 import com.amazonaws.services.s3.model.S3ObjectInputStream;
 import jakarta.validation.Valid;
@@ -91,53 +92,44 @@ public class ShortsController {
         log.info("{} 스트리밍을 시작합니다.", s3Key);
 
         StreamingResponseBody responseBody = outputStream -> {
-            int maxRetries = 3;
-            int retryCount = 0;
-            boolean success = false;
+            long chunkSize = 1024 * 1024; // 1MB 청크 단위
+            long startByte = 0;
 
-            while (retryCount < maxRetries && !success) {
-                try (S3Object s3Object = amazonS3Client.getObject(new GetObjectRequest(bucketName, s3Key));
-                     S3ObjectInputStream inputStream = s3Object.getObjectContent()) {
+            S3Object s3Object = amazonS3Client.getObject(new GetObjectRequest(bucketName, s3Key));
+            ObjectMetadata metadata = s3Object.getObjectMetadata();
+            long contentLength = metadata.getContentLength();
+            log.info("총 파일 크기: {} bytes", contentLength);
 
-                    long contentLength = s3Object.getObjectMetadata().getContentLength();
-                    byte[] buffer = new byte[4096]; // 더 작은 4KB 청크 사용
+            // Ranged GET 요청을 사용하여 청크 단위로 파일을 읽어옴
+            while (startByte < contentLength) {
+                long endByte = Math.min(startByte + chunkSize - 1, contentLength - 1);
+                GetObjectRequest rangeRequest = new GetObjectRequest(bucketName, s3Key)
+                        .withRange(startByte, endByte);
+
+                try (S3Object rangeObject = amazonS3Client.getObject(rangeRequest);
+                     S3ObjectInputStream inputStream = rangeObject.getObjectContent()) {
+
+                    byte[] buffer = new byte[4096];
                     int bytesRead;
-                    long totalBytesRead = 0;
 
                     while ((bytesRead = inputStream.read(buffer)) != -1) {
                         outputStream.write(buffer, 0, bytesRead);
                         outputStream.flush();
-                        totalBytesRead += bytesRead;
 
-                        if (totalBytesRead % (contentLength / 10) < 4096) {
-                            log.info("{}% 스트리밍 완료", (totalBytesRead * 100) / contentLength);
-                        }
-
-                        // 주기적으로 클라이언트 연결 확인
                         if (Thread.currentThread().isInterrupted()) {
                             log.warn("클라이언트 연결이 종료되었습니다.");
+                            inputStream.abort();
                             return;
                         }
                     }
-                    success = true;
-                } catch (IOException e) {
-                    log.error("스트리밍 중 오류 발생 (시도 {}/{})", retryCount + 1, maxRetries, e);
-                    retryCount++;
-                    if (retryCount < maxRetries) {
-                        log.info("{}초 후 재시도합니다.", retryCount * 5);
-                        try {
-                            Thread.sleep(retryCount * 5000);
-                        } catch (InterruptedException ie) {
-                            Thread.currentThread().interrupt();
-                            log.warn("재시도 대기 중 인터럽트 발생");
-                            return;
-                        }
-                    }
-                }
-            }
 
-            if (!success) {
-                log.error("최대 재시도 횟수 초과. 스트리밍 실패.");
+                    startByte = endByte + 1;
+                    log.info("스트리밍 진행: {}%", (startByte * 100) / contentLength);
+
+                } catch (IOException e) {
+                    log.error("청크 스트리밍 중 오류 발생", e);
+                    throw e; // 상위 try-catch로 예외를 전파
+                }
             }
         };
 

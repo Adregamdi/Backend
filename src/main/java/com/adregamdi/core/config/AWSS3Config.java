@@ -1,5 +1,6 @@
 package com.adregamdi.core.config;
 
+import com.amazonaws.ClientConfiguration;
 import com.amazonaws.auth.AWSStaticCredentialsProvider;
 import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.services.s3.AmazonS3Client;
@@ -28,10 +29,16 @@ public class AWSS3Config {
 
     @Bean
     public AmazonS3Client amazonS3Client() {
+
+        ClientConfiguration clientConfiguration = new ClientConfiguration()
+                .withConnectionTimeout(300000)
+                .withSocketTimeout(300000);
+
         return (AmazonS3Client) AmazonS3ClientBuilder
                 .standard()
                 .withRegion(region)
                 .withCredentials(new AWSStaticCredentialsProvider(awsCredentialsProvider()))
+                .withClientConfiguration(clientConfiguration)
                 .build();
     }
 }

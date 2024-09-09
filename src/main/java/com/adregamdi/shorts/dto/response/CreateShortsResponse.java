@@ -14,16 +14,16 @@ public class CreateShortsResponse {
     private Long shortsId;
     private String title;
     private UUID memberId;
-    private Long placeNo;
-    private Long travelReviewNo;
+    private Long placeId;
+    private Long travelogueId;
 
     public static CreateShortsResponse of(Shorts shorts) {
         return new CreateShortsResponse(
                 shorts.getId(),
                 shorts.getTitle(),
                 shorts.getMemberId(),
-                shorts.getPlaceNo(),
-                shorts.getTravelReviewNo()
+                shorts.getPlaceId(),
+                shorts.getTravelogueId()
         );
     }
 

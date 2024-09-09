@@ -100,7 +100,7 @@ public class ShortsServiceImpl implements ShortsService {
         Shorts savedShorts = shortsRepository.findById(shortsId)
                 .orElseThrow(() -> {
                     log.error("요청한 ID 값의 엔티티가 존재하지 않습니다. shortsId: {}", shortsId);
-                    throw new ShortsException.ShortsNotFoundException(shortsId);
+                    return new ShortsException.ShortsNotFoundException(shortsId);
                 });
 
         if (!shortsValidService.isWriter(memberId, savedShorts.getMemberId())) {

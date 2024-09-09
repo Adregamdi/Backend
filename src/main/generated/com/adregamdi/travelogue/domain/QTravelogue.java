@@ -30,7 +30,7 @@ public class QTravelogue extends EntityPathBase<Travelogue> {
 
     public final StringPath title = createString("title");
 
-    public final NumberPath<Long> travelId = createNumber("travelId", Long.class);
+    public final NumberPath<Long> travelId = createNumber("travelogueId", Long.class);
 
     public final NumberPath<Long> travelogueId = createNumber("travelogueId", Long.class);
 

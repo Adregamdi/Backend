@@ -10,9 +10,9 @@ public record CreateShortsRequest(
         @NotBlank(message = "제목을 작성해주세요.")
         String title,
         @Positive
-        Long placeNo,
+        Long placeId,
         @Positive
-        Long travelReviewNo,
+        Long travelogueId,
         @NotEmpty(message = "동영상을 업로드해주세요.")
         String videoUrl,
         @NotEmpty(message = "썸네일이 포함되지 않았습니다.")

@@ -30,13 +30,13 @@ public class Shorts extends BaseTime {
     @Comment(value = "작성자")
     private UUID memberId;
 
-    @Column(name = "place_no")
-    @Comment(value = "장소")
-    private Long placeNo;
+    @Column(name = "place_id")
+    @Comment(value = "장소 id")
+    private Long placeId;
 
-    @Column(name = "travel_review_no")
-    @Comment(value = "여행기 번호")
-    private Long travelReviewNo;
+    @Column(name = "travelogue_id")
+    @Comment(value = "여행기 id")
+    private Long travelogueId;
 
     @Column(name = "shorts_video_url", nullable = false, unique = true)
     @Comment(value = "동영상 업로드 url")
@@ -59,12 +59,12 @@ public class Shorts extends BaseTime {
     private int viewCount;
 
     @Builder
-    public Shorts(Long id, String title, UUID memberId, Long placeNo, Long travelReviewNo, String shortsVideoUrl, String thumbnailUrl) {
+    public Shorts(Long id, String title, UUID memberId, Long placeId, Long travelogueId, String shortsVideoUrl, String thumbnailUrl) {
         this.id = id;
         this.title = title;
         this.memberId = memberId;
-        this.placeNo = placeNo;
-        this.travelReviewNo = travelReviewNo;
+        this.placeId = placeId;
+        this.travelogueId = travelogueId;
         this.shortsVideoUrl = shortsVideoUrl;
         this.thumbnailUrl = thumbnailUrl;
         this.assignedStatus = false;
@@ -74,16 +74,16 @@ public class Shorts extends BaseTime {
 
     public void update(UpdateShortsRequest request) {
         this.title = request.title();
-        this.placeNo = request.placeNo();
-        this.travelReviewNo = request.travelReviewNo();
+        this.placeId = request.placeId();
+        this.travelogueId = request.travelogueId();
         this.shortsVideoUrl = request.videoUrl();
         this.thumbnailUrl = request.thumbnailUrl();
     }
 
     public void assign(CreateShortsRequest request) {
         this.title = request.title();
-        this.placeNo = request.placeNo();
-        this.travelReviewNo = request.travelReviewNo();
+        this.placeId = request.placeId();
+        this.travelogueId = request.travelogueId();
         this.assignedStatus = true;
     }
 

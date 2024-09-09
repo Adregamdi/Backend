@@ -17,8 +17,10 @@ public class ShortsDTO {
     private Long shortsId;
     private String title;
     private UUID memberId;
-    private Long placeNo;
-    private Long travelReviewNo;
+    private Long placeId;
+    private String placeTitle;
+    private Long travelogueId;
+    private String travelogueTitle;
     private String shortsVideoUrl;
     private String thumbnailUrl;
     private int viewCount;
@@ -28,8 +30,10 @@ public class ShortsDTO {
                 shorts.getId(),
                 shorts.getTitle(),
                 shorts.getMemberId(),
-                shorts.getPlaceNo(),
-                shorts.getTravelReviewNo(),
+                shorts.getPlaceId(),
+                null,
+                shorts.getTravelogueId(),
+                null,
                 shorts.getShortsVideoUrl(),
                 shorts.getThumbnailUrl(),
                 shorts.getViewCount()

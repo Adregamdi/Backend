@@ -57,10 +57,8 @@ public class ShortsController {
             @RequestParam(value = "size", defaultValue = "10") @Positive final int size
     ) {
 
-        log.info("shortsId: {}", lastShortsId);
-        log.info("size: {}", size);
-//        String memberId = userDetails.getUsername();
-        GetShortsResponse response = shortsService.getShorts(MEMBER_ID_FOR_TEST, lastShortsId, size);
+
+        GetShortsResponse response = shortsService.getShorts(userDetails.getUsername(), lastShortsId, size);
 
         return ResponseEntity
                 .ok()

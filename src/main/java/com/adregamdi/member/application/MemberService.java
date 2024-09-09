@@ -5,6 +5,7 @@ import com.adregamdi.member.domain.Role;
 import com.adregamdi.member.domain.SocialType;
 import com.adregamdi.member.dto.request.UpdateMyMemberRequest;
 import com.adregamdi.member.dto.response.GetMyMemberResponse;
+import com.adregamdi.member.exception.MemberException.HandleExistException;
 import com.adregamdi.member.exception.MemberException.MemberNotFoundException;
 import com.adregamdi.member.infrastructure.MemberRepository;
 import lombok.RequiredArgsConstructor;
@@ -46,6 +47,10 @@ public class MemberService {
     public void update(final UpdateMyMemberRequest request, final String username) {
         Member member = memberRepository.findById(UUID.fromString(username))
                 .orElseThrow(() -> new MemberNotFoundException(username));
+
+        if (member.getHandle().equals(request.handle())) {
+            throw new HandleExistException(request.handle());
+        }
 
         member.updateMember(request);
     }

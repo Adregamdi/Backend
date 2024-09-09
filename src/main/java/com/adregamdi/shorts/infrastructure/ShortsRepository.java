@@ -15,10 +15,11 @@ import java.util.UUID;
 public interface ShortsRepository extends JpaRepository<Shorts, Long>, ShortsCustomRepository {
     Optional<Slice<Shorts>> findAllByMemberId(Pageable pageable, UUID memberId);
 
-    @Query("SELECT s " +
-            " FROM Shorts s " +
-            "WHERE s.assignedStatus IS true " +
-            "  AND s.createdAt < :date")
+    @Query("""
+            SELECT s
+             FROM Shorts s
+            WHERE s.assignedStatus IS false
+              AND s.createdAt < :date""")
     List<Shorts> findUnassignedBeforeDate(@Param("date") LocalDateTime date);
 
 }

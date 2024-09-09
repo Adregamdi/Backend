@@ -23,4 +23,15 @@ public class MemberException extends RuntimeException {
             super("모든 회원이 존재하지 않습니다.");
         }
     }
+
+    public static class HandleExistException extends MemberException {
+
+        public HandleExistException() {
+            super("이미 존재하는 핸들입니다.");
+        }
+
+        public HandleExistException(final Object data) {
+            super(String.format("이미 존재하는 핸들입니다. - request info => %s", data));
+        }
+    }
 }

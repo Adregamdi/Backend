@@ -66,7 +66,7 @@ public class GlobalExceptionHandler {
                 .status(HttpStatus.BAD_REQUEST.value())
                 .body(new ErrorResponse(HttpStatus.BAD_REQUEST.value(), DEFAULT_FORMAT_ERROR_MESSAGE));
     }
-    
+
     @ExceptionHandler(ConstraintViolationException.class)
     public ResponseEntity<ErrorResponse> handleConstraintViolationException(final ConstraintViolationException exception) {
         log.warn("Constraint violation: {}", exception.getMessage());
@@ -109,6 +109,7 @@ public class GlobalExceptionHandler {
 
     // 존재 예외
     @ExceptionHandler(value = {
+            MemberException.HandleExistException.class,
             PlaceException.PlaceExistException.class,
             ShortsException.ShortsExistException.class
     })

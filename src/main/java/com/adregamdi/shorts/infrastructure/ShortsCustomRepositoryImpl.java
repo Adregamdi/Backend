@@ -12,6 +12,8 @@ import java.util.List;
 import java.util.UUID;
 
 import static com.adregamdi.shorts.domain.QShorts.shorts;
+import static com.adregamdi.place.domain.QPlace.place;
+import static com.adregamdi.travelogue.domain.QTravelogue.travelogue;
 
 @Slf4j
 @Repository
@@ -28,12 +30,16 @@ public class ShortsCustomRepositoryImpl implements ShortsCustomRepository {
                         shorts.id,
                         shorts.title,
                         shorts.memberId,
-                        shorts.placeNo,
-                        shorts.travelReviewNo,
+                        shorts.placeId,
+                        place.title,
+                        shorts.travelogueId,
+                        travelogue.title,
                         shorts.shortsVideoUrl,
                         shorts.thumbnailUrl,
                         shorts.viewCount))
                 .from(shorts)
+                .leftJoin(place).on(shorts.placeId.eq(place.placeId))
+                .leftJoin(travelogue).on(shorts.travelogueId.eq(travelogue.travelogueId))
                 .where(
                         shorts.id.gt(lastId),
                         shorts.assignedStatus.eq(true))
@@ -57,12 +63,16 @@ public class ShortsCustomRepositoryImpl implements ShortsCustomRepository {
                         shorts.id,
                         shorts.title,
                         shorts.memberId,
-                        shorts.placeNo,
-                        shorts.travelReviewNo,
+                        shorts.placeId,
+                        place.title,
+                        shorts.travelogueId,
+                        travelogue.title,
                         shorts.shortsVideoUrl,
                         shorts.thumbnailUrl,
                         shorts.viewCount))
                 .from(shorts)
+                .leftJoin(place).on(shorts.placeId.eq(place.placeId))
+                .leftJoin(travelogue).on(shorts.travelogueId.eq(travelogue.travelogueId))
                 .where(
                         shorts.id.gt(lastShortsId),
                         shorts.memberId.eq(memberId))

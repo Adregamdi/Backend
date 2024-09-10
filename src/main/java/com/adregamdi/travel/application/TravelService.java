@@ -23,9 +23,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
-import java.util.*;
-import java.util.function.Function;
-import java.util.stream.Collectors;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
 
 import static com.adregamdi.core.constant.Constant.LARGE_PAGE_SIZE;
 import static com.adregamdi.core.utils.PageUtil.generatePageDesc;
@@ -43,79 +43,68 @@ public class TravelService {
      * */
     @Transactional
     public CreateMyTravelResponse createMyTravel(final CreateMyTravelRequest request, final String memberId) {
+        int totalDays = (int) (ChronoUnit.DAYS.between(request.startDate(), request.endDate()) + 1);
+
         if (request.startDate().isAfter(request.endDate())) {
             throw new InvalidTravelDateException(request);
         }
 
         Travel travel;
         if (request.travelId() == null) {
-            travel = new Travel(request, memberId);
+            travel = travelRepository.save(new Travel(request, memberId));
         } else {
             travel = travelRepository.findById(request.travelId())
                     .orElseThrow(() -> new TravelNotFoundException(request.travelId()));
             travel.update(request);
         }
 
-        travel = travelRepository.save(travel);
-
         List<TravelDay> existingDays = travelDayRepository.findAllByTravelId(travel.getTravelId());
-        Map<Integer, TravelDay> existingDayMap = existingDays.stream()
-                .collect(Collectors.toMap(TravelDay::getDay, Function.identity()));
-
-        Set<Integer> processedDays = new HashSet<>();
-        long totalDays = ChronoUnit.DAYS.between(request.startDate(), request.endDate()) + 1;
-
-        for (CreateMyTravelRequest.DayInfo dayInfo : request.dayList()) {
-            TravelDay travelDay = existingDayMap.get(dayInfo.day());
-            if (travelDay == null) {
-                travelDay = new TravelDay(travel.getTravelId(), dayInfo.date(), dayInfo.day(), dayInfo.memo());
-            } else {
-                travelDay.update(dayInfo.date(), dayInfo.day(), dayInfo.memo());
-            }
-            travelDay = travelDayRepository.save(travelDay);
-            existingDayMap.put(dayInfo.day(), travelDay);
-            processedDays.add(dayInfo.day());
-        }
-
-        for (int day = 1; day <= totalDays; day++) {
-            if (!processedDays.contains(day)) {
+        // 첫 등록 시
+        if (request.travelId() == null && existingDays.isEmpty()) {
+            existingDays = new ArrayList<>();
+            for (int day = 1; day <= totalDays; day++) {
                 LocalDate date = request.startDate().plusDays(day - 1);
-                TravelDay emptyDay = new TravelDay(travel.getTravelId(), date, day, "");
-                emptyDay = travelDayRepository.save(emptyDay);
-                existingDayMap.put(day, emptyDay);
+                existingDays.add(new TravelDay(travel.getTravelId(), date, day, ""));
             }
+            travelDayRepository.saveAll(existingDays);
+            return CreateMyTravelResponse.from(travel.getTravelId());
         }
 
-        for (CreateMyTravelRequest.DayInfo dayInfo : request.dayList()) {
-            TravelDay travelDay = existingDayMap.get(dayInfo.day());
-            List<TravelPlace> existingPlaces = travelPlaceRepository.findAllByTravelDayId(travelDay.getTravelDayId());
-            Map<Integer, TravelPlace> existingPlaceMap = existingPlaces.stream()
-                    .collect(Collectors.toMap(TravelPlace::getPlaceOrder, Function.identity()));
+        // 기존 데이터 수정 시
+        // 하루도 설정하지 않으면
+        if (request.dayList().isEmpty()) {
+            for (int day = 1; day <= totalDays; day++) {
+                LocalDate date = request.startDate().plusDays(day - 1);
+                existingDays.get(day - 1).update(date, day, "");
+                travelPlaceRepository.deleteAllByTravelDayId(existingDays.get(day - 1).getTravelDayId());
+            }
+            return CreateMyTravelResponse.from(travel.getTravelId());
+        }
+        // 하루 이상 설정하면
+        for (int i = 0; i < request.dayList().size(); i++) {
+            existingDays.get(i).update(request.dayList().get(i).date(), request.dayList().get(i).day(), request.dayList().get(i).memo());
 
-            List<TravelPlace> placesToSave = new ArrayList<>();
-            for (CreateMyTravelRequest.PlaceInfo placeInfo : dayInfo.placeList()) {
-                TravelPlace travelPlace = existingPlaceMap.get(placeInfo.placeOrder());
-                if (travelPlace == null) {
-                    travelPlace = new TravelPlace(travelDay.getTravelDayId(), placeInfo.placeId(), placeInfo.placeOrder());
-                } else {
-                    travelPlace.update(placeInfo.placeId(), placeInfo.placeOrder());
+            List<TravelPlace> travelPlaces = travelPlaceRepository.findAllByTravelDayId(existingDays.get(i).getTravelDayId());
+
+            if (request.dayList().get(i).placeList().isEmpty() && !travelPlaces.isEmpty()) {
+                travelPlaceRepository.deleteAllByTravelDayId(existingDays.get(i).getTravelDayId());
+            } else if (!request.dayList().get(i).placeList().isEmpty() && travelPlaces.isEmpty()) {
+                travelPlaces = new ArrayList<>();
+                for (int j = 0; j < request.dayList().get(i).placeList().size(); j++) {
+                    travelPlaces.add(new TravelPlace(existingDays.get(i).getTravelDayId(), request.dayList().get(i).placeList().get(j).placeId(), request.dayList().get(i).placeList().get(j).placeOrder()));
                 }
-                placesToSave.add(travelPlace);
+                travelPlaceRepository.saveAll(travelPlaces);
+            } else if (!request.dayList().get(i).placeList().isEmpty() && !travelPlaces.isEmpty()) {
+                for (int j = 0; j < travelPlaces.size(); j++) {
+                    travelPlaces.get(j).update(request.dayList().get(i).placeList().get(j).placeId(), request.dayList().get(i).placeList().get(j).placeOrder());
+                }
             }
-            travelPlaceRepository.saveAll(placesToSave);
-
-            existingPlaces.stream()
-                    .filter(place -> dayInfo.placeList().stream().noneMatch(pi -> Objects.equals(pi.placeOrder(), place.getPlaceOrder())))
-                    .forEach(travelPlaceRepository::delete);
         }
+        for (int day = request.dayList().size() + 1; day <= totalDays; day++) {
+            LocalDate date = request.startDate().plusDays(day - 1);
+            existingDays.get(day - 1).update(date, day, "");
 
-        List<TravelDay> daysToDelete = existingDays.stream()
-                .filter(day -> !processedDays.contains(day.getDay()) && day.getDay() <= totalDays)
-                .toList();
-
-        for (TravelDay dayToDelete : daysToDelete) {
-            travelPlaceRepository.deleteAllByTravelDayId(dayToDelete.getTravelDayId());
-            travelDayRepository.delete(dayToDelete);
+            travelPlaceRepository.deleteAllByTravelDayId(existingDays.get(day - 1).getTravelDayId());
         }
 
         return CreateMyTravelResponse.from(travel.getTravelId());

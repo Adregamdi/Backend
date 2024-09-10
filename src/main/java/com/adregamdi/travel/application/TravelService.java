@@ -39,7 +39,7 @@ public class TravelService {
     private final TravelPlaceRepository travelPlaceRepository;
 
     /*
-     * 일정 등록
+     * 일정 등록/수정
      * */
     @Transactional
     public CreateMyTravelResponse createMyTravel(final CreateMyTravelRequest request, final String memberId) {

@@ -122,7 +122,7 @@ public class SearchRepositoryImpl implements SearchRepository {
                         JPAExpressions.select(placeReview.count()).from(placeReview)
                                 .where(placeReview.placeId.eq(place.placeId)),
                         JPAExpressions.select(shorts.count()).from(shorts)
-                                .where(shorts.placeNo.eq(place.placeId))))
+                                .where(shorts.placeId.eq(place.placeId))))
                 .from(place)
                 .where(place.title.startsWith(keyword))
                 .offset(pageable.getOffset())

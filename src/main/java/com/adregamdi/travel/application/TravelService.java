@@ -72,7 +72,7 @@ public class TravelService {
 
         // 기존 데이터 수정 시
         // 하루도 설정하지 않으면
-        if (request.dayList().isEmpty()) {
+        if (request.dayList() == null || request.dayList().isEmpty()) {
             for (int day = 1; day <= totalDays; day++) {
                 LocalDate date = request.startDate().plusDays(day - 1);
                 existingDays.get(day - 1).update(date, day, "");
@@ -86,15 +86,15 @@ public class TravelService {
 
             List<TravelPlace> travelPlaces = travelPlaceRepository.findAllByTravelDayId(existingDays.get(i).getTravelDayId());
 
-            if (request.dayList().get(i).placeList().isEmpty() && !travelPlaces.isEmpty()) {
+            if (request.dayList().get(i).placeList() == null || request.dayList().get(i).placeList().isEmpty() && !travelPlaces.isEmpty()) {
                 travelPlaceRepository.deleteAllByTravelDayId(existingDays.get(i).getTravelDayId());
-            } else if (!request.dayList().get(i).placeList().isEmpty() && travelPlaces.isEmpty()) {
+            } else if (request.dayList().get(i).placeList() != null || !request.dayList().get(i).placeList().isEmpty() && travelPlaces.isEmpty()) {
                 travelPlaces = new ArrayList<>();
                 for (int j = 0; j < request.dayList().get(i).placeList().size(); j++) {
                     travelPlaces.add(new TravelPlace(existingDays.get(i).getTravelDayId(), request.dayList().get(i).placeList().get(j).placeId(), request.dayList().get(i).placeList().get(j).placeOrder()));
                 }
                 travelPlaceRepository.saveAll(travelPlaces);
-            } else if (!request.dayList().get(i).placeList().isEmpty() && !travelPlaces.isEmpty()) {
+            } else if (request.dayList().get(i).placeList() != null || !request.dayList().get(i).placeList().isEmpty() && !travelPlaces.isEmpty()) {
                 for (int j = 0; j < travelPlaces.size(); j++) {
                     travelPlaces.get(j).update(request.dayList().get(i).placeList().get(j).placeId(), request.dayList().get(i).placeList().get(j).placeOrder());
                 }

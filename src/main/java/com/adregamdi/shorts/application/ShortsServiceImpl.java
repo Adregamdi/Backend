@@ -59,7 +59,7 @@ public class ShortsServiceImpl implements ShortsService {
                         .build()
         );
 
-        log.info("비디오가 저장되었습니다.: shorts ID: {}, videoUrl: {}, thumbnail: {}", savedShorts.getId(), savedShorts.getShortsVideoUrl(), savedShorts.getThumbnailUrl());
+        log.info("비디오가 저장되었습니다.: shorts ID: {}, videoUrl: {}, thumbnail: {}", savedShorts.getShortsId(), savedShorts.getShortsVideoUrl(), savedShorts.getThumbnailUrl());
         return SaveVideoResponse.ofEntity(savedShorts);
     }
 
@@ -70,7 +70,7 @@ public class ShortsServiceImpl implements ShortsService {
                 .orElseThrow(() -> new ShortsException.ShortsNotFoundException(request.shortsId()));
         unAssignedShorts.assign(request);
 
-        log.info("Shorts saved and assigned. shortsId: {}", unAssignedShorts.getId());
+        log.info("Shorts saved and assigned. shortsId: {}", unAssignedShorts.getShortsId());
     }
 
 
@@ -91,7 +91,7 @@ public class ShortsServiceImpl implements ShortsService {
 
         savedShorts.update(request);
 
-        log.info("Shorts updated. shortsId: {}", savedShorts.getId());
+        log.info("Shorts updated. shortsId: {}", savedShorts.getShortsId());
     }
 
     @Override

@@ -20,7 +20,7 @@ public class Shorts extends BaseTime {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Long shortsId;
 
     @Column(name = "title")
     @Comment(value = "쇼츠 제목")
@@ -59,8 +59,8 @@ public class Shorts extends BaseTime {
     private int viewCount;
 
     @Builder
-    public Shorts(Long id, String title, UUID memberId, Long placeId, Long travelogueId, String shortsVideoUrl, String thumbnailUrl) {
-        this.id = id;
+    public Shorts(Long shortsId, String title, UUID memberId, Long placeId, Long travelogueId, String shortsVideoUrl, String thumbnailUrl) {
+        this.shortsId = shortsId;
         this.title = title;
         this.memberId = memberId;
         this.placeId = placeId;

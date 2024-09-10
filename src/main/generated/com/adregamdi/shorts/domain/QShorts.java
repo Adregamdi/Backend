@@ -26,11 +26,11 @@ public class QShorts extends EntityPathBase<Shorts> {
     //inherited
     public final DateTimePath<java.time.LocalDateTime> createdAt = _super.createdAt;
 
-    public final NumberPath<Long> id = createNumber("id", Long.class);
-
     public final ComparablePath<java.util.UUID> memberId = createComparable("memberId", java.util.UUID.class);
 
     public final NumberPath<Long> placeId = createNumber("placeId", Long.class);
+
+    public final NumberPath<Long> shortsId = createNumber("shortsId", Long.class);
 
     public final StringPath shortsVideoUrl = createString("shortsVideoUrl");
 

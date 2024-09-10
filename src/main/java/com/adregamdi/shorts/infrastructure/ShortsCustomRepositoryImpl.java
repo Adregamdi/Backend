@@ -27,7 +27,7 @@ public class ShortsCustomRepositoryImpl implements ShortsCustomRepository {
 
         List<ShortsDTO> content = jpaQueryFactory
                 .select(Projections.constructor(ShortsDTO.class,
-                        shorts.id,
+                        shorts.shortsId,
                         shorts.title,
                         shorts.memberId,
                         shorts.placeId,
@@ -41,9 +41,9 @@ public class ShortsCustomRepositoryImpl implements ShortsCustomRepository {
                 .leftJoin(place).on(shorts.placeId.eq(place.placeId))
                 .leftJoin(travelogue).on(shorts.travelogueId.eq(travelogue.travelogueId))
                 .where(
-                        shorts.id.gt(lastId),
+                        shorts.shortsId.gt(lastId),
                         shorts.assignedStatus.eq(true))
-                .orderBy(shorts.id.asc())
+                .orderBy(shorts.shortsId.asc())
                 .limit(size + 1)
                 .fetch();
 
@@ -60,7 +60,7 @@ public class ShortsCustomRepositoryImpl implements ShortsCustomRepository {
 
         List<ShortsDTO> content = jpaQueryFactory
                 .select(Projections.constructor(ShortsDTO.class,
-                        shorts.id,
+                        shorts.shortsId,
                         shorts.title,
                         shorts.memberId,
                         shorts.placeId,
@@ -74,7 +74,7 @@ public class ShortsCustomRepositoryImpl implements ShortsCustomRepository {
                 .leftJoin(place).on(shorts.placeId.eq(place.placeId))
                 .leftJoin(travelogue).on(shorts.travelogueId.eq(travelogue.travelogueId))
                 .where(
-                        shorts.id.gt(lastShortsId),
+                        shorts.shortsId.gt(lastShortsId),
                         shorts.memberId.eq(memberId))
                 .orderBy(shorts.createdAt.desc())
                 .limit(size + 1)

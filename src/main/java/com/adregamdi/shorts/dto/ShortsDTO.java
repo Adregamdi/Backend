@@ -27,7 +27,7 @@ public class ShortsDTO {
 
     public static ShortsDTO of(Shorts shorts) {
         return new ShortsDTO(
-                shorts.getId(),
+                shorts.getShortsId(),
                 shorts.getTitle(),
                 shorts.getMemberId(),
                 shorts.getPlaceId(),

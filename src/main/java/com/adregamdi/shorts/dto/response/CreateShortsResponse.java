@@ -19,7 +19,7 @@ public class CreateShortsResponse {
 
     public static CreateShortsResponse of(Shorts shorts) {
         return new CreateShortsResponse(
-                shorts.getId(),
+                shorts.getShortsId(),
                 shorts.getTitle(),
                 shorts.getMemberId(),
                 shorts.getPlaceId(),

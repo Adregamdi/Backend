@@ -12,7 +12,7 @@ public record SaveVideoResponse (
         return new SaveVideoResponse(
                 shorts.getShortsVideoUrl(),
                 shorts.getThumbnailUrl(),
-                shorts.getId()
+                shorts.getShortsId()
         );
     }
 }

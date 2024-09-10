@@ -95,7 +95,7 @@ public class SearchRepositoryImpl implements SearchRepository {
     public Slice<ShortsSearchDTO> searchShorts(final String keyword, final Pageable pageable) {
         List<ShortsSearchDTO> results = queryFactory
                 .select(Projections.constructor(ShortsSearchDTO.class,
-                        shorts.id,
+                        shorts.shortsId,
                         shorts.title,
                         shorts.thumbnailUrl))
                 .from(shorts)

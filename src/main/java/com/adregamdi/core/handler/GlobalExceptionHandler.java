@@ -1,5 +1,6 @@
 package com.adregamdi.core.handler;
 
+import com.adregamdi.like.exception.LikesException;
 import com.adregamdi.media.exception.ImageException;
 import com.adregamdi.member.exception.MemberException;
 import com.adregamdi.notification.exception.NotificationException;
@@ -97,7 +98,8 @@ public class GlobalExceptionHandler {
             TravelogueException.TravelogueImageNotFoundException.class,
             TravelogueException.TravelogueDayNotFoundException.class,
             ShortsException.ShortsNotFoundException.class,
-            ImageException.ImageNotFoundException.class
+            ImageException.ImageNotFoundException.class,
+            LikesException.LikesNotFoundException.class
     })
     public ResponseEntity<ErrorResponse> handleNotFoundException(final RuntimeException exception) {
         log.warn(exception.getMessage());

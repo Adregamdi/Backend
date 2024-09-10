@@ -21,7 +21,7 @@ import static com.adregamdi.place.domain.QPlace.place;
 @Slf4j
 @Repository
 @RequiredArgsConstructor
-public class LikeCustomRepositoryImpl implements LikesCustomRepository{
+public class LikesCustomRepositoryImpl implements LikesCustomRepository{
 
     private final JPAQueryFactory jpaQueryFactory;
 

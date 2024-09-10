@@ -4,6 +4,7 @@ import com.adregamdi.core.annotation.MemberAuthorize;
 import com.adregamdi.core.handler.ApiResponse;
 import com.adregamdi.travel.application.TravelService;
 import com.adregamdi.travel.dto.request.CreateMyTravelRequest;
+import com.adregamdi.travel.dto.response.CreateMyTravelResponse;
 import com.adregamdi.travel.dto.response.GetMyTravelResponse;
 import com.adregamdi.travel.dto.response.GetMyTravelsResponse;
 import jakarta.validation.Valid;
@@ -25,14 +26,14 @@ public class TravelController {
 
     @PostMapping
     @MemberAuthorize
-    public ResponseEntity<ApiResponse<Void>> createMyTravel(
+    public ResponseEntity<ApiResponse<CreateMyTravelResponse>> createMyTravel(
             @RequestBody @Valid final CreateMyTravelRequest request,
             @AuthenticationPrincipal final UserDetails userDetails
     ) {
-        travelService.createMyTravel(request, userDetails.getUsername());
         return ResponseEntity.ok()
-                .body(ApiResponse.<Void>builder()
+                .body(ApiResponse.<CreateMyTravelResponse>builder()
                         .statusCode(HttpStatus.CREATED.value())
+                        .data(travelService.createMyTravel(request, userDetails.getUsername()))
                         .build()
                 );
     }

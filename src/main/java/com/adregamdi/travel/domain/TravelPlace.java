@@ -26,4 +26,9 @@ public class TravelPlace extends BaseTime {
         this.placeId = placeId;
         this.placeOrder = placeOrder;
     }
+
+    public void update(Long placeId, Integer placeOrder) {
+        this.placeId = placeId;
+        this.placeOrder = placeOrder;
+    }
 }

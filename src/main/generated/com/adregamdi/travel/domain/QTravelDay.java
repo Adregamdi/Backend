@@ -19,6 +19,11 @@ public class QTravelDay extends EntityPathBase<TravelDay> {
 
     public static final QTravelDay travelDay = new QTravelDay("travelDay");
 
+    public final com.adregamdi.core.entity.QBaseTime _super = new com.adregamdi.core.entity.QBaseTime(this);
+
+    //inherited
+    public final DateTimePath<java.time.LocalDateTime> createdAt = _super.createdAt;
+
     public final DatePath<java.time.LocalDate> date = createDate("date", java.time.LocalDate.class);
 
     public final NumberPath<Integer> day = createNumber("day", Integer.class);
@@ -28,6 +33,9 @@ public class QTravelDay extends EntityPathBase<TravelDay> {
     public final NumberPath<Long> travelDayId = createNumber("travelDayId", Long.class);
 
     public final NumberPath<Long> travelId = createNumber("travelId", Long.class);
+
+    //inherited
+    public final DateTimePath<java.time.LocalDateTime> updatedAt = _super.updatedAt;
 
     public QTravelDay(String variable) {
         super(TravelDay.class, forVariable(variable));

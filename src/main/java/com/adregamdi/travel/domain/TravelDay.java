@@ -1,5 +1,6 @@
 package com.adregamdi.travel.domain;
 
+import com.adregamdi.core.entity.BaseTime;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -11,7 +12,7 @@ import java.time.LocalDate;
 @Builder
 @Entity
 @Table(name = "tbl_travel_day")
-public class TravelDay {
+public class TravelDay extends BaseTime {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long travelDayId;
@@ -29,5 +30,17 @@ public class TravelDay {
         this.date = date;
         this.day = day;
         this.memo = memo;
+    }
+
+    public TravelDay update(LocalDate date, Integer day, String memo) {
+        this.date = date;
+        this.day = day;
+        this.memo = memo;
+
+        return TravelDay.builder()
+                .date(date)
+                .day(day)
+                .memo(memo)
+                .build();
     }
 }

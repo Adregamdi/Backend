@@ -1,11 +1,13 @@
 package com.adregamdi.place.application;
 
 import com.adregamdi.place.domain.Place;
+import com.adregamdi.place.domain.PlaceReview;
 import com.adregamdi.place.domain.vo.PlaceNode;
 import com.adregamdi.place.dto.KorServicePlace;
 import com.adregamdi.place.dto.PlaceCoordinate;
 import com.adregamdi.place.dto.PlaceDTO;
 import com.adregamdi.place.dto.request.CreatePlaceRequest;
+import com.adregamdi.place.dto.request.CreatePlaceReviewRequest;
 import com.adregamdi.place.dto.request.GetSortingPlacesRequest;
 import com.adregamdi.place.dto.response.GetPlaceResponse;
 import com.adregamdi.place.dto.response.GetPlacesResponse;
@@ -111,6 +113,12 @@ public class PlaceServiceImpl implements PlaceService {
                     })
                     .block();
         });
+    }
+
+    @Override
+    @Transactional
+    public void createReview(final CreatePlaceReviewRequest request, final String memberId) {
+        placeReviewRepository.save(new PlaceReview(memberId, request.placeId(), request.content()));
     }
 
     @Override

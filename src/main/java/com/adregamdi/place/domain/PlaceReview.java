@@ -33,4 +33,10 @@ public class PlaceReview extends BaseTime {
         this.travelogueId = travelogueId;
         this.content = content;
     }
+
+    public PlaceReview(String memberId, Long placeId, String content) {
+        this.memberId = UUID.fromString(memberId);
+        this.placeId = placeId;
+        this.content = content;
+    }
 }

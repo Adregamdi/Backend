@@ -32,15 +32,9 @@ public class TravelDay extends BaseTime {
         this.memo = memo;
     }
 
-    public TravelDay update(LocalDate date, Integer day, String memo) {
+    public void update(LocalDate date, Integer day, String memo) {
         this.date = date;
         this.day = day;
         this.memo = memo;
-
-        return TravelDay.builder()
-                .date(date)
-                .day(day)
-                .memo(memo)
-                .build();
     }
 }

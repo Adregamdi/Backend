@@ -123,7 +123,7 @@ public class PlaceServiceImpl implements PlaceService {
     public void createReview(final CreatePlaceReviewRequest request, final String memberId) {
         PlaceReview placeReview = placeReviewRepository.save(new PlaceReview(memberId, request.placeId(), request.content()));
 
-        List<CreatePlaceReviewRequest.PlaceReviewImageInfo> imageList = (request.placeReviewImageInfos() != null) ? request.placeReviewImageInfos() : Collections.emptyList();
+        List<CreatePlaceReviewRequest.PlaceReviewImageInfo> imageList = (request.placeReviewImageList() != null) ? request.placeReviewImageList() : Collections.emptyList();
 
         List<PlaceReviewImage> placeReviewImages = imageList.stream()
                 .map(img -> new PlaceReviewImage(placeReview.getPlaceReviewId(), img.url()))

@@ -2,6 +2,7 @@ package com.adregamdi.place.application;
 
 import com.adregamdi.place.domain.Place;
 import com.adregamdi.place.domain.PlaceReview;
+import com.adregamdi.place.domain.PlaceReviewImage;
 import com.adregamdi.place.domain.vo.PlaceNode;
 import com.adregamdi.place.dto.KorServicePlace;
 import com.adregamdi.place.dto.PlaceCoordinate;
@@ -16,6 +17,7 @@ import com.adregamdi.place.dto.response.GetSortingPlacesResponse;
 import com.adregamdi.place.exception.PlaceException.PlaceExistException;
 import com.adregamdi.place.exception.PlaceException.PlaceNotFoundException;
 import com.adregamdi.place.infrastructure.PlaceRepository;
+import com.adregamdi.place.infrastructure.PlaceReviewImageRepository;
 import com.adregamdi.place.infrastructure.PlaceReviewRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -52,6 +54,7 @@ public class PlaceServiceImpl implements PlaceService {
     private final WebClient webClient;
     private final PlaceRepository placeRepository;
     private final PlaceReviewRepository placeReviewRepository;
+    private final PlaceReviewImageRepository placeReviewImageRepository;
     private final ObjectMapper objectMapper;
 
     @Value("${api-key.visit-jeju}")
@@ -118,7 +121,14 @@ public class PlaceServiceImpl implements PlaceService {
     @Override
     @Transactional
     public void createReview(final CreatePlaceReviewRequest request, final String memberId) {
-        placeReviewRepository.save(new PlaceReview(memberId, request.placeId(), request.content()));
+        PlaceReview placeReview = placeReviewRepository.save(new PlaceReview(memberId, request.placeId(), request.content()));
+
+        List<CreatePlaceReviewRequest.PlaceReviewImageInfo> imageList = (request.placeReviewImageInfos() != null) ? request.placeReviewImageInfos() : Collections.emptyList();
+
+        List<PlaceReviewImage> placeReviewImages = imageList.stream()
+                .map(img -> new PlaceReviewImage(placeReview.getPlaceReviewId(), img.url()))
+                .collect(Collectors.toList());
+        placeReviewImageRepository.saveAll(placeReviewImages);
     }
 
     @Override

@@ -19,6 +19,8 @@ import jakarta.validation.constraints.PositiveOrZero;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -56,8 +58,11 @@ public class PlaceController {
 
     @PostMapping("/review")
     @AdminAuthorize
-    public ResponseEntity<ApiResponse<Void>> createReview(@RequestBody @Valid final CreatePlaceReviewRequest request) {
-        placeService.createReview(request);
+    public ResponseEntity<ApiResponse<Void>> createReview(
+            @RequestBody @Valid final CreatePlaceReviewRequest request,
+            @AuthenticationPrincipal final UserDetails userDetails
+    ) {
+        placeService.createReview(request, userDetails.getUsername());
         return ResponseEntity.ok()
                 .body(ApiResponse.<Void>builder()
                         .statusCode(HttpStatus.CREATED.value())

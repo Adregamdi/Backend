@@ -13,7 +13,7 @@ public record CreatePlaceReviewRequest(
         @NotNull
         @NotEmpty
         String content,
-        List<PlaceReviewImageInfo> placeReviewImageInfos
+        List<PlaceReviewImageInfo> placeReviewImageList
 ) {
     public record PlaceReviewImageInfo(
             String url

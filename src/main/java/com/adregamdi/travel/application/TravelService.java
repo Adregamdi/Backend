@@ -159,7 +159,7 @@ public class TravelService {
      * */
     @Transactional(readOnly = true)
     public GetMyTravelsResponse getMyTravels(final int page, final String memberId) {
-        Slice<TravelDTO> travels = travelRepository.findByMemberId(memberId, generatePageDesc(page, LARGE_PAGE_SIZE, "travelogueId"));
+        Slice<TravelDTO> travels = travelRepository.findByMemberId(memberId, generatePageDesc(page, LARGE_PAGE_SIZE, "travelId"));
 
         return GetMyTravelsResponse.of(
                 LARGE_PAGE_SIZE,

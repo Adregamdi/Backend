@@ -27,7 +27,7 @@ public class QLike extends EntityPathBase<Like> {
 
     public final NumberPath<Long> likeId = createNumber("likeId", Long.class);
 
-    public final StringPath memberId = createString("memberId");
+    public final ComparablePath<java.util.UUID> memberId = createComparable("memberId", java.util.UUID.class);
 
     public QLike(String variable) {
         super(Like.class, forVariable(variable));

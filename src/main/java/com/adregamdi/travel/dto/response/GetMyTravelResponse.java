@@ -2,7 +2,7 @@ package com.adregamdi.travel.dto.response;
 
 import com.adregamdi.travel.domain.Travel;
 import com.adregamdi.travel.domain.TravelDay;
-import com.adregamdi.travel.domain.TravelPlace;
+import com.adregamdi.travel.dto.TravelPlaceDTO;
 import lombok.Builder;
 
 import java.time.LocalDate;
@@ -19,19 +19,24 @@ public record GetMyTravelResponse(
     public static GetMyTravelResponse of(
             final Travel travel,
             final List<TravelDay> travelDays,
-            final List<List<TravelPlace>> travelPlaces
+            final List<List<TravelPlaceDTO>> travelPlaces
     ) {
-        Map<Long, List<TravelPlace>> placesByDayId = travelPlaces.stream()
+        Map<Long, List<TravelPlaceDTO>> placesByDayId = travelPlaces.stream()
                 .flatMap(List::stream)
-                .collect(Collectors.groupingBy(TravelPlace::getTravelDayId));
+                .collect(Collectors.groupingBy(dto -> dto.travelPlace().getTravelDayId()));
 
         List<DayInfo> dayList = travelDays.stream()
                 .map(travelDay -> {
-                    List<PlaceInfo> places = placesByDayId.getOrDefault(travelDay.getTravelDayId(), Collections.emptyList())
+                    List<PlaceInfo> placeInfos = placesByDayId.getOrDefault(travelDay.getTravelDayId(), Collections.emptyList())
                             .stream()
                             .map(travelPlace -> PlaceInfo.builder()
-                                    .placeId(travelPlace.getPlaceId())
-                                    .placeOrder(travelPlace.getPlaceOrder())
+                                    .placeId(travelPlace.place().getPlaceId())
+                                    .title(travelPlace.place().getTitle())
+                                    .contentsLabel(travelPlace.place().getContentsLabel())
+                                    .regionLabel(travelPlace.place().getRegionLabel())
+                                    .latitude(travelPlace.place().getLatitude())
+                                    .longitude(travelPlace.place().getLongitude())
+                                    .placeOrder(travelPlace.travelPlace().getPlaceOrder())
                                     .build())
                             .sorted(Comparator.comparing(PlaceInfo::placeOrder))
                             .collect(Collectors.toList());
@@ -40,7 +45,7 @@ public record GetMyTravelResponse(
                             .date(travelDay.getDate())
                             .day(travelDay.getDay())
                             .memo(travelDay.getMemo())
-                            .placeList(places)
+                            .placeList(placeInfos)
                             .build();
                 })
                 .sorted(Comparator.comparing(DayInfo::day))
@@ -81,6 +86,11 @@ public record GetMyTravelResponse(
     @Builder
     public record PlaceInfo(
             Long placeId,
+            String title,
+            String contentsLabel,
+            String regionLabel,
+            Double latitude,
+            Double longitude,
             Integer placeOrder
     ) {
     }

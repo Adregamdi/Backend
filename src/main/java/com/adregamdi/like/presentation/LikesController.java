@@ -1,9 +1,11 @@
-package com.adregamdi.like.presentaion;
+package com.adregamdi.like.presentation;
 
+import com.adregamdi.core.annotation.MemberAuthorize;
 import com.adregamdi.core.handler.ApiResponse;
 import com.adregamdi.like.application.LikesService;
 import com.adregamdi.like.dto.request.CreateLikesRequest;
 import com.adregamdi.like.dto.request.GetLikesContentsRequest;
+import com.adregamdi.like.dto.response.CreateShortsLikeResponse;
 import com.adregamdi.like.dto.response.GetLikesContentsResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -23,6 +25,7 @@ public class LikesController {
     private final LikesService likesService;
 
     @GetMapping("/content-list")
+    @MemberAuthorize
     public ResponseEntity<ApiResponse<GetLikesContentsResponse<?>>> getLikesContents(
             @Valid @ModelAttribute GetLikesContentsRequest request
     ) {
@@ -37,17 +40,34 @@ public class LikesController {
     }
 
     @PostMapping()
+    @MemberAuthorize
     public ResponseEntity<ApiResponse<Void>> create(
             @AuthenticationPrincipal UserDetails userDetails,
-            @RequestBody CreateLikesRequest request
+            @Valid @RequestBody CreateLikesRequest request
     ) {
-        String memberId = userDetails.getUsername();
-        likesService.create(memberId, request);
+        likesService.create(userDetails.getUsername(), request);
         return ResponseEntity.ok()
-                .body(ApiResponse.<Void>builder().build());
+                .body(ApiResponse.<Void>builder()
+                        .statusCode(HttpStatus.OK.value())
+                        .build());
+    }
+
+    @PostMapping("/shorts/{shorts_id}")
+    @MemberAuthorize
+    public ResponseEntity<ApiResponse<CreateShortsLikeResponse>> create(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @PathVariable(value = "shorts_id") Long shorts_id
+    ) {
+
+        return ResponseEntity.ok()
+                .body(ApiResponse.<CreateShortsLikeResponse>builder()
+                        .statusCode(HttpStatus.OK.value())
+                        .data(likesService.createShortsLike(userDetails.getUsername(), shorts_id))
+                        .build());
     }
 
     @DeleteMapping("/{likeId}")
+    @MemberAuthorize
     public ResponseEntity<ApiResponse<Void>> delete(
             @AuthenticationPrincipal UserDetails userDetails,
             @PathVariable("likeId") Long likeId
@@ -55,6 +75,8 @@ public class LikesController {
         String memberId = userDetails.getUsername();
         likesService.delete(memberId, likeId);
         return ResponseEntity.ok()
-                .body(ApiResponse.<Void>builder().build());
+                .body(ApiResponse.<Void>builder()
+                        .statusCode(HttpStatus.OK.value())
+                        .build());
     }
 }

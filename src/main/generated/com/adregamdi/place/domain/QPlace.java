@@ -21,6 +21,8 @@ public class QPlace extends EntityPathBase<Place> {
 
     public final com.adregamdi.core.entity.QBaseTime _super = new com.adregamdi.core.entity.QBaseTime(this);
 
+    public final NumberPath<Integer> addCount = createNumber("addCount", Integer.class);
+
     public final StringPath address = createString("address");
 
     public final StringPath contentsLabel = createString("contentsLabel");

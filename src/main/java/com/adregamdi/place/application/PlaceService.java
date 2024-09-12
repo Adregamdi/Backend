@@ -4,10 +4,7 @@ package com.adregamdi.place.application;
 import com.adregamdi.place.dto.request.CreatePlaceRequest;
 import com.adregamdi.place.dto.request.CreatePlaceReviewRequest;
 import com.adregamdi.place.dto.request.GetSortingPlacesRequest;
-import com.adregamdi.place.dto.response.GetPlaceResponse;
-import com.adregamdi.place.dto.response.GetPlacesResponse;
-import com.adregamdi.place.dto.response.GetSelectionBasedRecommendationPlacesResponse;
-import com.adregamdi.place.dto.response.GetSortingPlacesResponse;
+import com.adregamdi.place.dto.response.*;
 
 import java.net.URISyntaxException;
 import java.util.List;
@@ -29,6 +26,11 @@ public interface PlaceService {
     void createReview(final CreatePlaceReviewRequest request, final String memberId);
 
     /*
+     * [장소 추가 카운트 증감]
+     * */
+    void addCount(final Long placeId, final boolean choice);
+
+    /*
      * [특정 장소 조회]
      * */
     GetPlaceResponse get(final Long placeId);
@@ -47,4 +49,9 @@ public interface PlaceService {
      * [최적 거리 정렬]
      * */
     List<GetSortingPlacesResponse> getSortingPlaces(final List<GetSortingPlacesRequest> requests);
+
+    /*
+     * [일정에 많이 추가된 장소 리스트 조회]
+     * */
+    GetPopularPlacesResponse getPopularPlaces(final Long lastId, final Integer lastAddCount);
 }

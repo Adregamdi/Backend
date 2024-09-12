@@ -116,11 +116,13 @@ public class PlaceController {
 
     @GetMapping("/popular")
     @MemberAuthorize
-    public ResponseEntity<ApiResponse<GetPopularPlacesResponse>> getPopularPlaces(@RequestParam(defaultValue = "", required = false) final Long lastId) {
+    public ResponseEntity<ApiResponse<GetPopularPlacesResponse>> getPopularPlaces(
+            @RequestParam(name = "last_id", required = false) final Long lastId,
+            @RequestParam(name = "last_add_count", required = false) final Integer lastAddCount) {
         return ResponseEntity.ok()
                 .body(ApiResponse.<GetPopularPlacesResponse>builder()
                         .statusCode(HttpStatus.OK.value())
-                        .data(placeService.getPopularPlaces(lastId))
+                        .data(placeService.getPopularPlaces(lastId, lastAddCount))
                         .build()
                 );
     }

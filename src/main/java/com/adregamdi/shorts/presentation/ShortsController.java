@@ -5,7 +5,9 @@ import com.adregamdi.core.handler.ApiResponse;
 import com.adregamdi.shorts.application.ShortsService;
 import com.adregamdi.shorts.application.VideoService;
 import com.adregamdi.shorts.dto.request.CreateShortsRequest;
+import com.adregamdi.shorts.dto.request.GetShortsByPlaceIdRequest;
 import com.adregamdi.shorts.dto.request.UpdateShortsRequest;
+import com.adregamdi.shorts.dto.response.GetShortsByPlaceIdResponse;
 import com.adregamdi.shorts.dto.response.GetShortsResponse;
 import com.adregamdi.shorts.dto.response.SaveVideoResponse;
 import com.adregamdi.shorts.dto.response.UploadVideoDTO;
@@ -25,6 +27,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
@@ -33,6 +36,7 @@ import ws.schild.jave.EncoderException;
 import java.io.IOException;
 
 @Slf4j
+@Validated
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/shorts")
@@ -40,9 +44,6 @@ public class ShortsController {
 
     private final ShortsService shortsService;
     private final VideoService videoService;
-
-    private static String MEMBER_ID_FOR_TEST = "8a00e980-971a-4e17-9189-93dc61cfad63";
-
 
     private final AmazonS3Client amazonS3Client;
 
@@ -84,7 +85,27 @@ public class ShortsController {
                         .build());
     }
 
+    @GetMapping("/place")
+    @MemberAuthorize
+    public ResponseEntity<ApiResponse<GetShortsByPlaceIdResponse>> getShortsByPlaceId(
+            @AuthenticationPrincipal final UserDetails userDetails,
+            @RequestParam("place_id") @Positive Long placeId,
+            @RequestParam(value = "shorts_id", required = false, defaultValue = "0") @PositiveOrZero Long lastShortsId,
+            @RequestParam(value = "size", defaultValue = "10") @Positive int size
+    ) {
+
+        GetShortsByPlaceIdRequest request = new GetShortsByPlaceIdRequest(placeId, lastShortsId, size);
+        GetShortsByPlaceIdResponse response = shortsService.getShortsByPlaceId(userDetails.getUsername(), request);
+
+        return ResponseEntity.ok()
+                .body(ApiResponse.<GetShortsByPlaceIdResponse>builder()
+                        .statusCode(HttpStatus.OK.value())
+                        .data(response)
+                        .build());
+    }
+
     @GetMapping("/stream/{shorts_id}")
+    @MemberAuthorize
     public ResponseEntity<StreamingResponseBody> streamShort(@PathVariable(value = "shorts_id") Long shortsId) {
         String s3Key = shortsService.getS3KeyByShortId(shortsId);
         log.info("{} 스트리밍을 시작합니다.", s3Key);
@@ -163,10 +184,8 @@ public class ShortsController {
             @AuthenticationPrincipal UserDetails userDetails,
             @Valid @RequestBody CreateShortsRequest request
     ) {
+        shortsService.saveShorts(userDetails.getUsername(), request);
 
-        log.info("shortsId : {}", request);
-//        shortsService.saveShorts(userDetails.getUsername(), request);
-        shortsService.saveShorts(MEMBER_ID_FOR_TEST, request);
         return ResponseEntity.ok()
                 .body(ApiResponse.<Void>builder()
                         .statusCode(HttpStatus.OK.value())
@@ -180,7 +199,7 @@ public class ShortsController {
             @Valid @RequestBody UpdateShortsRequest request
     ) {
 
-        shortsService.updateShorts(MEMBER_ID_FOR_TEST, request);
+        shortsService.updateShorts(userDetails.getUsername(), request);
 
         return ResponseEntity.ok()
                 .body(ApiResponse.<Void>builder()
@@ -194,9 +213,8 @@ public class ShortsController {
             @AuthenticationPrincipal UserDetails userDetails,
             @PathVariable(value = "shorts_id") Long shortsId
     ) {
-
-        log.info("shortsId: {}", shortsId);
         shortsService.deleteShorts(userDetails.getUsername(), shortsId);
+
         return ResponseEntity.ok()
                 .body(ApiResponse.<Void>builder()
                         .statusCode(HttpStatus.OK.value())

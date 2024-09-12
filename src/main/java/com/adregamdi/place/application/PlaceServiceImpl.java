@@ -68,7 +68,13 @@ public class PlaceServiceImpl implements PlaceService {
         if (placeRepository.findByTitleAndContentsLabel(request.title(), request.contentsLabel()).isPresent()) {
             throw new PlaceExistException(request);
         }
-        placeRepository.save(new Place(request));
+        placeRepository.save(new Place(
+                request.title(), request.contentsLabel(), request.region1Cd(),
+                request.region2Cd(), request.regionLabel(), request.address(),
+                request.roadAddress(), request.tag(), request.introduction(),
+                request.information(), request.latitude(), request.longitude(),
+                request.phoneNo(), request.imgPath(), request.thumbnailPath()
+        ));
     }
 
     @Override

@@ -57,7 +57,7 @@ public class PlaceController {
     }
 
     @PostMapping("/review")
-    @AdminAuthorize
+    @MemberAuthorize
     public ResponseEntity<ApiResponse<Void>> createReview(
             @RequestBody @Valid final CreatePlaceReviewRequest request,
             @AuthenticationPrincipal final UserDetails userDetails

@@ -5,6 +5,7 @@ import com.adregamdi.core.annotation.MemberAuthorize;
 import com.adregamdi.core.handler.ApiResponse;
 import com.adregamdi.place.application.PlaceService;
 import com.adregamdi.place.dto.request.CreatePlaceRequest;
+import com.adregamdi.place.dto.request.CreatePlaceReviewRequest;
 import com.adregamdi.place.dto.request.GetSortingPlacesRequest;
 import com.adregamdi.place.dto.response.GetPlaceResponse;
 import com.adregamdi.place.dto.response.GetPlacesResponse;
@@ -18,6 +19,8 @@ import jakarta.validation.constraints.PositiveOrZero;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -46,6 +49,20 @@ public class PlaceController {
     @AdminAuthorize
     public ResponseEntity<ApiResponse<Void>> createByAPI() {
         placeService.createByAPI();
+        return ResponseEntity.ok()
+                .body(ApiResponse.<Void>builder()
+                        .statusCode(HttpStatus.CREATED.value())
+                        .build()
+                );
+    }
+
+    @PostMapping("/review")
+    @MemberAuthorize
+    public ResponseEntity<ApiResponse<Void>> createReview(
+            @RequestBody @Valid final CreatePlaceReviewRequest request,
+            @AuthenticationPrincipal final UserDetails userDetails
+    ) {
+        placeService.createReview(request, userDetails.getUsername());
         return ResponseEntity.ok()
                 .body(ApiResponse.<Void>builder()
                         .statusCode(HttpStatus.CREATED.value())

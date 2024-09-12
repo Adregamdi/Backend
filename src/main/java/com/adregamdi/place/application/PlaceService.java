@@ -2,6 +2,7 @@ package com.adregamdi.place.application;
 
 
 import com.adregamdi.place.dto.request.CreatePlaceRequest;
+import com.adregamdi.place.dto.request.CreatePlaceReviewRequest;
 import com.adregamdi.place.dto.request.GetSortingPlacesRequest;
 import com.adregamdi.place.dto.response.GetPlaceResponse;
 import com.adregamdi.place.dto.response.GetPlacesResponse;
@@ -23,6 +24,11 @@ public interface PlaceService {
     void createByAPI();
 
     /*
+     * [장소 리뷰 등록]
+     * */
+    void createReview(final CreatePlaceReviewRequest request, final String memberId);
+
+    /*
      * [특정 장소 조회]
      * */
     GetPlaceResponse get(final Long placeId);
@@ -40,5 +46,5 @@ public interface PlaceService {
     /*
      * [최적 거리 정렬]
      * */
-    List<GetSortingPlacesResponse> getSortingPlaces(List<GetSortingPlacesRequest> requests);
+    List<GetSortingPlacesResponse> getSortingPlaces(final List<GetSortingPlacesRequest> requests);
 }

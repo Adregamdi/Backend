@@ -81,4 +81,8 @@ public class Place extends BaseTime {
         this.imgPath = imgPath;
         this.thumbnailPath = thumbnailPath;
     }
+
+    public void updateAddCount(int addCount) {
+        this.addCount = addCount;
+    }
 }

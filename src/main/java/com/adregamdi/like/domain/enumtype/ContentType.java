@@ -8,7 +8,7 @@ import lombok.Getter;
 public enum ContentType {
     SHORTS("쇼츠"),
     PLACE("장소"),
-    TRAVEL("여행기");
+    TRAVELOGUE("여행기");
 
     private final String description;
 }

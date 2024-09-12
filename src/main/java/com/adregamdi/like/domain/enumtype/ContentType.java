@@ -11,4 +11,13 @@ public enum ContentType {
     TRAVELOGUE("여행기");
 
     private final String description;
+
+    public static boolean isValid(String value) {
+        for (ContentType type : values()) {
+            if (type.name().equalsIgnoreCase(value)) {
+                return true;
+            }
+        }
+        return false;
+    }
 }

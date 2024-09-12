@@ -45,7 +45,7 @@ public class Place extends BaseTime {
     @Column
     private String thumbnailPath; // 썸네일 이미지 경로
     @Column
-    private Integer addCount; // 일정 추가 카운트
+    private Integer addCount; // 장소 카운트
 
     public Place(String title, String contentsLabel, String region1Value, String region2Value, String region2Label, String address, String roadAddress, String tag, String introduction, double latitude, double longitude, String phoneNo, String imgPath, String thumbnailPath) {
         this.title = title;

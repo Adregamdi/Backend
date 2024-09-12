@@ -7,13 +7,11 @@ import com.adregamdi.place.domain.vo.PlaceNode;
 import com.adregamdi.place.dto.KorServicePlace;
 import com.adregamdi.place.dto.PlaceCoordinate;
 import com.adregamdi.place.dto.PlaceDTO;
+import com.adregamdi.place.dto.PopularPlaceDTO;
 import com.adregamdi.place.dto.request.CreatePlaceRequest;
 import com.adregamdi.place.dto.request.CreatePlaceReviewRequest;
 import com.adregamdi.place.dto.request.GetSortingPlacesRequest;
-import com.adregamdi.place.dto.response.GetPlaceResponse;
-import com.adregamdi.place.dto.response.GetPlacesResponse;
-import com.adregamdi.place.dto.response.GetSelectionBasedRecommendationPlacesResponse;
-import com.adregamdi.place.dto.response.GetSortingPlacesResponse;
+import com.adregamdi.place.dto.response.*;
 import com.adregamdi.place.exception.PlaceException.PlaceExistException;
 import com.adregamdi.place.exception.PlaceException.PlaceNotFoundException;
 import com.adregamdi.place.infrastructure.PlaceRepository;
@@ -379,5 +377,33 @@ public class PlaceServiceImpl implements PlaceService {
                         Math.sin(dLon / 2) * Math.sin(dLon / 2);
         double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
         return R * c;
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public GetPopularPlacesResponse getPopularPlaces(final Long lastId, final Integer lastAddCount) {
+        List<PopularPlaceDTO> popularPlaces = placeRepository.findInOrderOfPopularAddCount(lastId, lastAddCount);
+
+        if (popularPlaces.isEmpty()) {
+            throw new PlaceNotFoundException();
+        }
+
+        List<GetPopularPlacesResponse.PopularPlaceInfo> placeInfos = popularPlaces.stream()
+                .map(GetPopularPlacesResponse.PopularPlaceInfo::from)
+                .collect(Collectors.toList());
+
+        boolean hasNext = popularPlaces.size() == 10;
+        int currentPage = (lastId == null) ? 0 : (lastId.intValue() / 10);
+        int pageSize = placeInfos.size();
+
+        long totalPlaces = (currentPage * 10) + pageSize;
+
+        return GetPopularPlacesResponse.of(
+                currentPage,
+                pageSize,
+                hasNext,
+                totalPlaces,
+                placeInfos
+        );
     }
 }

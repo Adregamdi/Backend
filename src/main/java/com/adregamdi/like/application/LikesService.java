@@ -31,7 +31,7 @@ public class LikesService {
 
         Like like = Like.builder()
                 .memberId(UUID.fromString(memberId))
-                .contentType(request.contentType())
+                .contentType(request.getContentType())
                 .contentId(request.contentId())
                 .build();
 
@@ -56,7 +56,7 @@ public class LikesService {
 
     public void delete(String memberId, Role memberRole, DeleteLikeRequest request) {
 
-        Like like = likesRepository.findByContentTypeAndContentId(request.contentType(), request.contentId())
+        Like like = likesRepository.findByContentTypeAndContentId(request.getContentType(), request.contentId())
                 .orElseThrow(() -> new LikesException.LikesNotFoundException(request));
 
         if (memberRole == Role.ADMIN) {

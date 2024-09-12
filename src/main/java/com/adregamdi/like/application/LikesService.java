@@ -1,9 +1,11 @@
 package com.adregamdi.like.application;
 
 import com.adregamdi.like.domain.Like;
+import com.adregamdi.like.domain.enumtype.ContentType;
 import com.adregamdi.like.domain.enumtype.SelectedType;
 import com.adregamdi.like.dto.request.CreateLikesRequest;
 import com.adregamdi.like.dto.request.GetLikesContentsRequest;
+import com.adregamdi.like.dto.response.CreateShortsLikeResponse;
 import com.adregamdi.like.dto.response.GetLikesContentsResponse;
 import com.adregamdi.like.exception.LikesException;
 import com.adregamdi.like.infrastructure.LikesRepository;
@@ -11,6 +13,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.UUID;
 
 @Slf4j
 @Service
@@ -24,12 +28,27 @@ public class LikesService {
     public void create(String memberId, CreateLikesRequest request) {
 
         Like like = Like.builder()
-                .memberId(memberId)
+                .memberId(UUID.fromString(memberId))
                 .contentType(request.contentType())
                 .contentId(request.contentId())
                 .build();
 
         likesRepository.save(like);
+    }
+
+    public CreateShortsLikeResponse createShortsLike(String memberId, Long shortsId) {
+
+        Like like = Like.builder()
+                .memberId(UUID.fromString(memberId))
+                .contentType(ContentType.SHORTS)
+                .contentId(shortsId)
+                .build();
+
+        likesRepository.save(like);
+
+        return new CreateShortsLikeResponse(
+                likesRepository.countByContentTypeAndContentId(ContentType.SHORTS, shortsId)
+        );
     }
 
 
@@ -38,7 +57,7 @@ public class LikesService {
         Like like = likesRepository.findById(likeId)
                 .orElseThrow(() -> new LikesException.LikesNotFoundException(likeId));
 
-        if (!likesValidService.isWriter(like.getMemberId(), memberId)) {
+        if (!likesValidService.isWriter(like.getMemberId().toString(), memberId)) {
             log.warn("작성자 외에 요청으로 인해 메서드를 종료합니다.");
             return;
         }
@@ -58,7 +77,7 @@ public class LikesService {
             case ALL -> likesRepository.getLikesContentsOfAll(request);
             case SHORTS -> likesRepository.getLikesContentsOfShorts(request);
             case PLACE -> likesRepository.getLikesContentsOfPlace(request);
-            case TRAVEL -> likesRepository.getLikesContentsOfTravel(request);
+            case TRAVELOGUE -> likesRepository.getLikesContentsOfTravel(request);
         };
     }
 }

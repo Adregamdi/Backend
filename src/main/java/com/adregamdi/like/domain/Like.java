@@ -10,6 +10,7 @@ import org.hibernate.annotations.Comment;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Entity
 @Getter
@@ -27,7 +28,7 @@ public class Like {
 
     @Column(name = "user_id", updatable = false, nullable = false)
     @Comment("회원 id")
-    private String memberId;
+    private UUID memberId;
 
     @Column(name = "content_type", nullable = false)
     @Comment("컨텐츠 타입")
@@ -44,7 +45,7 @@ public class Like {
     private LocalDateTime createAt;
 
     @Builder
-    public Like(String memberId, ContentType contentType, Long contentId, LocalDateTime createAt) {
+    public Like(UUID memberId, ContentType contentType, Long contentId, LocalDateTime createAt) {
         this.memberId = memberId;
         this.contentType = contentType;
         this.contentId = contentId;

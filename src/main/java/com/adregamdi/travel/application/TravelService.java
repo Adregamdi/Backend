@@ -1,5 +1,6 @@
 package com.adregamdi.travel.application;
 
+import com.adregamdi.place.application.PlaceService;
 import com.adregamdi.travel.domain.Travel;
 import com.adregamdi.travel.domain.TravelDay;
 import com.adregamdi.travel.domain.TravelPlace;
@@ -34,6 +35,7 @@ import static com.adregamdi.core.utils.PageUtil.generatePageDesc;
 @RequiredArgsConstructor
 @Service
 public class TravelService {
+    private final PlaceService placeService;
     private final TravelRepository travelRepository;
     private final TravelDayRepository travelDayRepository;
     private final TravelPlaceRepository travelPlaceRepository;
@@ -75,6 +77,13 @@ public class TravelService {
         if (request.dayList() == null || request.dayList().isEmpty()) {
             for (int day = 1; day <= totalDays; day++) {
                 LocalDate date = request.startDate().plusDays(day - 1);
+                List<TravelPlace> travelPlaces = travelPlaceRepository.findAllByTravelDayId(existingDays.get(day - 1).getTravelDayId());
+
+                if (!travelPlaces.isEmpty()) {
+                    for (TravelPlace travelPlace : travelPlaces) {
+                        placeService.addCount(travelPlace.getPlaceId(), false);
+                    }
+                }
                 existingDays.get(day - 1).update(date, day, "");
                 travelPlaceRepository.deleteAllByTravelDayId(existingDays.get(day - 1).getTravelDayId());
             }
@@ -88,22 +97,33 @@ public class TravelService {
 
             if (request.dayList().get(i).placeList() == null || request.dayList().get(i).placeList().isEmpty() && !travelPlaces.isEmpty()) {
                 travelPlaceRepository.deleteAllByTravelDayId(existingDays.get(i).getTravelDayId());
+                for (TravelPlace travelPlace : travelPlaces) {
+                    placeService.addCount(travelPlace.getPlaceId(), false);
+                }
             } else if (request.dayList().get(i).placeList() != null || !request.dayList().get(i).placeList().isEmpty() && travelPlaces.isEmpty()) {
                 travelPlaces = new ArrayList<>();
                 for (int j = 0; j < request.dayList().get(i).placeList().size(); j++) {
                     travelPlaces.add(new TravelPlace(existingDays.get(i).getTravelDayId(), request.dayList().get(i).placeList().get(j).placeId(), request.dayList().get(i).placeList().get(j).placeOrder()));
+                    placeService.addCount(request.dayList().get(i).placeList().get(j).placeId(), true);
                 }
                 travelPlaceRepository.saveAll(travelPlaces);
             } else if (request.dayList().get(i).placeList() != null || !request.dayList().get(i).placeList().isEmpty() && !travelPlaces.isEmpty()) {
                 for (int j = 0; j < travelPlaces.size(); j++) {
                     travelPlaces.get(j).update(request.dayList().get(i).placeList().get(j).placeId(), request.dayList().get(i).placeList().get(j).placeOrder());
+                    placeService.addCount(request.dayList().get(i).placeList().get(j).placeId(), true);
                 }
             }
         }
         for (int day = request.dayList().size() + 1; day <= totalDays; day++) {
             LocalDate date = request.startDate().plusDays(day - 1);
-            existingDays.get(day - 1).update(date, day, "");
+            List<TravelPlace> travelPlaces = travelPlaceRepository.findAllByTravelDayId(existingDays.get(day - 1).getTravelDayId());
 
+            if (!travelPlaces.isEmpty()) {
+                for (TravelPlace travelPlace : travelPlaces) {
+                    placeService.addCount(travelPlace.getPlaceId(), false);
+                }
+            }
+            existingDays.get(day - 1).update(date, day, "");
             travelPlaceRepository.deleteAllByTravelDayId(existingDays.get(day - 1).getTravelDayId());
         }
 

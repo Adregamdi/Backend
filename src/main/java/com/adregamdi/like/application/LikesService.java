@@ -4,11 +4,13 @@ import com.adregamdi.like.domain.Like;
 import com.adregamdi.like.domain.enumtype.ContentType;
 import com.adregamdi.like.domain.enumtype.SelectedType;
 import com.adregamdi.like.dto.request.CreateLikesRequest;
+import com.adregamdi.like.dto.request.DeleteLikeRequest;
 import com.adregamdi.like.dto.request.GetLikesContentsRequest;
 import com.adregamdi.like.dto.response.CreateShortsLikeResponse;
 import com.adregamdi.like.dto.response.GetLikesContentsResponse;
 import com.adregamdi.like.exception.LikesException;
 import com.adregamdi.like.infrastructure.LikesRepository;
+import com.adregamdi.member.domain.Role;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -52,18 +54,19 @@ public class LikesService {
     }
 
 
-    public void delete(String memberId, Long likeId) {
+    public void delete(String memberId, Role memberRole, DeleteLikeRequest request) {
 
-        Like like = likesRepository.findById(likeId)
-                .orElseThrow(() -> new LikesException.LikesNotFoundException(likeId));
+        Like like = likesRepository.findByContentTypeAndContentId(request.contentType(), request.contentId())
+                .orElseThrow(() -> new LikesException.LikesNotFoundException(request));
 
-        if (!likesValidService.isWriter(like.getMemberId().toString(), memberId)) {
+        if (memberRole == Role.ADMIN) {
+            log.info("관리자 권한으로 좋아요를 삭제합니다. 좋아요 ID: {}", like.getLikeId());
+        } else if (!likesValidService.isWriter(like.getMemberId().toString(), memberId)) {
             log.warn("작성자 외에 요청으로 인해 메서드를 종료합니다.");
             return;
         }
 
         likesRepository.delete(like);
-        log.info("정상적으로 삭제되었습니다. likeId: {}", likeId);
     }
 
     public GetLikesContentsResponse<?> getLikesContents(GetLikesContentsRequest request) {

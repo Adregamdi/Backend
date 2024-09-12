@@ -30,7 +30,7 @@ public class AllContentDTO implements LikeContent{
                 return "/api/shorts/stream/" + contentId;
             case PLACE:
                 return "/api/places?place_id=" + contentId;
-            case TRAVEL:
+            case TRAVELOGUE:
                 return "/travels/" + contentId; // 수정 필요
             default:
                 return "";

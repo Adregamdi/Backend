@@ -36,6 +36,7 @@ public record GetPopularPlacesResponse(
             String title,
             String contentsLabel,
             String regionLabel,
+            List<String> imageUrls,
             Integer addCount,
             Long photoReviewCount,
             Long shortsCount
@@ -47,6 +48,7 @@ public record GetPopularPlacesResponse(
                     .title(place.getTitle())
                     .contentsLabel(place.getContentsLabel())
                     .regionLabel(place.getRegionLabel())
+                    .imageUrls(dto.imageUrls())
                     .addCount(place.getAddCount())
                     .photoReviewCount(dto.photoReviewCount())
                     .shortsCount(dto.shortsCount())

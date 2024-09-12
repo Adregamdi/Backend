@@ -384,19 +384,25 @@ public class PlaceServiceImpl implements PlaceService {
     public GetPopularPlacesResponse getPopularPlaces(final Long lastId, final Integer lastAddCount) {
         List<PopularPlaceDTO> popularPlaces = placeRepository.findInOrderOfPopularAddCount(lastId, lastAddCount);
 
-        if (popularPlaces.isEmpty()) {
-            throw new PlaceNotFoundException();
-        }
+        boolean hasNext = popularPlaces.size() > 10;
+        List<PopularPlaceDTO> content = hasNext ? popularPlaces.subList(0, 10) : popularPlaces;
 
-        List<GetPopularPlacesResponse.PopularPlaceInfo> placeInfos = popularPlaces.stream()
-                .map(GetPopularPlacesResponse.PopularPlaceInfo::from)
+        List<GetPopularPlacesResponse.PopularPlaceInfo> placeInfos = content.stream()
+                .map(dto -> GetPopularPlacesResponse.PopularPlaceInfo.builder()
+                        .placeId(dto.place().getPlaceId())
+                        .title(dto.place().getTitle())
+                        .contentsLabel(dto.place().getContentsLabel())
+                        .regionLabel(dto.place().getRegionLabel())
+                        .imageUrls(dto.imageUrls())
+                        .addCount(dto.place().getAddCount())
+                        .photoReviewCount(dto.photoReviewCount())
+                        .shortsCount(dto.shortsCount())
+                        .build())
                 .collect(Collectors.toList());
 
-        boolean hasNext = popularPlaces.size() == 10;
-        int currentPage = (lastId == null) ? 0 : (lastId.intValue() / 10);
         int pageSize = placeInfos.size();
-
-        long totalPlaces = (currentPage * 10) + pageSize;
+        int currentPage = calculateCurrentPage(lastId, pageSize);
+        long totalPlaces = placeRepository.countTotalPlaces();
 
         return GetPopularPlacesResponse.of(
                 currentPage,
@@ -405,5 +411,12 @@ public class PlaceServiceImpl implements PlaceService {
                 totalPlaces,
                 placeInfos
         );
+    }
+
+    private int calculateCurrentPage(Long lastId, int pageSize) {
+        if (lastId == null) {
+            return 0;
+        }
+        return (lastId.intValue() / pageSize) + 1;
     }
 }

@@ -7,15 +7,9 @@ import com.adregamdi.place.application.PlaceService;
 import com.adregamdi.place.dto.request.CreatePlaceRequest;
 import com.adregamdi.place.dto.request.CreatePlaceReviewRequest;
 import com.adregamdi.place.dto.request.GetSortingPlacesRequest;
-import com.adregamdi.place.dto.response.GetPlaceResponse;
-import com.adregamdi.place.dto.response.GetPlacesResponse;
-import com.adregamdi.place.dto.response.GetSelectionBasedRecommendationPlacesResponse;
-import com.adregamdi.place.dto.response.GetSortingPlacesResponse;
+import com.adregamdi.place.dto.response.*;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.DecimalMax;
-import jakarta.validation.constraints.DecimalMin;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.PositiveOrZero;
+import jakarta.validation.constraints.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -72,7 +66,7 @@ public class PlaceController {
 
     @GetMapping
     @MemberAuthorize
-    public ResponseEntity<ApiResponse<GetPlaceResponse>> get(@RequestParam("place_id") @PositiveOrZero final Long placeId) {
+    public ResponseEntity<ApiResponse<GetPlaceResponse>> get(@RequestParam("place_id") @Positive final Long placeId) {
         return ResponseEntity.ok()
                 .body(ApiResponse.<GetPlaceResponse>builder()
                         .statusCode(HttpStatus.OK.value())
@@ -116,6 +110,17 @@ public class PlaceController {
                 .body(ApiResponse.<List<GetSortingPlacesResponse>>builder()
                         .statusCode(HttpStatus.OK.value())
                         .data(placeService.getSortingPlaces(requests))
+                        .build()
+                );
+    }
+
+    @GetMapping("/popular")
+    @MemberAuthorize
+    public ResponseEntity<ApiResponse<GetPopularPlacesResponse>> getPopularPlaces(@RequestParam(defaultValue = "", required = false) final Long lastId) {
+        return ResponseEntity.ok()
+                .body(ApiResponse.<GetPopularPlacesResponse>builder()
+                        .statusCode(HttpStatus.OK.value())
+                        .data(placeService.getPopularPlaces(lastId))
                         .build()
                 );
     }

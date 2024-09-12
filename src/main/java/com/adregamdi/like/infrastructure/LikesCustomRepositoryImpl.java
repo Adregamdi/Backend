@@ -14,6 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.UUID;
 
 import static com.adregamdi.like.domain.QLike.like;
 import static com.adregamdi.place.domain.QPlace.place;
@@ -128,7 +129,7 @@ public class LikesCustomRepositoryImpl implements LikesCustomRepository{
                 .from(like)
                 .join(place).on(like.contentId.eq(place.placeId))
                 .where(
-                        like.memberId.eq(request.memberId()),
+                        like.memberId.eq(UUID.fromString(request.memberId())),
                         like.contentType.eq(ContentType.PLACE),
                         like.likeId.gt(request.lastLikeId()))
                 .orderBy(like.createAt.desc())

@@ -1,7 +1,6 @@
 package com.adregamdi.place.domain;
 
 import com.adregamdi.core.entity.BaseTime;
-import com.adregamdi.place.dto.request.CreatePlaceRequest;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -45,6 +44,8 @@ public class Place extends BaseTime {
     private String imgPath; // 일반 이미지 경로
     @Column
     private String thumbnailPath; // 썸네일 이미지 경로
+    @Column
+    private Integer addCount; // 장소 카운트
 
     public Place(String title, String contentsLabel, String region1Value, String region2Value, String region2Label, String address, String roadAddress, String tag, String introduction, double latitude, double longitude, String phoneNo, String imgPath, String thumbnailPath) {
         this.title = title;
@@ -63,21 +64,25 @@ public class Place extends BaseTime {
         this.thumbnailPath = thumbnailPath;
     }
 
-    public Place(CreatePlaceRequest request) {
-        this.title = request.title();
-        this.contentsLabel = request.contentsLabel();
-        this.region1Cd = request.region1Cd();
-        this.region2Cd = request.region2Cd();
-        this.regionLabel = request.regionLabel();
-        this.address = request.address();
-        this.roadAddress = request.roadAddress();
-        this.tag = request.tag();
-        this.introduction = request.introduction();
-        this.information = request.information();
-        this.latitude = request.latitude();
-        this.longitude = request.longitude();
-        this.phoneNo = request.phoneNo();
-        this.imgPath = request.imgPath();
-        this.thumbnailPath = request.thumbnailPath();
+    public Place(String title, String contentsLabel, String region1Cd, String region2Cd, String regionLabel, String address, String roadAddress, String tag, String introduction, String information, double latitude, double longitude, String phoneNo, String imgPath, String thumbnailPath) {
+        this.title = title;
+        this.contentsLabel = contentsLabel;
+        this.region1Cd = region1Cd;
+        this.region2Cd = region2Cd;
+        this.regionLabel = regionLabel;
+        this.address = address;
+        this.roadAddress = roadAddress;
+        this.tag = tag;
+        this.introduction = introduction;
+        this.information = information;
+        this.latitude = latitude;
+        this.longitude = longitude;
+        this.phoneNo = phoneNo;
+        this.imgPath = imgPath;
+        this.thumbnailPath = thumbnailPath;
+    }
+
+    public void updateAddCount(int addCount) {
+        this.addCount = addCount;
     }
 }

@@ -7,13 +7,11 @@ import com.adregamdi.place.domain.vo.PlaceNode;
 import com.adregamdi.place.dto.KorServicePlace;
 import com.adregamdi.place.dto.PlaceCoordinate;
 import com.adregamdi.place.dto.PlaceDTO;
+import com.adregamdi.place.dto.PopularPlaceDTO;
 import com.adregamdi.place.dto.request.CreatePlaceRequest;
 import com.adregamdi.place.dto.request.CreatePlaceReviewRequest;
 import com.adregamdi.place.dto.request.GetSortingPlacesRequest;
-import com.adregamdi.place.dto.response.GetPlaceResponse;
-import com.adregamdi.place.dto.response.GetPlacesResponse;
-import com.adregamdi.place.dto.response.GetSelectionBasedRecommendationPlacesResponse;
-import com.adregamdi.place.dto.response.GetSortingPlacesResponse;
+import com.adregamdi.place.dto.response.*;
 import com.adregamdi.place.exception.PlaceException.PlaceExistException;
 import com.adregamdi.place.exception.PlaceException.PlaceNotFoundException;
 import com.adregamdi.place.infrastructure.PlaceRepository;
@@ -68,7 +66,13 @@ public class PlaceServiceImpl implements PlaceService {
         if (placeRepository.findByTitleAndContentsLabel(request.title(), request.contentsLabel()).isPresent()) {
             throw new PlaceExistException(request);
         }
-        placeRepository.save(new Place(request));
+        placeRepository.save(new Place(
+                request.title(), request.contentsLabel(), request.region1Cd(),
+                request.region2Cd(), request.regionLabel(), request.address(),
+                request.roadAddress(), request.tag(), request.introduction(),
+                request.information(), request.latitude(), request.longitude(),
+                request.phoneNo(), request.imgPath(), request.thumbnailPath()
+        ));
     }
 
     @Override
@@ -129,6 +133,15 @@ public class PlaceServiceImpl implements PlaceService {
                 .map(img -> new PlaceReviewImage(placeReview.getPlaceReviewId(), img.url()))
                 .collect(Collectors.toList());
         placeReviewImageRepository.saveAll(placeReviewImages);
+    }
+
+    @Override
+    @Transactional
+    public void addCount(final Long placeId, final boolean choice) {
+        Place place = placeRepository.findById(placeId)
+                .orElseThrow(() -> new PlaceNotFoundException(placeId));
+
+        place.updateAddCount(choice ? 1 : -1);
     }
 
     @Override
@@ -364,5 +377,46 @@ public class PlaceServiceImpl implements PlaceService {
                         Math.sin(dLon / 2) * Math.sin(dLon / 2);
         double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
         return R * c;
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public GetPopularPlacesResponse getPopularPlaces(final Long lastId, final Integer lastAddCount) {
+        List<PopularPlaceDTO> popularPlaces = placeRepository.findInOrderOfPopularAddCount(lastId, lastAddCount);
+
+        boolean hasNext = popularPlaces.size() > 10;
+        List<PopularPlaceDTO> content = hasNext ? popularPlaces.subList(0, 10) : popularPlaces;
+
+        List<GetPopularPlacesResponse.PopularPlaceInfo> placeInfos = content.stream()
+                .map(dto -> GetPopularPlacesResponse.PopularPlaceInfo.builder()
+                        .placeId(dto.place().getPlaceId())
+                        .title(dto.place().getTitle())
+                        .contentsLabel(dto.place().getContentsLabel())
+                        .regionLabel(dto.place().getRegionLabel())
+                        .imageUrls(dto.imageUrls())
+                        .addCount(dto.place().getAddCount())
+                        .photoReviewCount(dto.photoReviewCount())
+                        .shortsCount(dto.shortsCount())
+                        .build())
+                .collect(Collectors.toList());
+
+        int pageSize = placeInfos.size();
+        int currentPage = calculateCurrentPage(lastId, pageSize);
+        long totalPlaces = placeRepository.countTotalPlaces();
+
+        return GetPopularPlacesResponse.of(
+                currentPage,
+                pageSize,
+                hasNext,
+                totalPlaces,
+                placeInfos
+        );
+    }
+
+    private int calculateCurrentPage(Long lastId, int pageSize) {
+        if (lastId == null) {
+            return 0;
+        }
+        return (lastId.intValue() / pageSize) + 1;
     }
 }

@@ -4,10 +4,8 @@ import com.adregamdi.shorts.dto.ShortsDTO;
 
 import java.util.List;
 
-public record GetShortsResponse(
-
+public record GetShortsByPlaceIdResponse(
         List<ShortsDTO> shortsList,
         Boolean hasNext
-
 ) {
 }

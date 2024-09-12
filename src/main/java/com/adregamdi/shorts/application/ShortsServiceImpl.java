@@ -3,7 +3,9 @@ package com.adregamdi.shorts.application;
 import com.adregamdi.media.application.FileUploadService;
 import com.adregamdi.shorts.domain.Shorts;
 import com.adregamdi.shorts.dto.request.CreateShortsRequest;
+import com.adregamdi.shorts.dto.request.GetShortsByPlaceIdRequest;
 import com.adregamdi.shorts.dto.request.UpdateShortsRequest;
+import com.adregamdi.shorts.dto.response.GetShortsByPlaceIdResponse;
 import com.adregamdi.shorts.dto.response.GetShortsResponse;
 import com.adregamdi.shorts.dto.response.SaveVideoResponse;
 import com.adregamdi.shorts.dto.response.UploadVideoDTO;
@@ -38,6 +40,11 @@ public class ShortsServiceImpl implements ShortsService {
     @Override
     public GetShortsResponse getUserShorts(String memberId, long lastShortsId, int size) {
         return shortsRepository.getUserShorts(UUID.fromString(memberId), lastShortsId, size);
+    }
+
+    @Override
+    public GetShortsByPlaceIdResponse getShortsByPlaceId(String memberId, GetShortsByPlaceIdRequest request) {
+        return shortsRepository.getShortsByPlaceId(UUID.fromString(memberId), request);
     }
 
     @Override

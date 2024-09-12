@@ -1,7 +1,9 @@
 package com.adregamdi.shorts.application;
 
 import com.adregamdi.shorts.dto.request.CreateShortsRequest;
+import com.adregamdi.shorts.dto.request.GetShortsByPlaceIdRequest;
 import com.adregamdi.shorts.dto.request.UpdateShortsRequest;
+import com.adregamdi.shorts.dto.response.GetShortsByPlaceIdResponse;
 import com.adregamdi.shorts.dto.response.GetShortsResponse;
 import com.adregamdi.shorts.dto.response.SaveVideoResponse;
 import com.adregamdi.shorts.dto.response.UploadVideoDTO;
@@ -14,4 +16,6 @@ public interface ShortsService {
     void deleteShorts(String memberId, Long shortsId);
     SaveVideoResponse saveVideo(UploadVideoDTO videoUrls, String memberId);
     String getS3KeyByShortId(Long shortsId);
+
+    GetShortsByPlaceIdResponse getShortsByPlaceId(String memberId, GetShortsByPlaceIdRequest request);
 }

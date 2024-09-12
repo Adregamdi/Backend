@@ -138,6 +138,15 @@ public class PlaceServiceImpl implements PlaceService {
     }
 
     @Override
+    @Transactional
+    public void addCount(final Long placeId, final boolean choice) {
+        Place place = placeRepository.findById(placeId)
+                .orElseThrow(() -> new PlaceNotFoundException(placeId));
+
+        place.updateAddCount(choice ? 1 : -1);
+    }
+
+    @Override
     @Transactional(readOnly = true)
     public GetPlaceResponse get(final Long placeId) {
         Place place = placeRepository.findById(placeId)

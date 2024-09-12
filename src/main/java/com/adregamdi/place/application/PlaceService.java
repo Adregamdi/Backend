@@ -29,6 +29,11 @@ public interface PlaceService {
     void createReview(final CreatePlaceReviewRequest request, final String memberId);
 
     /*
+     * [장소 추가 카운트 증감]
+     * */
+    void addCount(final Long placeId, final boolean choice);
+
+    /*
      * [특정 장소 조회]
      * */
     GetPlaceResponse get(final Long placeId);

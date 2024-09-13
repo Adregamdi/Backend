@@ -5,6 +5,7 @@ import com.adregamdi.travel.domain.Travel;
 import com.adregamdi.travel.domain.TravelDay;
 import com.adregamdi.travel.domain.TravelPlace;
 import com.adregamdi.travel.dto.TravelDTO;
+import com.adregamdi.travel.dto.TravelPlaceDTO;
 import com.adregamdi.travel.dto.request.CreateMyTravelRequest;
 import com.adregamdi.travel.dto.response.CreateMyTravelResponse;
 import com.adregamdi.travel.dto.response.GetMyTravelResponse;
@@ -135,7 +136,7 @@ public class TravelService {
      * */
     @Transactional(readOnly = true)
     public GetMyTravelResponse getMyTravel(final Long travelId, final String memberId) {
-        List<List<TravelPlace>> travelPlaces = new ArrayList<>();
+        List<List<TravelPlaceDTO>> travelPlaceDTOList = new ArrayList<>();
 
         Travel travel = travelRepository.findByTravelIdAndMemberId(travelId, UUID.fromString(memberId))
                 .orElseThrow(() -> new TravelNotFoundException(memberId));
@@ -145,13 +146,17 @@ public class TravelService {
 
         for (TravelDay travelDay : travelDays) {
             List<TravelPlace> travelPlaceList = travelPlaceRepository.findByTravelDayId(travelDay.getTravelDayId());
+            List<TravelPlaceDTO> travelPlaceDTOS = new ArrayList<>();
             if (travelPlaceList == null) {
                 throw new TravelPlaceNotFoundException(travel.getTravelId());
             }
-            travelPlaces.add(travelPlaceList);
+            for (TravelPlace travelPlace : travelPlaceList) {
+                travelPlaceDTOS.add(TravelPlaceDTO.of(travelPlace, placeService.get(travelPlace.getPlaceId()).place()));
+            }
+            travelPlaceDTOList.add(travelPlaceDTOS);
         }
 
-        return GetMyTravelResponse.of(travel, travelDays, travelPlaces);
+        return GetMyTravelResponse.of(travel, travelDays, travelPlaceDTOList);
     }
 
     /*

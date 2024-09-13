@@ -47,23 +47,6 @@ public class Place extends BaseTime {
     @Column
     private Integer addCount; // 장소 카운트
 
-    public Place(String title, String contentsLabel, String region1Value, String region2Value, String region2Label, String address, String roadAddress, String tag, String introduction, double latitude, double longitude, String phoneNo, String imgPath, String thumbnailPath) {
-        this.title = title;
-        this.contentsLabel = contentsLabel;
-        this.region1Cd = region1Value;
-        this.region2Cd = region2Value;
-        this.regionLabel = region2Label;
-        this.address = address;
-        this.roadAddress = roadAddress;
-        this.tag = tag;
-        this.introduction = introduction;
-        this.latitude = latitude;
-        this.longitude = longitude;
-        this.phoneNo = phoneNo;
-        this.imgPath = imgPath;
-        this.thumbnailPath = thumbnailPath;
-    }
-
     public Place(String title, String contentsLabel, String region1Cd, String region2Cd, String regionLabel, String address, String roadAddress, String tag, String introduction, String information, double latitude, double longitude, String phoneNo, String imgPath, String thumbnailPath) {
         this.title = title;
         this.contentsLabel = contentsLabel;
@@ -80,6 +63,25 @@ public class Place extends BaseTime {
         this.phoneNo = phoneNo;
         this.imgPath = imgPath;
         this.thumbnailPath = thumbnailPath;
+        this.addCount = 0;
+    }
+
+    public Place(String title, String contentsLabel, String region1Value, String region2Value, String region2Label, String address, String roadAddress, String tag, String introduction, double latitude, double longitude, String phoneNo, String imgPath, String thumbnailPath) {
+        this.title = title;
+        this.contentsLabel = contentsLabel;
+        this.region1Cd = region1Value;
+        this.region2Cd = region2Value;
+        this.regionLabel = region2Label;
+        this.address = address;
+        this.roadAddress = roadAddress;
+        this.tag = tag;
+        this.introduction = introduction;
+        this.latitude = latitude;
+        this.longitude = longitude;
+        this.phoneNo = phoneNo;
+        this.imgPath = imgPath;
+        this.thumbnailPath = thumbnailPath;
+        this.addCount = 0;
     }
 
     public void updateAddCount(int addCount) {

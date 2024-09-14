@@ -48,7 +48,7 @@ public class TravelogueController {
                 );
     }
 
-    @GetMapping("/list")
+    @GetMapping("/list/me")
     @MemberAuthorize
     public ResponseEntity<ApiResponse<GetMyTraveloguesResponse>> getMyTravelogues(
             @RequestParam(defaultValue = "0") final int page,

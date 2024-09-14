@@ -7,6 +7,8 @@ import java.time.LocalDate;
 import java.util.List;
 
 public record CreateMyTravelogueRequest(
+        @Positive
+        Long travelogueId,
         @NotNull
         @Positive
         Long travelId,

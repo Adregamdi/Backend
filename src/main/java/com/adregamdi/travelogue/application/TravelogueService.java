@@ -49,7 +49,10 @@ public class TravelogueService {
      * 여행기 등록
      */
     @Transactional
-    public CreateMyTravelogueResponse createMyTravelogue(final CreateMyTravelogueRequest request, final String memberId) {
+    public CreateMyTravelogueResponse createMyTravelogue(
+            final CreateMyTravelogueRequest request,
+            final String memberId
+    ) {
         Travelogue travelogue;
         if (request.travelogueId() == null) {
             travelogue = travelogueRepository.save(new Travelogue(memberId, request.travelId(), request.title(), request.introduction()));
@@ -95,7 +98,10 @@ public class TravelogueService {
         return CreateMyTravelogueResponse.from(travelogue.getTravelogueId());
     }
 
-    private void saveTravelogueImages(final List<CreateMyTravelogueRequest.TravelogueImageInfo> images, final Long travelogueId) {
+    private void saveTravelogueImages(
+            final List<CreateMyTravelogueRequest.TravelogueImageInfo> images,
+            final Long travelogueId
+    ) {
         List<CreateMyTravelogueRequest.TravelogueImageInfo> imageList = (images != null) ? images : Collections.emptyList();
 
         List<TravelogueImage> travelogueImages = imageList.stream()
@@ -105,25 +111,36 @@ public class TravelogueService {
         travelogueImageRepository.saveAll(travelogueImages);
     }
 
-    private void saveTravelogueDaysAndReviews(final List<CreateMyTravelogueRequest.DayInfo> dayList, final Long travelogueId, final String memberId) {
+    private void saveTravelogueDaysAndReviews(
+            final List<CreateMyTravelogueRequest.DayInfo> dayList,
+            final Long travelogueId,
+            final String memberId
+    ) {
         List<CreateMyTravelogueRequest.DayInfo> days = (dayList != null) ? dayList : Collections.emptyList();
 
         for (CreateMyTravelogueRequest.DayInfo dayInfo : days) {
-            travelogueDayRepository.save(new TravelogueDay(travelogueId, dayInfo.date(), dayInfo.day(), dayInfo.content()));
-            savePlaceReviews(dayInfo.placeReviewList(), travelogueId, memberId);
+            TravelogueDay travelogueDay = travelogueDayRepository.save(new TravelogueDay(travelogueId, dayInfo.date(), dayInfo.day(), dayInfo.content()));
+            savePlaceReviews(dayInfo.placeReviewList(), travelogueId, travelogueDay.getTravelogueDayId(), memberId);
         }
     }
 
-    private void savePlaceReviews(final List<CreateMyTravelogueRequest.PlaceReviewInfo> placeReviews, final Long travelogueId, final String memberId) {
+    private void savePlaceReviews(
+            final List<CreateMyTravelogueRequest.PlaceReviewInfo> placeReviews,
+            final Long travelogueId, final Long travelogueDayId,
+            final String memberId
+    ) {
         List<CreateMyTravelogueRequest.PlaceReviewInfo> reviews = (placeReviews != null) ? placeReviews : Collections.emptyList();
 
         for (CreateMyTravelogueRequest.PlaceReviewInfo reviewInfo : reviews) {
-            PlaceReview placeReview = placeReviewRepository.save(new PlaceReview(memberId, reviewInfo.placeId(), travelogueId, reviewInfo.content()));
+            PlaceReview placeReview = placeReviewRepository.save(new PlaceReview(memberId, reviewInfo.placeId(), travelogueId, travelogueDayId, reviewInfo.content()));
             savePlaceReviewImages(reviewInfo.placeReviewImageList(), placeReview.getPlaceReviewId());
         }
     }
 
-    private void savePlaceReviewImages(final List<CreateMyTravelogueRequest.PlaceReviewImageInfo> images, final Long placeReviewId) {
+    private void savePlaceReviewImages(
+            final List<CreateMyTravelogueRequest.PlaceReviewImageInfo> images,
+            final Long placeReviewId
+    ) {
         List<CreateMyTravelogueRequest.PlaceReviewImageInfo> imageList = (images != null) ? images : Collections.emptyList();
 
         List<PlaceReviewImage> placeReviewImages = imageList.stream()

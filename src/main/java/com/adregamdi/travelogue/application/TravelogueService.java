@@ -54,6 +54,13 @@ public class TravelogueService {
             final String memberId
     ) {
         Travelogue travelogue;
+        List<CreateMyTravelogueRequest.TravelogueImageInfo> travelogueImageUrls = new ArrayList<>();
+        if (request.travelogueImageList() == null || request.travelogueImageList().isEmpty()) {
+            travelogueImageUrls.add(new CreateMyTravelogueRequest.TravelogueImageInfo("https://adregamdi-dev2.s3.ap-northeast-2.amazonaws.com/profile/default_profile_image.png"));
+        } else {
+            travelogueImageUrls = request.travelogueImageList();
+        }
+
         if (request.travelogueId() == null) {
             travelogue = travelogueRepository.save(new Travelogue(memberId, request.travelId(), request.title(), request.introduction()));
             saveTravelogueImages(request.travelogueImageList(), travelogue.getTravelogueId());
@@ -66,34 +73,39 @@ public class TravelogueService {
             List<TravelogueImage> travelogueImages = travelogueImageRepository.findAllByTravelogueId(request.travelogueId());
             if (!travelogueImages.isEmpty()) {
                 // 요청 < 기존
-                if (travelogueImages.size() > request.travelogueImageList().size()) {
+                if (travelogueImages.size() > travelogueImageUrls.size()) {
                     for (int i = 0; i < travelogueImages.size(); i++) {
-                        if (request.travelogueImageList().size() > i) {
-                            travelogueImages.get(i).update(request.travelogueId(), request.travelogueImageList().get(i).url());
+                        if (travelogueImageUrls.size() > i) {
+                            travelogueImages.get(i).update(request.travelogueId(), travelogueImageUrls.get(i).url());
                         } else {
                             travelogueImageRepository.deleteById(travelogueImages.get(i).getTravelogueImageId());
                         }
                     }
                 }
                 // 요청 == 기존
-                else if (travelogueImages.size() == request.travelogueImageList().size()) {
+                else if (travelogueImages.size() == travelogueImageUrls.size()) {
                     for (int i = 0; i < travelogueImages.size(); i++) {
-                        travelogueImages.get(i).update(request.travelogueId(), request.travelogueImageList().get(i).url());
+                        travelogueImages.get(i).update(request.travelogueId(), travelogueImageUrls.get(i).url());
                     }
                 }
                 // 요청 > 기존
                 else {
-                    for (int i = 0; i < request.travelogueImageList().size(); i++) {
+                    for (int i = 0; i < travelogueImageUrls.size(); i++) {
                         List<TravelogueImage> newTravelogueImages = new ArrayList<>();
                         if (travelogueImages.size() > i) {
-                            travelogueImages.get(i).update(request.travelogueId(), request.travelogueImageList().get(i).url());
+                            travelogueImages.get(i).update(request.travelogueId(), travelogueImageUrls.get(i).url());
                         } else {
-                            newTravelogueImages.add(new TravelogueImage(request.travelogueId(), request.travelogueImageList().get(i).url()));
+                            newTravelogueImages.add(new TravelogueImage(request.travelogueId(), travelogueImageUrls.get(i).url()));
                         }
                         travelogueImageRepository.saveAll(newTravelogueImages);
                     }
                 }
-            } // if (!travelogueImages.isEmpty())
+            } else {
+                for (CreateMyTravelogueRequest.TravelogueImageInfo travelogueImageUrl : travelogueImageUrls) {
+                    travelogueImages.add(new TravelogueImage(request.travelogueId(), travelogueImageUrl.url()));
+                }
+                travelogueImageRepository.saveAll(travelogueImages);
+            }
         }
         return CreateMyTravelogueResponse.from(travelogue.getTravelogueId());
     }

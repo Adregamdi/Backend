@@ -23,4 +23,9 @@ public class TravelogueImage extends BaseTime {
         this.travelogueId = travelogueId;
         this.url = url;
     }
+
+    public void update(Long travelogueId, String url) {
+        this.travelogueId = travelogueId;
+        this.url = url;
+    }
 }

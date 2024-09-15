@@ -58,7 +58,7 @@ public class TravelService {
         } else {
             travel = travelRepository.findById(request.travelId())
                     .orElseThrow(() -> new TravelNotFoundException(request.travelId()));
-            travel.update(request);
+            travel.update(request, memberId);
         }
 
         List<TravelDay> existingDays = travelDayRepository.findAllByTravelId(travel.getTravelId());
@@ -101,14 +101,14 @@ public class TravelService {
                 for (TravelPlace travelPlace : travelPlaces) {
                     placeService.addCount(travelPlace.getPlaceId(), false);
                 }
-            } else if (request.dayList().get(i).placeList() != null || !request.dayList().get(i).placeList().isEmpty() && travelPlaces.isEmpty()) {
+            } else if (request.dayList().get(i).placeList() != null && !request.dayList().get(i).placeList().isEmpty() && travelPlaces.isEmpty()) {
                 travelPlaces = new ArrayList<>();
                 for (int j = 0; j < request.dayList().get(i).placeList().size(); j++) {
                     travelPlaces.add(new TravelPlace(existingDays.get(i).getTravelDayId(), request.dayList().get(i).placeList().get(j).placeId(), request.dayList().get(i).placeList().get(j).placeOrder()));
                     placeService.addCount(request.dayList().get(i).placeList().get(j).placeId(), true);
                 }
                 travelPlaceRepository.saveAll(travelPlaces);
-            } else if (request.dayList().get(i).placeList() != null || !request.dayList().get(i).placeList().isEmpty() && !travelPlaces.isEmpty()) {
+            } else if (request.dayList().get(i).placeList() != null && !request.dayList().get(i).placeList().isEmpty() && !travelPlaces.isEmpty()) {
                 for (int j = 0; j < travelPlaces.size(); j++) {
                     travelPlaces.get(j).update(request.dayList().get(i).placeList().get(j).placeId(), request.dayList().get(i).placeList().get(j).placeOrder());
                     placeService.addCount(request.dayList().get(i).placeList().get(j).placeId(), true);

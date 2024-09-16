@@ -31,4 +31,9 @@ public class Travelogue extends BaseTime {
         this.title = title;
         this.introduction = introduction;
     }
+
+    public void update(String title, String introduction) {
+        this.title = title;
+        this.introduction = introduction;
+    }
 }

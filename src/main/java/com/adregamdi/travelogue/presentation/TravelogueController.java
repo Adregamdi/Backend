@@ -4,6 +4,7 @@ import com.adregamdi.core.annotation.MemberAuthorize;
 import com.adregamdi.core.handler.ApiResponse;
 import com.adregamdi.travelogue.application.TravelogueService;
 import com.adregamdi.travelogue.dto.request.CreateMyTravelogueRequest;
+import com.adregamdi.travelogue.dto.response.CreateMyTravelogueResponse;
 import com.adregamdi.travelogue.dto.response.GetMyTraveloguesResponse;
 import com.adregamdi.travelogue.dto.response.GetTravelogueResponse;
 import jakarta.validation.Valid;
@@ -25,14 +26,14 @@ public class TravelogueController {
 
     @PostMapping
     @MemberAuthorize
-    public ResponseEntity<ApiResponse<Void>> createMyTravelogue(
+    public ResponseEntity<ApiResponse<CreateMyTravelogueResponse>> createMyTravelogue(
             @RequestBody @Valid final CreateMyTravelogueRequest request,
             @AuthenticationPrincipal final UserDetails userDetails
     ) {
-        travelogueService.createMyTravelogue(request, userDetails.getUsername());
         return ResponseEntity.ok()
-                .body(ApiResponse.<Void>builder()
+                .body(ApiResponse.<CreateMyTravelogueResponse>builder()
                         .statusCode(HttpStatus.CREATED.value())
+                        .data(travelogueService.createMyTravelogue(request, userDetails.getUsername()))
                         .build()
                 );
     }
@@ -48,7 +49,7 @@ public class TravelogueController {
                 );
     }
 
-    @GetMapping("/list")
+    @GetMapping("/list/me")
     @MemberAuthorize
     public ResponseEntity<ApiResponse<GetMyTraveloguesResponse>> getMyTravelogues(
             @RequestParam(defaultValue = "0") final int page,

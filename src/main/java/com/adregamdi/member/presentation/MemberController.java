@@ -5,13 +5,16 @@ import com.adregamdi.core.handler.ApiResponse;
 import com.adregamdi.member.application.MemberService;
 import com.adregamdi.member.dto.request.UpdateMyMemberRequest;
 import com.adregamdi.member.dto.response.GetMyMemberResponse;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+@Validated
 @RequiredArgsConstructor
 @RequestMapping("/api/member")
 @RestController
@@ -31,7 +34,7 @@ public class MemberController {
     @PatchMapping("/me")
     @MemberAuthorize
     public ResponseEntity<ApiResponse<Void>> update(
-            @RequestBody final UpdateMyMemberRequest request,
+            @RequestBody @Valid final UpdateMyMemberRequest request,
             @AuthenticationPrincipal final UserDetails userDetails
     ) {
         memberService.update(request, userDetails.getUsername());

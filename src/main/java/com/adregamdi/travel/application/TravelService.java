@@ -63,13 +63,23 @@ public class TravelService {
 
         List<TravelDay> existingDays = travelDayRepository.findAllByTravelId(travel.getTravelId());
         // 첫 등록 시
-        if (request.travelId() == null && existingDays.isEmpty()) {
-            existingDays = new ArrayList<>();
+        if (request.travelId() == null) {
             for (int day = 1; day <= totalDays; day++) {
                 LocalDate date = request.startDate().plusDays(day - 1);
-                existingDays.add(new TravelDay(travel.getTravelId(), date, day, ""));
+                TravelDay travelDay;
+                if (request.dayList().size() > day - 1) {
+                    travelDay = new TravelDay(travel.getTravelId(), date, day, request.dayList().get(day - 1).memo());
+                    travelDayRepository.save(travelDay);
+                    if (request.dayList().get(day - 1).placeList() != null && !request.dayList().get(day - 1).placeList().isEmpty()) {
+                        for (int i = 0; i < request.dayList().get(day - 1).placeList().size(); i++) {
+                            travelPlaceRepository.save(new TravelPlace(travelDay.getTravelDayId(), request.dayList().get(day - 1).placeList().get(i).placeId(), request.dayList().get(day - 1).placeList().get(i).placeOrder()));
+                        }
+                    }
+                } else {
+                    travelDay = new TravelDay(travel.getTravelId(), date, day, "");
+                    travelDayRepository.save(travelDay);
+                }
             }
-            travelDayRepository.saveAll(existingDays);
             return CreateMyTravelResponse.from(travel.getTravelId());
         }
 

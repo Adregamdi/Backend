@@ -3,7 +3,6 @@ package com.adregamdi.like.presentation;
 import com.adregamdi.core.annotation.MemberAuthorize;
 import com.adregamdi.core.handler.ApiResponse;
 import com.adregamdi.like.application.LikesService;
-import com.adregamdi.like.domain.enumtype.ContentType;
 import com.adregamdi.like.dto.request.CreateLikesRequest;
 import com.adregamdi.like.dto.request.DeleteLikeRequest;
 import com.adregamdi.like.dto.request.GetLikesContentsRequest;
@@ -11,6 +10,7 @@ import com.adregamdi.like.dto.response.CreateShortsLikeResponse;
 import com.adregamdi.like.dto.response.GetLikesContentsResponse;
 import com.adregamdi.member.domain.Role;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -30,16 +30,33 @@ public class LikesController {
 
     private final LikesService likesService;
 
-    @GetMapping("/content-list")
+    @GetMapping("/content-list/all")
     @MemberAuthorize
     public ResponseEntity<ApiResponse<GetLikesContentsResponse<?>>> getLikesContents(
-            @Valid @ModelAttribute GetLikesContentsRequest request
+            @AuthenticationPrincipal UserDetails userDetails,
+            @RequestParam(value = "like_id", defaultValue = "0") Long lastLikeId,
+            @RequestParam(value = "size") @Positive int size
     ) {
-        GetLikesContentsResponse<?> response = likesService.getLikesContents(request);
+        GetLikesContentsRequest request = new GetLikesContentsRequest(userDetails.getUsername(), lastLikeId, size);
         return ResponseEntity.ok()
                 .body(ApiResponse.<GetLikesContentsResponse<?>>builder()
                         .statusCode(HttpStatus.OK.value())
-                        .data(null)
+                        .data(likesService.getLikesContents(request))
+                        .build());
+    }
+
+    @GetMapping("/content-list/travelogue")
+    @MemberAuthorize
+    public ResponseEntity<ApiResponse<GetLikesContentsResponse<?>>> getLikesContentsOfTravelogue(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @RequestParam(value = "like_id", defaultValue = "0") Long lastLikeId,
+            @RequestParam(value = "size") @Positive int size
+    ) {
+        GetLikesContentsRequest request = new GetLikesContentsRequest(userDetails.getUsername(), lastLikeId, size);
+        return ResponseEntity.ok()
+                .body(ApiResponse.<GetLikesContentsResponse<?>>builder()
+                        .statusCode(HttpStatus.OK.value())
+                        .data(likesService.getLikesContentsOfTravelogue(request))
                         .build());
     }
 

@@ -8,7 +8,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @NoArgsConstructor
-public class AllContentDTO implements LikeContent{
+public class AllContentDTO{
 
     private String title;
     private ContentType contentType;
@@ -25,16 +25,11 @@ public class AllContentDTO implements LikeContent{
     }
 
     private String generateDetailUri(ContentType contentType, Long contentId) {
-        switch (contentType) {
-            case SHORTS:
-                return "/api/shorts/stream/" + contentId;
-            case PLACE:
-                return "/api/places?place_id=" + contentId;
-            case TRAVELOGUE:
-                return "/travels/" + contentId; // 수정 필요
-            default:
-                return "";
-        }
+        return switch (contentType) {
+            case SHORTS -> "/api/shorts/stream/" + contentId;
+            case PLACE -> "/api/places?place_id=" + contentId;
+            case TRAVELOGUE -> "/api/travelogue?travelogue_id" + contentId;
+        };
     }
 
 }

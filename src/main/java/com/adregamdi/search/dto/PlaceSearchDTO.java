@@ -7,8 +7,9 @@ public record PlaceSearchDTO(
         String title,
         String contentsLabel,
         String regionLabel,
-        List<String> imageUrls,
+        String roadAddress,
         Long photoReviewCount,
-        Long shortsCount
+        Long shortsCount,
+        List<String> imageUrls
 ) {
 }

@@ -13,14 +13,6 @@ public class ShortsContentDTO {
 
     private Long shortsId;
     private String title;
-    private String memberId;
-    private Long placeId;
-    private String placeName; // 장소 이름
-    private Long travelReviewId;
-    private String travelTitle;
     private String shortsVideoUrl;
     private String thumbnailUrl;
-    private int viewCount;
-    private boolean isLiked;
-
 }

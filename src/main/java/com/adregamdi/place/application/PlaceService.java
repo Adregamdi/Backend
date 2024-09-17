@@ -58,5 +58,5 @@ public interface PlaceService {
     /*
      * [내 리뷰 조회]
      * */
-    GetMyPlaceReviewResponse getReview(final String username);
+    GetMyPlaceReviewResponse getReview(final String memberId);
 }

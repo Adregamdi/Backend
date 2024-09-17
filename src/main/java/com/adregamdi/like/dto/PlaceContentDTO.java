@@ -1,6 +1,5 @@
 package com.adregamdi.like.dto;
 
-import com.adregamdi.like.domain.enumtype.ContentType;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -10,7 +9,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class PlaceContentDTO implements LikeContent{
+public class PlaceContentDTO{
 
     private Long placeId;
     private String title; // 장소 이름
@@ -30,19 +29,4 @@ public class PlaceContentDTO implements LikeContent{
     private String thumbnailPath; // 썸네일 이미지 경로
 //    private List<String> placeImgList; // 장소 리뷰 이미지 리스트 추후 업데이트
 
-
-    @Override
-    public ContentType getContentType() {
-        return null;
-    }
-
-    @Override
-    public Long getContentId() {
-        return 0L;
-    }
-
-    @Override
-    public String getThumbnailUrl() {
-        return "";
-    }
 }

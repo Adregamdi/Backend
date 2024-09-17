@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.UUID;
 
 import static com.adregamdi.like.domain.QLike.like;
+import static com.adregamdi.member.domain.QMember.member;
 import static com.adregamdi.place.domain.QPlace.place;
 import static com.adregamdi.shorts.domain.QShorts.shorts;
 import static com.adregamdi.travelogue.domain.QTravelogue.travelogue;
@@ -30,7 +31,7 @@ public class LikesCustomRepositoryImpl implements LikesCustomRepository{
 
     private final JPAQueryFactory jpaQueryFactory;
 
-    //    @Override
+    @Override
     public GetLikesContentsResponse<List<AllContentDTO>> getLikesContentsOfAll(GetLikesContentsRequest request) {
 
         List<AllContentDTO> contents = jpaQueryFactory
@@ -103,11 +104,33 @@ public class LikesCustomRepositoryImpl implements LikesCustomRepository{
         return null;
     }
 
-    //    @Override
+    @Override
     public GetLikesContentsResponse<List<TravelogueContentDTO>> getLikesContentsOfTravelogue(GetLikesContentsRequest request) {
 
-        List<Trav>
-        return null;
+        List<TravelogueContentDTO> contents = jpaQueryFactory
+                .select(Projections.constructor(TravelogueContentDTO.class,
+                        travelogue.travelogueId,
+                        travelogue.title,
+                        member.name,
+                        member.profile
+                        ))
+                .from(like)
+                .leftJoin(travelogue).on(like.contentId.eq(travelogue.travelogueId).and(like.contentType.eq(ContentType.TRAVELOGUE)))
+                .leftJoin(member).on(travelogue.memberId.eq(member.memberId))
+                .where(
+                        like.memberId.eq(UUID.fromString(request.memberId())),
+                        like.contentType.eq(ContentType.TRAVELOGUE),
+                        like.likeId.gt(request.lastLikeId()))
+                .orderBy(like.likeId.desc())
+                .limit(request.size()+1)
+                .fetch();
+
+        boolean hasNext = contents.size() > request.size();
+        if (hasNext) {
+            contents.remove(request.size());
+        }
+
+        return new GetLikesContentsResponse<>(hasNext, contents);
     }
 
     //    @Override
@@ -148,6 +171,6 @@ public class LikesCustomRepositoryImpl implements LikesCustomRepository{
             contents.remove(request.size());
         }
 
-        return new GetLikesContentsResponse<>(request.getSelectedType(), hasNext, contents);
+        return new GetLikesContentsResponse<>(hasNext, contents);
     }
 }

@@ -176,7 +176,7 @@ public class TravelogueService {
         List<TravelogueDay> travelogueDays = travelogueDayRepository.findByTravelogueIdOrderByDay(travelogueId)
                 .orElseThrow(() -> new TravelogueDayNotFoundException(travelogueId));
 
-        List<PlaceReview> placeReviews = placeReviewRepository.findByTravelogueId(travelogueId)
+        List<PlaceReview> placeReviews = placeReviewRepository.findAllByTravelogueId(travelogueId)
                 .orElseThrow(() -> new PlaceReviewNotFoundException(travelogueId));
 
         Function<Long, List<PlaceReviewImage>> placeReviewImagesFetcher = (reviewId) ->

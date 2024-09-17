@@ -6,6 +6,7 @@ import com.adregamdi.travelogue.application.TravelogueService;
 import com.adregamdi.travelogue.dto.request.CreateMyTravelogueRequest;
 import com.adregamdi.travelogue.dto.response.CreateMyTravelogueResponse;
 import com.adregamdi.travelogue.dto.response.GetMyTraveloguesResponse;
+import com.adregamdi.travelogue.dto.response.GetRecentTraveloguesResponse;
 import com.adregamdi.travelogue.dto.response.GetTravelogueResponse;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
@@ -59,6 +60,17 @@ public class TravelogueController {
                 .body(ApiResponse.<GetMyTraveloguesResponse>builder()
                         .statusCode(HttpStatus.OK.value())
                         .data(travelogueService.getMyTravelogues(page, userDetails.getUsername()))
+                        .build()
+                );
+    }
+
+    @GetMapping("/list/recent")
+    @MemberAuthorize
+    public ResponseEntity<ApiResponse<GetRecentTraveloguesResponse>> getRecentTravelogues(@RequestParam(defaultValue = "0") final int page) {
+        return ResponseEntity.ok()
+                .body(ApiResponse.<GetRecentTraveloguesResponse>builder()
+                        .statusCode(HttpStatus.OK.value())
+                        .data(travelogueService.getRecentTravelogues(page))
                         .build()
                 );
     }

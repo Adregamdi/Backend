@@ -180,7 +180,7 @@ public class TravelogueService {
                 .orElseThrow(() -> new PlaceReviewNotFoundException(travelogueId));
 
         Function<Long, List<PlaceReviewImage>> placeReviewImagesFetcher = (reviewId) ->
-                placeReviewImageRepository.findByPlaceReviewId(reviewId)
+                placeReviewImageRepository.findAllByPlaceReviewId(reviewId)
                         .orElseThrow(() -> new PlaceReviewImageNotFoundException(reviewId));
 
         return GetTravelogueResponse.of(travelogue, travelogueImages, travelogueDays, placeReviews, placeReviewImagesFetcher);

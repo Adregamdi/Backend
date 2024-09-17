@@ -4,19 +4,24 @@ import com.adregamdi.place.domain.Place;
 import com.adregamdi.place.domain.PlaceReview;
 import com.adregamdi.place.domain.PlaceReviewImage;
 import com.adregamdi.place.domain.vo.PlaceNode;
-import com.adregamdi.place.dto.KorServicePlace;
-import com.adregamdi.place.dto.PlaceCoordinate;
-import com.adregamdi.place.dto.PlaceDTO;
-import com.adregamdi.place.dto.PopularPlaceDTO;
+import com.adregamdi.place.dto.*;
 import com.adregamdi.place.dto.request.CreatePlaceRequest;
 import com.adregamdi.place.dto.request.CreatePlaceReviewRequest;
 import com.adregamdi.place.dto.request.GetSortingPlacesRequest;
 import com.adregamdi.place.dto.response.*;
 import com.adregamdi.place.exception.PlaceException.PlaceExistException;
 import com.adregamdi.place.exception.PlaceException.PlaceNotFoundException;
+import com.adregamdi.place.exception.PlaceException.PlaceReviewNotFoundException;
 import com.adregamdi.place.infrastructure.PlaceRepository;
 import com.adregamdi.place.infrastructure.PlaceReviewImageRepository;
 import com.adregamdi.place.infrastructure.PlaceReviewRepository;
+import com.adregamdi.shorts.infrastructure.ShortsRepository;
+import com.adregamdi.travel.domain.Travel;
+import com.adregamdi.travel.exception.TravelException;
+import com.adregamdi.travel.infrastructure.TravelRepository;
+import com.adregamdi.travelogue.domain.Travelogue;
+import com.adregamdi.travelogue.exception.TravelogueException;
+import com.adregamdi.travelogue.infrastructure.TravelogueRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -35,9 +40,9 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.StreamSupport;
@@ -53,6 +58,9 @@ public class PlaceServiceImpl implements PlaceService {
     private final PlaceRepository placeRepository;
     private final PlaceReviewRepository placeReviewRepository;
     private final PlaceReviewImageRepository placeReviewImageRepository;
+    private final ShortsRepository shortsRepository;
+    private final TravelogueRepository travelogueRepository;
+    private final TravelRepository travelRepository;
     private final ObjectMapper objectMapper;
 
     @Value("${api-key.visit-jeju}")
@@ -165,15 +173,6 @@ public class PlaceServiceImpl implements PlaceService {
         );
     }
 
-    private String formatTags(final String tag) {
-        String[] tags = tag.split(",");
-        StringBuilder formattedTags = new StringBuilder();
-        for (String t : tags) {
-            formattedTags.append("#").append(t).append(" ");
-        }
-        return formattedTags.toString().trim();
-    }
-
     @Override
     @Transactional
     public List<GetSelectionBasedRecommendationPlacesResponse> getSelectionBasedRecommendationPlaces(final Double latitude, final Double longitude) throws URISyntaxException {
@@ -218,6 +217,92 @@ public class PlaceServiceImpl implements PlaceService {
         }
     }
 
+    @Override
+    @Transactional
+    public List<GetSortingPlacesResponse> getSortingPlaces(final List<GetSortingPlacesRequest> requests) {
+        return requests.stream()
+                .map(this::sortPlacesForDay)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public GetPopularPlacesResponse getPopularPlaces(final Long lastId, final Integer lastAddCount) {
+        List<PopularPlaceDTO> popularPlaces = placeRepository.findInOrderOfPopularAddCount(lastId, lastAddCount);
+
+        boolean hasNext = popularPlaces.size() > 10;
+        List<PopularPlaceDTO> content = hasNext ? popularPlaces.subList(0, 10) : popularPlaces;
+
+        List<GetPopularPlacesResponse.PopularPlaceInfo> placeInfos = content.stream()
+                .map(dto -> GetPopularPlacesResponse.PopularPlaceInfo.builder()
+                        .placeId(dto.place().getPlaceId())
+                        .title(dto.place().getTitle())
+                        .contentsLabel(dto.place().getContentsLabel())
+                        .regionLabel(dto.place().getRegionLabel())
+                        .imageUrls(dto.imageUrls())
+                        .addCount(dto.place().getAddCount())
+                        .photoReviewCount(dto.photoReviewCount())
+                        .shortsCount(dto.shortsCount())
+                        .build())
+                .collect(Collectors.toList());
+
+        int pageSize = placeInfos.size();
+        int currentPage = calculateCurrentPage(lastId, pageSize);
+        long totalPlaces = placeRepository.countTotalPlaces();
+
+        return GetPopularPlacesResponse.of(
+                currentPage,
+                pageSize,
+                hasNext,
+                totalPlaces,
+                placeInfos
+        );
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public GetMyPlaceReviewResponse getReview(final String memberId) {
+        List<PlaceReview> placeReviews = placeReviewRepository.findAllByMemberIdOrderByPlaceReviewIdDesc(UUID.fromString(memberId))
+                .orElseThrow(() -> new PlaceReviewNotFoundException(memberId));
+        List<MyPlaceReviewDTO> myPlaceReviews = new ArrayList<>();
+
+        for (PlaceReview placeReview : placeReviews) {
+            int imageReviewCount = placeRepository.countPlaceReviewsWithImagesForPlace(placeReview.getPlaceId());
+            int shortsReviewCount = placeRepository.countShortsReviewsForPlace(placeReview.getPlaceId());
+            List<PlaceReviewImage> placeReviewImages = placeReviewImageRepository.findAllByPlaceReviewId(placeReview.getPlaceReviewId())
+                    .orElse(new ArrayList<>());
+            Place place = placeRepository.findById(placeReview.getPlaceId())
+                    .orElseThrow(() -> new PlaceNotFoundException(placeReview.getPlaceId()));
+            Travelogue travelogue = travelogueRepository.findById(placeReview.getTravelogueId())
+                    .orElseThrow(() -> new TravelogueException.TravelogueNotFoundException(placeReview.getTravelogueId()));
+            Travel travel = travelRepository.findById(travelogue.getTravelId())
+                    .orElseThrow(() -> new TravelException.TravelNotFoundException(travelogue.getTravelId()));
+
+            myPlaceReviews.add(MyPlaceReviewDTO.of(
+                            place.getTitle(),
+                            place.getContentsLabel(),
+                            place.getRegionLabel(),
+                            imageReviewCount,
+                            shortsReviewCount,
+                            formatToKoreanString(travel.getStartDate()),
+                            placeReview.getContent(),
+                            placeReviewImages,
+                            LocalDate.from(placeReview.getCreatedAt())
+                    )
+            );
+        }
+        return GetMyPlaceReviewResponse.from(myPlaceReviews);
+    }
+
+    private String formatTags(final String tag) {
+        String[] tags = tag.split(",");
+        StringBuilder formattedTags = new StringBuilder();
+        for (String t : tags) {
+            formattedTags.append("#").append(t).append(" ");
+        }
+        return formattedTags.toString().trim();
+    }
+
     private String encode(String value) {
         return URLEncoder.encode(value, StandardCharsets.UTF_8);
     }
@@ -246,7 +331,6 @@ public class PlaceServiceImpl implements PlaceService {
 
         return GetSelectionBasedRecommendationPlacesResponse.of(place, reviewCount);
     }
-
 
     private Place saveNewPlace(final KorServicePlace item) {
         Place newPlace = Place.builder()
@@ -286,14 +370,6 @@ public class PlaceServiceImpl implements PlaceService {
             case "4" -> "제주시";
             default -> "기타";
         };
-    }
-
-    @Override
-    @Transactional
-    public List<GetSortingPlacesResponse> getSortingPlaces(final List<GetSortingPlacesRequest> requests) {
-        return requests.stream()
-                .map(this::sortPlacesForDay)
-                .collect(Collectors.toList());
     }
 
     private GetSortingPlacesResponse sortPlacesForDay(final GetSortingPlacesRequest request) {
@@ -379,44 +455,15 @@ public class PlaceServiceImpl implements PlaceService {
         return R * c;
     }
 
-    @Override
-    @Transactional(readOnly = true)
-    public GetPopularPlacesResponse getPopularPlaces(final Long lastId, final Integer lastAddCount) {
-        List<PopularPlaceDTO> popularPlaces = placeRepository.findInOrderOfPopularAddCount(lastId, lastAddCount);
-
-        boolean hasNext = popularPlaces.size() > 10;
-        List<PopularPlaceDTO> content = hasNext ? popularPlaces.subList(0, 10) : popularPlaces;
-
-        List<GetPopularPlacesResponse.PopularPlaceInfo> placeInfos = content.stream()
-                .map(dto -> GetPopularPlacesResponse.PopularPlaceInfo.builder()
-                        .placeId(dto.place().getPlaceId())
-                        .title(dto.place().getTitle())
-                        .contentsLabel(dto.place().getContentsLabel())
-                        .regionLabel(dto.place().getRegionLabel())
-                        .imageUrls(dto.imageUrls())
-                        .addCount(dto.place().getAddCount())
-                        .photoReviewCount(dto.photoReviewCount())
-                        .shortsCount(dto.shortsCount())
-                        .build())
-                .collect(Collectors.toList());
-
-        int pageSize = placeInfos.size();
-        int currentPage = calculateCurrentPage(lastId, pageSize);
-        long totalPlaces = placeRepository.countTotalPlaces();
-
-        return GetPopularPlacesResponse.of(
-                currentPage,
-                pageSize,
-                hasNext,
-                totalPlaces,
-                placeInfos
-        );
-    }
-
     private int calculateCurrentPage(Long lastId, int pageSize) {
         if (lastId == null) {
             return 0;
         }
         return (lastId.intValue() / pageSize) + 1;
+    }
+
+    private String formatToKoreanString(LocalDate date) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy년 M월 여행", Locale.KOREAN);
+        return date.format(formatter);
     }
 }

@@ -54,4 +54,9 @@ public interface PlaceService {
      * [일정에 많이 추가된 장소 리스트 조회]
      * */
     GetPopularPlacesResponse getPopularPlaces(final Long lastId, final Integer lastAddCount);
+
+    /*
+     * [내 리뷰 조회]
+     * */
+    GetMyPlaceReviewResponse getReview(final String memberId);
 }

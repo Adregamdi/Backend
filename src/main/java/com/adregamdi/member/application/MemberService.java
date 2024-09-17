@@ -20,6 +20,7 @@ import reactor.core.publisher.Mono;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 @Slf4j
@@ -45,14 +46,15 @@ public class MemberService {
      */
     @Transactional
     public void update(final UpdateMyMemberRequest request, final String username) {
+        Member another = memberRepository.findByHandle(request.handle());
         Member member = memberRepository.findById(UUID.fromString(username))
                 .orElseThrow(() -> new MemberNotFoundException(username));
 
-        if (member.getHandle().equals(request.handle())) {
+        if (another != null && !Objects.equals(another.getHandle(), member.getHandle())) {
             throw new HandleExistException(request.handle());
         }
 
-        member.updateMember(request);
+        member.updateMember(request.profile(), request.handle());
     }
 
     /*

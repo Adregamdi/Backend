@@ -6,9 +6,6 @@ import jakarta.validation.constraints.NotNull;
 public record UpdateMyMemberRequest(
         @NotNull
         @NotEmpty
-        String name,
-        @NotNull
-        @NotEmpty
         String profile,
         @NotNull
         @NotEmpty

@@ -126,4 +126,15 @@ public class PlaceController {
                         .build()
                 );
     }
+
+    @GetMapping("/review")
+    @MemberAuthorize
+    public ResponseEntity<ApiResponse<GetMyPlaceReviewResponse>> getReview(@AuthenticationPrincipal final UserDetails userDetails) {
+        return ResponseEntity.ok()
+                .body(ApiResponse.<GetMyPlaceReviewResponse>builder()
+                        .statusCode(HttpStatus.OK.value())
+                        .data(placeService.getReview(userDetails.getUsername()))
+                        .build()
+                );
+    }
 }

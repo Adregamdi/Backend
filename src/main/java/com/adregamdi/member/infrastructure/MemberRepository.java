@@ -34,4 +34,6 @@ public interface MemberRepository extends JpaRepository<Member, UUID> {
             AND m.updatedAt < :date
             """)
     void deleteByMemberStatusAndUpdatedAt(@Param("date") final LocalDateTime date);
+
+    Member findByHandle(String handle);
 }

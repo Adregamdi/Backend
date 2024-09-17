@@ -176,11 +176,11 @@ public class TravelogueService {
         List<TravelogueDay> travelogueDays = travelogueDayRepository.findByTravelogueIdOrderByDay(travelogueId)
                 .orElseThrow(() -> new TravelogueDayNotFoundException(travelogueId));
 
-        List<PlaceReview> placeReviews = placeReviewRepository.findByTravelogueId(travelogueId)
+        List<PlaceReview> placeReviews = placeReviewRepository.findAllByTravelogueId(travelogueId)
                 .orElseThrow(() -> new PlaceReviewNotFoundException(travelogueId));
 
         Function<Long, List<PlaceReviewImage>> placeReviewImagesFetcher = (reviewId) ->
-                placeReviewImageRepository.findByPlaceReviewId(reviewId)
+                placeReviewImageRepository.findAllByPlaceReviewId(reviewId)
                         .orElseThrow(() -> new PlaceReviewImageNotFoundException(reviewId));
 
         return GetTravelogueResponse.of(travelogue, travelogueImages, travelogueDays, placeReviews, placeReviewImagesFetcher);

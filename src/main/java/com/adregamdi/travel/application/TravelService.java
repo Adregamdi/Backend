@@ -101,6 +101,7 @@ public class TravelService {
             return CreateMyTravelResponse.from(travel.getTravelId());
         }
         // 하루 이상 설정하면
+        // 전체 기간에서 요청된 날짜만큼 채우기
         for (int i = 0; i < request.dayList().size(); i++) {
             existingDays.get(i).update(request.dayList().get(i).date(), request.dayList().get(i).day(), request.dayList().get(i).memo());
 
@@ -119,12 +120,36 @@ public class TravelService {
                 }
                 travelPlaceRepository.saveAll(travelPlaces);
             } else if (request.dayList().get(i).placeList() != null && !request.dayList().get(i).placeList().isEmpty() && !travelPlaces.isEmpty()) {
-                for (int j = 0; j < travelPlaces.size(); j++) {
-                    travelPlaces.get(j).update(request.dayList().get(i).placeList().get(j).placeId(), request.dayList().get(i).placeList().get(j).placeOrder());
-                    placeService.addCount(request.dayList().get(i).placeList().get(j).placeId(), true);
+                if (travelPlaces.size() > request.dayList().get(i).placeList().size()) {
+                    for (int j = 0; j < travelPlaces.size(); j++) {
+                        if (request.dayList().get(i).placeList().size() > j) {
+                            travelPlaces.get(j).update(request.dayList().get(i).placeList().get(j).placeId(), request.dayList().get(i).placeList().get(j).placeOrder());
+                            placeService.addCount(request.dayList().get(i).placeList().get(j).placeId(), true);
+                        } else {
+                            travelPlaceRepository.deleteByTravelDayIdAndPlaceId(existingDays.get(i).getTravelDayId(), travelPlaces.get(j).getPlaceId());
+                            placeService.addCount(travelPlaces.get(j).getPlaceId(), false);
+                        }
+                    }
+                } else if (travelPlaces.size() == request.dayList().get(i).placeList().size()) {
+                    for (int j = 0; j < travelPlaces.size(); j++) {
+                        travelPlaces.get(j).update(request.dayList().get(i).placeList().get(j).placeId(), request.dayList().get(i).placeList().get(j).placeOrder());
+                        placeService.addCount(request.dayList().get(i).placeList().get(j).placeId(), true);
+                    }
+                } else {
+                    for (int j = 0; j < request.dayList().get(i).placeList().size(); j++) {
+                        if (travelPlaces.size() > j) {
+                            travelPlaces.get(j).update(request.dayList().get(i).placeList().get(j).placeId(), request.dayList().get(i).placeList().get(j).placeOrder());
+                            placeService.addCount(request.dayList().get(i).placeList().get(j).placeId(), true);
+                        } else {
+                            travelPlaces.add(new TravelPlace(existingDays.get(i).getTravelDayId(), request.dayList().get(i).placeList().get(j).placeId(), request.dayList().get(i).placeList().get(j).placeOrder()));
+                            placeService.addCount(request.dayList().get(i).placeList().get(j).placeId(), true);
+                        }
+                        travelPlaceRepository.saveAll(travelPlaces);
+                    }
                 }
             }
         }
+        // 전체 기간에서 비어있는 날짜 지우기
         for (int day = request.dayList().size() + 1; day <= totalDays; day++) {
             LocalDate date = request.startDate().plusDays(day - 1);
             List<TravelPlace> travelPlaces = travelPlaceRepository.findAllByTravelDayId(existingDays.get(day - 1).getTravelDayId());

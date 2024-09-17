@@ -11,4 +11,6 @@ public interface TravelPlaceRepository extends JpaRepository<TravelPlace, Long>,
     List<TravelPlace> findAllByTravelDayId(Long travelDayId);
 
     void deleteAllByTravelDayId(Long travelDayId);
+
+    void deleteByTravelDayIdAndPlaceId(Long travelDayId, Long placeId);
 }

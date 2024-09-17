@@ -2,7 +2,6 @@ package com.adregamdi.member.domain;
 
 import com.adregamdi.core.entity.BaseTime;
 import com.adregamdi.core.oauth2.dto.SignUpDTO;
-import com.adregamdi.member.dto.request.UpdateMyMemberRequest;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -63,10 +62,9 @@ public class Member extends BaseTime {
         this.memberStatus = true;
     }
 
-    public void updateMember(UpdateMyMemberRequest request) {
-        this.name = request.name();
-        this.profile = request.profile();
-        this.handle = request.handle();
+    public void updateMember(String profile, String handle) {
+        this.profile = profile;
+        this.handle = handle;
     }
 
     public void updateSocialAccessToken(String socialAccessToken) {

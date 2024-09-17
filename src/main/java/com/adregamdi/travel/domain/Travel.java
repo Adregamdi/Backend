@@ -34,7 +34,8 @@ public class Travel extends BaseTime {
         this.title = request.title();
     }
 
-    public void update(CreateMyTravelRequest request) {
+    public void update(CreateMyTravelRequest request, String memberId) {
+        this.memberId = UUID.fromString(memberId);
         this.startDate = request.startDate();
         this.endDate = request.endDate();
         this.title = request.title();

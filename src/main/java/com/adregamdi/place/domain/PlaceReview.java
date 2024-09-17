@@ -23,14 +23,15 @@ public class PlaceReview extends BaseTime {
     @Column
     private Long travelogueId; // 여행기 id
     @Column
-    private Long travelogueDayId; // 여행기 날짜 id
+    private Long travelogueDayId; // 날짜 별 여행기 id
     @Column
     private String content; // 내용
 
-    public PlaceReview(String memberId, Long placeId, Long travelogueId, String content) {
+    public PlaceReview(String memberId, Long placeId, Long travelogueId, Long travelogueDayId, String content) {
         this.memberId = UUID.fromString(memberId);
         this.placeId = placeId;
         this.travelogueId = travelogueId;
+        this.travelogueDayId = travelogueDayId;
         this.content = content;
     }
 

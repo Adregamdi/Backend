@@ -5,6 +5,7 @@ import com.adregamdi.travel.domain.Travel;
 import com.adregamdi.travel.domain.TravelDay;
 import com.adregamdi.travel.domain.TravelPlace;
 import com.adregamdi.travel.dto.TravelDTO;
+import com.adregamdi.travel.dto.TravelPlaceDTO;
 import com.adregamdi.travel.dto.request.CreateMyTravelRequest;
 import com.adregamdi.travel.dto.response.CreateMyTravelResponse;
 import com.adregamdi.travel.dto.response.GetMyTravelResponse;
@@ -57,18 +58,28 @@ public class TravelService {
         } else {
             travel = travelRepository.findById(request.travelId())
                     .orElseThrow(() -> new TravelNotFoundException(request.travelId()));
-            travel.update(request);
+            travel.update(request, memberId);
         }
 
         List<TravelDay> existingDays = travelDayRepository.findAllByTravelId(travel.getTravelId());
         // 첫 등록 시
-        if (request.travelId() == null && existingDays.isEmpty()) {
-            existingDays = new ArrayList<>();
+        if (request.travelId() == null) {
             for (int day = 1; day <= totalDays; day++) {
                 LocalDate date = request.startDate().plusDays(day - 1);
-                existingDays.add(new TravelDay(travel.getTravelId(), date, day, ""));
+                TravelDay travelDay;
+                if (request.dayList().size() > day - 1) {
+                    travelDay = new TravelDay(travel.getTravelId(), date, day, request.dayList().get(day - 1).memo());
+                    travelDayRepository.save(travelDay);
+                    if (request.dayList().get(day - 1).placeList() != null && !request.dayList().get(day - 1).placeList().isEmpty()) {
+                        for (int i = 0; i < request.dayList().get(day - 1).placeList().size(); i++) {
+                            travelPlaceRepository.save(new TravelPlace(travelDay.getTravelDayId(), request.dayList().get(day - 1).placeList().get(i).placeId(), request.dayList().get(day - 1).placeList().get(i).placeOrder()));
+                        }
+                    }
+                } else {
+                    travelDay = new TravelDay(travel.getTravelId(), date, day, "");
+                    travelDayRepository.save(travelDay);
+                }
             }
-            travelDayRepository.saveAll(existingDays);
             return CreateMyTravelResponse.from(travel.getTravelId());
         }
 
@@ -100,14 +111,14 @@ public class TravelService {
                 for (TravelPlace travelPlace : travelPlaces) {
                     placeService.addCount(travelPlace.getPlaceId(), false);
                 }
-            } else if (request.dayList().get(i).placeList() != null || !request.dayList().get(i).placeList().isEmpty() && travelPlaces.isEmpty()) {
+            } else if (request.dayList().get(i).placeList() != null && !request.dayList().get(i).placeList().isEmpty() && travelPlaces.isEmpty()) {
                 travelPlaces = new ArrayList<>();
                 for (int j = 0; j < request.dayList().get(i).placeList().size(); j++) {
                     travelPlaces.add(new TravelPlace(existingDays.get(i).getTravelDayId(), request.dayList().get(i).placeList().get(j).placeId(), request.dayList().get(i).placeList().get(j).placeOrder()));
                     placeService.addCount(request.dayList().get(i).placeList().get(j).placeId(), true);
                 }
                 travelPlaceRepository.saveAll(travelPlaces);
-            } else if (request.dayList().get(i).placeList() != null || !request.dayList().get(i).placeList().isEmpty() && !travelPlaces.isEmpty()) {
+            } else if (request.dayList().get(i).placeList() != null && !request.dayList().get(i).placeList().isEmpty() && !travelPlaces.isEmpty()) {
                 for (int j = 0; j < travelPlaces.size(); j++) {
                     travelPlaces.get(j).update(request.dayList().get(i).placeList().get(j).placeId(), request.dayList().get(i).placeList().get(j).placeOrder());
                     placeService.addCount(request.dayList().get(i).placeList().get(j).placeId(), true);
@@ -135,7 +146,7 @@ public class TravelService {
      * */
     @Transactional(readOnly = true)
     public GetMyTravelResponse getMyTravel(final Long travelId, final String memberId) {
-        List<List<TravelPlace>> travelPlaces = new ArrayList<>();
+        List<List<TravelPlaceDTO>> travelPlaceDTOList = new ArrayList<>();
 
         Travel travel = travelRepository.findByTravelIdAndMemberId(travelId, UUID.fromString(memberId))
                 .orElseThrow(() -> new TravelNotFoundException(memberId));
@@ -145,13 +156,17 @@ public class TravelService {
 
         for (TravelDay travelDay : travelDays) {
             List<TravelPlace> travelPlaceList = travelPlaceRepository.findByTravelDayId(travelDay.getTravelDayId());
+            List<TravelPlaceDTO> travelPlaceDTOS = new ArrayList<>();
             if (travelPlaceList == null) {
                 throw new TravelPlaceNotFoundException(travel.getTravelId());
             }
-            travelPlaces.add(travelPlaceList);
+            for (TravelPlace travelPlace : travelPlaceList) {
+                travelPlaceDTOS.add(TravelPlaceDTO.of(travelPlace, placeService.get(travelPlace.getPlaceId()).place()));
+            }
+            travelPlaceDTOList.add(travelPlaceDTOS);
         }
 
-        return GetMyTravelResponse.of(travel, travelDays, travelPlaces);
+        return GetMyTravelResponse.of(travel, travelDays, travelPlaceDTOList);
     }
 
     /*

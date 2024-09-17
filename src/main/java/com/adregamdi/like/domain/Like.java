@@ -17,7 +17,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "tbl_like", indexes = {
-        @Index(name = "idx_user_content", columnList = "userId, contentType, contentId"),
+        @Index(name = "idx_member_content", columnList = "memberId, contentType, contentId"),
         @Index(name = "idx_content", columnList = "contentType, contentId")
 })
 public class Like {
@@ -26,7 +26,7 @@ public class Like {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long likeId;
 
-    @Column(name = "user_id", updatable = false, nullable = false)
+    @Column(name = "member_id", updatable = false, nullable = false)
     @Comment("회원 id")
     private UUID memberId;
 

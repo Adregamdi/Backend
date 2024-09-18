@@ -263,7 +263,7 @@ public class PlaceServiceImpl implements PlaceService {
 
     @Override
     @Transactional(readOnly = true)
-    public GetMyPlaceReviewResponse getReview(final String memberId) {
+    public GetMyPlaceReviewResponse getMyReview(final String memberId) {
         List<PlaceReview> placeReviews = placeReviewRepository.findAllByMemberIdOrderByPlaceReviewIdDesc(UUID.fromString(memberId))
                 .orElseThrow(() -> new PlaceReviewNotFoundException(memberId));
         List<MyPlaceReviewDTO> myPlaceReviews = new ArrayList<>();
@@ -271,12 +271,12 @@ public class PlaceServiceImpl implements PlaceService {
         for (PlaceReview placeReview : placeReviews) {
             int imageReviewCount = placeRepository.countPlaceReviewsWithImagesForPlace(placeReview.getPlaceId());
             int shortsReviewCount = placeRepository.countShortsReviewsForPlace(placeReview.getPlaceId());
-            List<PlaceReviewImage> placeReviewImages = placeReviewImageRepository.findAllByPlaceReviewId(placeReview.getPlaceReviewId())
-                    .orElse(new ArrayList<>());
+            List<PlaceReviewImage> placeReviewImages = placeReviewImageRepository.findByPlaceReviewId(placeReview.getPlaceReviewId());
             Place place = placeRepository.findById(placeReview.getPlaceId())
                     .orElseThrow(() -> new PlaceNotFoundException(placeReview.getPlaceId()));
 
             myPlaceReviews.add(MyPlaceReviewDTO.of(
+                            place.getPlaceId(),
                             place.getTitle(),
                             place.getContentsLabel(),
                             place.getRegionLabel(),
@@ -290,6 +290,18 @@ public class PlaceServiceImpl implements PlaceService {
             );
         }
         return GetMyPlaceReviewResponse.from(myPlaceReviews);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public GetPlaceReviewResponse getReview(final Long placeReviewId) {
+        PlaceReview placeReview = placeReviewRepository.findById(placeReviewId)
+                .orElseThrow(() -> new PlaceReviewNotFoundException(placeReviewId));
+        Place place = placeRepository.findById(placeReview.getPlaceId())
+                .orElseThrow(() -> new PlaceNotFoundException(placeReview.getPlaceId()));
+        List<PlaceReviewImage> placeReviewImages = placeReviewImageRepository.findByPlaceReviewId(placeReview.getPlaceReviewId());
+
+        return GetPlaceReviewResponse.of(place, placeReview, placeReviewImages);
     }
 
     private String formatTags(final String tag) {

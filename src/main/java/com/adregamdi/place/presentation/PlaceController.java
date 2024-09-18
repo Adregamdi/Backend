@@ -163,4 +163,17 @@ public class PlaceController {
                         .build()
                 );
     }
+
+    @GetMapping("/images")
+    @MemberAuthorize
+    public ResponseEntity<ApiResponse<GetPlaceImagesResponse>> getPlaceImages(
+            @RequestParam("place_id") final Long placeId
+    ) {
+        return ResponseEntity.ok()
+                .body(ApiResponse.<GetPlaceImagesResponse>builder()
+                        .statusCode(HttpStatus.OK.value())
+                        .data(placeService.getPlaceImages(placeId))
+                        .build()
+                );
+    }
 }

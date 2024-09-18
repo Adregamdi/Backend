@@ -36,7 +36,7 @@ public class LikesController {
     @MemberAuthorize
     public ResponseEntity<ApiResponse<GetLikesContentsResponse<?>>> getLikesContents(
             @AuthenticationPrincipal UserDetails userDetails,
-            @Pattern(regexp = "(?i)ALL|PLACE|TRAVELOGUE|SHORTS", message = "장소(PLACE) 혹은 여행기(TRAVELOGUE)만 입력 가능합니다.")
+            @Pattern(regexp = "(?i)ALL|PLACE|TRAVELOGUE|SHORTS", message = "전체(ALL) 혹은 쇼츠(SHORTS), 장소(PLACE), 여행기(TRAVELOGUE)만 입력 가능합니다.")
             @RequestParam(value = "select-content") String selectedContent,
             @RequestParam(value = "like_id", required = false) Long lastLikeId,
             @RequestParam(value = "size") @Positive int size

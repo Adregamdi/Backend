@@ -128,6 +128,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(value = {
             TravelException.InvalidTravelDateException.class,
             TravelException.InvalidTravelDayException.class,
+            TravelogueException.TravelNotEndedException.class,
             ShortsException.ShortsNOTWRITERException.class,
             ImageException.UnSupportedImageTypeException.class,
             ImageException.InvalidFileNameException.class,

@@ -8,4 +8,6 @@ import java.util.Optional;
 
 public interface PlaceReviewImageRepository extends JpaRepository<PlaceReviewImage, Long> {
     Optional<List<PlaceReviewImage>> findAllByPlaceReviewId(Long placeReviewId);
+
+    List<PlaceReviewImage> findByPlaceReviewId(Long placeReviewId);
 }

@@ -4,12 +4,15 @@ import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 
+import java.time.LocalDate;
 import java.util.List;
 
 public record CreatePlaceReviewRequest(
         @NotNull
         @Positive
         Long placeId,
+        @NotNull
+        LocalDate visitDate,
         @NotNull
         @NotEmpty
         String content,

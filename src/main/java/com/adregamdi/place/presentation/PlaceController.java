@@ -52,14 +52,14 @@ public class PlaceController {
 
     @PostMapping("/review")
     @MemberAuthorize
-    public ResponseEntity<ApiResponse<Void>> createReview(
+    public ResponseEntity<ApiResponse<CreatePlaceReviewResponse>> createReview(
             @RequestBody @Valid final CreatePlaceReviewRequest request,
             @AuthenticationPrincipal final UserDetails userDetails
     ) {
-        placeService.createReview(request, userDetails.getUsername());
         return ResponseEntity.ok()
-                .body(ApiResponse.<Void>builder()
+                .body(ApiResponse.<CreatePlaceReviewResponse>builder()
                         .statusCode(HttpStatus.CREATED.value())
+                        .data(placeService.createReview(request, userDetails.getUsername()))
                         .build()
                 );
     }

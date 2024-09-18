@@ -118,11 +118,12 @@ public class SearchRepositoryImpl implements SearchRepository {
                         place.title,
                         place.contentsLabel,
                         place.regionLabel,
-                        Expressions.constant(new ArrayList<String>()),
+                        place.roadAddress,
                         JPAExpressions.select(placeReview.count()).from(placeReview)
                                 .where(placeReview.placeId.eq(place.placeId)),
                         JPAExpressions.select(shorts.count()).from(shorts)
-                                .where(shorts.placeId.eq(place.placeId))))
+                                .where(shorts.placeId.eq(place.placeId)),
+                        Expressions.constant(new ArrayList<String>())))
                 .from(place)
                 .where(place.title.startsWith(keyword))
                 .offset(pageable.getOffset())

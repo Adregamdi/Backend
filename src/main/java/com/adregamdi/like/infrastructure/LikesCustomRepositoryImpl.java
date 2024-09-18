@@ -7,6 +7,7 @@ import com.adregamdi.like.dto.ShortsContentDTO;
 import com.adregamdi.like.dto.TravelogueContentDTO;
 import com.adregamdi.like.dto.request.GetLikesContentsRequest;
 import com.adregamdi.like.dto.response.GetLikesContentsResponse;
+import com.querydsl.core.Tuple;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.JPAExpressions;
@@ -15,8 +16,11 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import static com.adregamdi.like.domain.QLike.like;
 import static com.adregamdi.member.domain.QMember.member;
@@ -108,20 +112,8 @@ public class LikesCustomRepositoryImpl implements LikesCustomRepository{
 
     @Override
     public GetLikesContentsResponse<List<TravelogueContentDTO>> getLikesContentsOfTravelogue(GetLikesContentsRequest request) {
-
-        List<TravelogueContentDTO> contents = jpaQueryFactory
-                .select(Projections.constructor(TravelogueContentDTO.class,
-                        travelogue.travelogueId,
-                        travelogue.title,
-                        JPAExpressions
-                                .select(travelogueImage.url)
-                                .from(travelogueImage)
-                                .where(travelogueImage.travelogueId.eq(travelogue.travelogueId))
-                                .orderBy(travelogueImage.travelogueImageId.asc())
-                                .limit(5),
-                        member.name,
-                        member.profile
-                ))
+        List<Tuple> results = jpaQueryFactory
+                .select(travelogue.travelogueId, travelogue.title, member.name, member.profile)
                 .from(like)
                 .join(travelogue).on(like.contentId.eq(travelogue.travelogueId).and(like.contentType.eq(ContentType.TRAVELOGUE)))
                 .join(member).on(travelogue.memberId.eq(member.memberId))
@@ -130,14 +122,39 @@ public class LikesCustomRepositoryImpl implements LikesCustomRepository{
                         like.contentType.eq(ContentType.TRAVELOGUE),
                         like.likeId.lt(request.lastLikeId())
                 )
-                .groupBy(travelogue.travelogueId, travelogue.title, member.name, member.profile)
                 .orderBy(like.likeId.desc())
                 .limit(request.size() + 1)
                 .fetch();
 
+        List<Long> travelogueIds = results.stream()
+                .map(tuple -> tuple.get(travelogue.travelogueId))
+                .collect(Collectors.toList());
+
+        Map<Long, List<String>> imageMap = jpaQueryFactory
+                .select(travelogueImage.travelogueId, travelogueImage.url)
+                .from(travelogueImage)
+                .where(travelogueImage.travelogueId.in(travelogueIds))
+                .orderBy(travelogueImage.travelogueImageId.asc())
+                .fetch()
+                .stream()
+                .collect(Collectors.groupingBy(
+                        tuple -> tuple.get(travelogueImage.travelogueId),
+                        Collectors.mapping(tuple -> tuple.get(travelogueImage.url), Collectors.toList())
+                ));
+
+        List<TravelogueContentDTO> contents = results.stream()
+                .map(tuple -> new TravelogueContentDTO(
+                        tuple.get(travelogue.travelogueId),
+                        tuple.get(travelogue.title),
+                        imageMap.getOrDefault(tuple.get(travelogue.travelogueId), Collections.emptyList()).stream().limit(5).collect(Collectors.toList()),
+                        tuple.get(member.name),
+                        tuple.get(member.profile)
+                ))
+                .collect(Collectors.toList());
+
         boolean hasNext = contents.size() > request.size();
         if (hasNext) {
-            contents.remove(request.size());
+            contents = contents.subList(0, request.size());
         }
 
         return new GetLikesContentsResponse<>(hasNext, contents);

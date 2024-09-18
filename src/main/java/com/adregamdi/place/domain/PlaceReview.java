@@ -4,6 +4,7 @@ import com.adregamdi.core.entity.BaseTime;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDate;
 import java.util.UUID;
 
 @Getter
@@ -21,23 +22,14 @@ public class PlaceReview extends BaseTime {
     @Column
     private Long placeId; // 장소 id
     @Column
-    private Long travelogueId; // 여행기 id
-    @Column
-    private Long travelogueDayId; // 날짜 별 여행기 id
+    private LocalDate visitDate; // 방문 날짜
     @Column
     private String content; // 내용
 
-    public PlaceReview(String memberId, Long placeId, Long travelogueId, Long travelogueDayId, String content) {
+    public PlaceReview(String memberId, Long placeId, LocalDate visitDate, String content) {
         this.memberId = UUID.fromString(memberId);
         this.placeId = placeId;
-        this.travelogueId = travelogueId;
-        this.travelogueDayId = travelogueDayId;
-        this.content = content;
-    }
-
-    public PlaceReview(String memberId, Long placeId, String content) {
-        this.memberId = UUID.fromString(memberId);
-        this.placeId = placeId;
+        this.visitDate = visitDate;
         this.content = content;
     }
 }

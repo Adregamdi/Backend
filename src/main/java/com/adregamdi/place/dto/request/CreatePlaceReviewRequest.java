@@ -12,7 +12,6 @@ public record CreatePlaceReviewRequest(
         @Positive
         Long placeId,
         @NotNull
-        @NotEmpty
         LocalDate visitDate,
         @NotNull
         @NotEmpty

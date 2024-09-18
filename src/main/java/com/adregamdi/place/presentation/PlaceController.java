@@ -150,4 +150,17 @@ public class PlaceController {
                         .build()
                 );
     }
+
+    @GetMapping("/reviews")
+    @MemberAuthorize
+    public ResponseEntity<ApiResponse<GetPlaceReviewsResponse>> getReviews(
+            @RequestParam("place_id") final Long placeId
+    ) {
+        return ResponseEntity.ok()
+                .body(ApiResponse.<GetPlaceReviewsResponse>builder()
+                        .statusCode(HttpStatus.OK.value())
+                        .data(placeService.getReviews(placeId))
+                        .build()
+                );
+    }
 }

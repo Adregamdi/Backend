@@ -3,7 +3,7 @@ package com.adregamdi.like.presentation;
 import com.adregamdi.core.annotation.MemberAuthorize;
 import com.adregamdi.core.handler.ApiResponse;
 import com.adregamdi.like.application.LikesService;
-import com.adregamdi.like.domain.enumtype.ContentType;
+import com.adregamdi.like.domain.enumtype.SelectedType;
 import com.adregamdi.like.dto.request.CreateLikesRequest;
 import com.adregamdi.like.dto.request.DeleteLikeRequest;
 import com.adregamdi.like.dto.request.GetLikesContentsRequest;
@@ -11,6 +11,8 @@ import com.adregamdi.like.dto.response.CreateShortsLikeResponse;
 import com.adregamdi.like.dto.response.GetLikesContentsResponse;
 import com.adregamdi.member.domain.Role;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -33,13 +35,21 @@ public class LikesController {
     @GetMapping("/content-list")
     @MemberAuthorize
     public ResponseEntity<ApiResponse<GetLikesContentsResponse<?>>> getLikesContents(
-            @Valid @ModelAttribute GetLikesContentsRequest request
+            @AuthenticationPrincipal UserDetails userDetails,
+            @Pattern(regexp = "(?i)ALL|PLACE|TRAVELOGUE|SHORTS", message = "전체(ALL) 혹은 쇼츠(SHORTS), 장소(PLACE), 여행기(TRAVELOGUE)만 입력 가능합니다.")
+            @RequestParam(value = "select-content") String selectedContent,
+            @RequestParam(value = "like_id", required = false) Long lastLikeId,
+            @RequestParam(value = "size") @Positive int size
     ) {
-        GetLikesContentsResponse<?> response = likesService.getLikesContents(request);
+        GetLikesContentsRequest request = new GetLikesContentsRequest(
+                SelectedType.valueOf(selectedContent.toUpperCase()),
+                userDetails.getUsername(),
+                lastLikeId != null ? lastLikeId : Long.MAX_VALUE,
+                size);
         return ResponseEntity.ok()
                 .body(ApiResponse.<GetLikesContentsResponse<?>>builder()
                         .statusCode(HttpStatus.OK.value())
-                        .data(null)
+                        .data(likesService.getLikesContents(request))
                         .build());
     }
 

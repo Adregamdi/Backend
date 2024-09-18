@@ -1,7 +1,5 @@
 package com.adregamdi.place.dto.response;
 
-import com.adregamdi.place.domain.Place;
-import com.adregamdi.place.domain.PlaceReview;
 import com.adregamdi.place.domain.PlaceReviewImage;
 import lombok.Builder;
 
@@ -14,25 +12,30 @@ public record GetPlaceReviewResponse(
         String title,
         String contentsLabel,
         String regionLabel,
-        LocalDate visitDate,
+        String visitDate,
         String content,
         List<PlaceReviewImage> placeReviewImageList,
         LocalDate createdAt
 ) {
     public static GetPlaceReviewResponse of(
-            final Place place,
-            final PlaceReview placeReview,
-            final List<PlaceReviewImage> placeReviewImages
+            final Long placeReviewId,
+            final String title,
+            final String contentsLabel,
+            final String regionLabel,
+            final String visitDate,
+            final String content,
+            final List<PlaceReviewImage> placeReviewImages,
+            final LocalDate createdAt
     ) {
         return GetPlaceReviewResponse.builder()
-                .placeReviewId(placeReview.getPlaceReviewId())
-                .title(place.getTitle())
-                .contentsLabel(place.getContentsLabel())
-                .regionLabel(place.getRegionLabel())
-                .visitDate(placeReview.getVisitDate())
-                .content(placeReview.getContent())
+                .placeReviewId(placeReviewId)
+                .title(title)
+                .contentsLabel(contentsLabel)
+                .regionLabel(regionLabel)
+                .visitDate(visitDate)
+                .content(content)
                 .placeReviewImageList(placeReviewImages)
-                .createdAt(LocalDate.from(placeReview.getCreatedAt()))
+                .createdAt(createdAt)
                 .build();
     }
 }

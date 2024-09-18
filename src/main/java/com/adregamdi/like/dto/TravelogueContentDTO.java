@@ -14,8 +14,8 @@ public class TravelogueContentDTO {
     private Long travelogueId;
     private String title;
     private List<String> imageList;
-    private String name; // 작성자 닉네임
-    private String profile; // 작성자 프로필 사진
+    private String name;
+    private String profile;
 
     public TravelogueContentDTO(Long travelogueId, String title, List<String> imageList, String name, String profile) {
         this.travelogueId = travelogueId;

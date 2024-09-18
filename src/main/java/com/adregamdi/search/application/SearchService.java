@@ -50,9 +50,6 @@ public class SearchService {
         }
 
         return SearchResponse.of(
-                travelogues.getContent(),
-                shorts.getContent(),
-                places.getContent(),
                 page,
                 pageSize,
                 travelogues.hasNext(),
@@ -60,7 +57,10 @@ public class SearchService {
                 places.hasNext(),
                 totalCounts.getOrDefault(SearchType.TRAVELOGUE, 0L),
                 totalCounts.getOrDefault(SearchType.SHORTS, 0L),
-                totalCounts.getOrDefault(SearchType.PLACE, 0L)
+                totalCounts.getOrDefault(SearchType.PLACE, 0L),
+                travelogues.getContent(),
+                shorts.getContent(),
+                places.getContent()
         );
     }
 

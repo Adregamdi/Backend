@@ -13,8 +13,10 @@ import com.adregamdi.travelogue.dto.TravelogueDTO;
 import com.adregamdi.travelogue.dto.request.CreateMyTravelogueRequest;
 import com.adregamdi.travelogue.dto.response.CreateMyTravelogueResponse;
 import com.adregamdi.travelogue.dto.response.GetMyTraveloguesResponse;
+import com.adregamdi.travelogue.dto.response.GetRecentTraveloguesResponse;
 import com.adregamdi.travelogue.dto.response.GetTravelogueResponse;
 import com.adregamdi.travelogue.exception.TravelogueException.TravelogueDayNotFoundException;
+import com.adregamdi.travelogue.exception.TravelogueException.TravelogueExistException;
 import com.adregamdi.travelogue.exception.TravelogueException.TravelogueImageNotFoundException;
 import com.adregamdi.travelogue.exception.TravelogueException.TravelogueNotFoundException;
 import com.adregamdi.travelogue.infrastructure.TravelogueDayRepository;
@@ -62,6 +64,10 @@ public class TravelogueService {
         }
 
         if (request.travelogueId() == null) {
+            travelogue = travelogueRepository.findByTravelId(request.travelId());
+            if (travelogue != null) {
+                throw new TravelogueExistException(request.travelId());
+            }
             travelogue = travelogueRepository.save(new Travelogue(memberId, request.travelId(), request.title(), request.introduction()));
             saveTravelogueImages(request.travelogueImageList(), travelogue.getTravelogueId());
             saveTravelogueDaysAndReviews(request.dayList(), travelogue.getTravelogueId(), memberId);
@@ -195,6 +201,18 @@ public class TravelogueService {
         Slice<TravelogueDTO> travelogues = travelogueRepository.findByMemberId(memberId, generatePageDesc(page, LARGE_PAGE_SIZE, "travelogueId"));
 
         return GetMyTraveloguesResponse.of(
+                LARGE_PAGE_SIZE,
+                page,
+                travelogues.getNumberOfElements(),
+                travelogues.hasNext(),
+                travelogues.getContent()
+        );
+    }
+
+    public GetRecentTraveloguesResponse getRecentTravelogues(final int page) {
+        Slice<TravelogueDTO> travelogues = travelogueRepository.findOrderByCreatedAt(generatePageDesc(page, LARGE_PAGE_SIZE, "createdAt"));
+
+        return GetRecentTraveloguesResponse.of(
                 LARGE_PAGE_SIZE,
                 page,
                 travelogues.getNumberOfElements(),

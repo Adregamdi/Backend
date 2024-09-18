@@ -9,9 +9,6 @@ import java.util.List;
 
 @Builder
 public record SearchResponse(
-        List<TravelogueSearchDTO> travelogues,
-        List<ShortsSearchDTO> shorts,
-        List<PlaceSearchDTO> places,
         int currentPage,
         int pageSize,
         boolean hasNextTravelogues,
@@ -19,12 +16,12 @@ public record SearchResponse(
         boolean hasNextPlaces,
         long totalTravelogues,
         long totalShorts,
-        long totalPlaces
+        long totalPlaces,
+        List<TravelogueSearchDTO> travelogues,
+        List<ShortsSearchDTO> shorts,
+        List<PlaceSearchDTO> places
 ) {
     public static SearchResponse of(
-            List<TravelogueSearchDTO> travelogues,
-            List<ShortsSearchDTO> shorts,
-            List<PlaceSearchDTO> places,
             int currentPage,
             int pageSize,
             boolean hasNextTravelogues,
@@ -32,12 +29,12 @@ public record SearchResponse(
             boolean hasNextPlaces,
             long totalTravelogues,
             long totalShorts,
-            long totalPlaces
+            long totalPlaces,
+            List<TravelogueSearchDTO> travelogues,
+            List<ShortsSearchDTO> shorts,
+            List<PlaceSearchDTO> places
     ) {
         return SearchResponse.builder()
-                .travelogues(travelogues)
-                .shorts(shorts)
-                .places(places)
                 .currentPage(currentPage)
                 .pageSize(pageSize)
                 .hasNextTravelogues(hasNextTravelogues)
@@ -46,6 +43,9 @@ public record SearchResponse(
                 .totalTravelogues(totalTravelogues)
                 .totalShorts(totalShorts)
                 .totalPlaces(totalPlaces)
+                .travelogues(travelogues)
+                .shorts(shorts)
+                .places(places)
                 .build();
     }
 }

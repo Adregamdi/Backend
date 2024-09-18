@@ -6,4 +6,6 @@ import org.springframework.data.domain.Slice;
 
 public interface TravelogueCustomRepository {
     Slice<TravelogueDTO> findByMemberId(String memberId, Pageable pageable);
+
+    Slice<TravelogueDTO> findOrderByCreatedAt(Pageable pageable);
 }

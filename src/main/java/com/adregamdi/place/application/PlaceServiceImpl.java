@@ -271,7 +271,7 @@ public class PlaceServiceImpl implements PlaceService {
         for (PlaceReview placeReview : placeReviews) {
             int imageReviewCount = placeRepository.countPlaceReviewsWithImagesForPlace(placeReview.getPlaceId());
             int shortsReviewCount = placeRepository.countShortsReviewsForPlace(placeReview.getPlaceId());
-            List<PlaceReviewImage> placeReviewImages = placeReviewImageRepository.findByPlaceReviewId(placeReview.getPlaceReviewId());
+            List<PlaceReviewImage> placeReviewImages = placeReviewImageRepository.findByPlaceReviewIdOrderByPlaceReviewImageIdDesc(placeReview.getPlaceReviewId());
             Place place = placeRepository.findById(placeReview.getPlaceId())
                     .orElseThrow(() -> new PlaceNotFoundException(placeReview.getPlaceId()));
 
@@ -299,7 +299,7 @@ public class PlaceServiceImpl implements PlaceService {
                 .orElseThrow(() -> new PlaceReviewNotFoundException(placeReviewId));
         Place place = placeRepository.findById(placeReview.getPlaceId())
                 .orElseThrow(() -> new PlaceNotFoundException(placeReview.getPlaceId()));
-        List<PlaceReviewImage> placeReviewImages = placeReviewImageRepository.findByPlaceReviewId(placeReview.getPlaceReviewId());
+        List<PlaceReviewImage> placeReviewImages = placeReviewImageRepository.findByPlaceReviewIdOrderByPlaceReviewImageIdDesc(placeReview.getPlaceReviewId());
 
         return GetPlaceReviewResponse.of(
                 place.getPlaceId(),
@@ -322,7 +322,7 @@ public class PlaceServiceImpl implements PlaceService {
 
         List<PlaceReviewDTO> placeReviewDTOS = new ArrayList<>();
         for (PlaceReview placeReview : placeReviews) {
-            List<PlaceReviewImage> placeReviewImages = placeReviewImageRepository.findByPlaceReviewId(placeReview.getPlaceReviewId());
+            List<PlaceReviewImage> placeReviewImages = placeReviewImageRepository.findByPlaceReviewIdOrderByPlaceReviewImageIdDesc(placeReview.getPlaceReviewId());
 
             placeReviewDTOS.add(PlaceReviewDTO.of(
                             place.getPlaceId(),
@@ -337,6 +337,25 @@ public class PlaceServiceImpl implements PlaceService {
             );
         }
         return GetPlaceReviewsResponse.from(placeReviewDTOS);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public GetPlaceImagesResponse getPlaceImages(final Long placeId) {
+        Place place = placeRepository.findById(placeId)
+                .orElseThrow(() -> new PlaceNotFoundException(placeId));
+        List<PlaceReview> placeReviews = placeReviewRepository.findAllByPlaceIdOrderByPlaceReviewIdDesc(placeId);
+
+        List<PlaceImageDTO> placeImageDTOS = new ArrayList<>();
+        for (PlaceReview placeReview : placeReviews) {
+            List<PlaceReviewImage> placeReviewImages = placeReviewImageRepository.findByPlaceReviewIdOrderByPlaceReviewImageIdDesc(placeReview.getPlaceReviewId());
+
+            for (PlaceReviewImage placeReviewImage : placeReviewImages) {
+                placeImageDTOS.add(new PlaceImageDTO(LocalDate.from(placeReviewImage.getCreatedAt()), placeReviewImage.getUrl()));
+            }
+        }
+        placeImageDTOS.add(new PlaceImageDTO(LocalDate.from(place.getCreatedAt()), place.getImgPath()));
+        return GetPlaceImagesResponse.of(placeId, placeImageDTOS);
     }
 
     private String formatTags(final String tag) {

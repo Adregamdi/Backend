@@ -69,4 +69,9 @@ public interface PlaceService {
      * [특정 장소의 전체 리뷰 조회]
      * */
     GetPlaceReviewsResponse getReviews(final Long placeId);
+
+    /*
+     * [특정 장소의 전체 사진 조회]
+     * */
+    GetPlaceImagesResponse getPlaceImages(final Long placeId);
 }

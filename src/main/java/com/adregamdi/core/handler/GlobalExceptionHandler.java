@@ -113,7 +113,8 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(value = {
             MemberException.HandleExistException.class,
             PlaceException.PlaceExistException.class,
-            ShortsException.ShortsExistException.class
+            ShortsException.ShortsExistException.class,
+            TravelogueException.TravelogueExistException.class
     })
     public ResponseEntity<ErrorResponse> handleExistException(final RuntimeException exception) {
         log.warn(exception.getMessage());

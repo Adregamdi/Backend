@@ -6,5 +6,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 
 public interface PlaceReviewImageRepository extends JpaRepository<PlaceReviewImage, Long> {
-    List<PlaceReviewImage> findByPlaceReviewId(Long placeReviewId);
+    List<PlaceReviewImage> findByPlaceReviewIdOrderByPlaceReviewImageIdDesc(Long placeReviewId);
 }

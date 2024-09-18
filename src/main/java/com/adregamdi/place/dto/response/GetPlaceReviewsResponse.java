@@ -7,11 +7,11 @@ import java.util.List;
 
 @Builder
 public record GetPlaceReviewsResponse(
-        List<PlaceReviewDTO> review_list
+        List<PlaceReviewDTO> reviewList
 ) {
     public static GetPlaceReviewsResponse from(List<PlaceReviewDTO> placeReviewDTOS) {
         return GetPlaceReviewsResponse.builder()
-                .review_list(placeReviewDTOS)
+                .reviewList(placeReviewDTOS)
                 .build();
     }
 }

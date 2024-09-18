@@ -301,7 +301,42 @@ public class PlaceServiceImpl implements PlaceService {
                 .orElseThrow(() -> new PlaceNotFoundException(placeReview.getPlaceId()));
         List<PlaceReviewImage> placeReviewImages = placeReviewImageRepository.findByPlaceReviewId(placeReview.getPlaceReviewId());
 
-        return GetPlaceReviewResponse.of(place, placeReview, placeReviewImages);
+        return GetPlaceReviewResponse.of(
+                place.getPlaceId(),
+                place.getTitle(),
+                place.getContentsLabel(),
+                place.getRegionLabel(),
+                formatToKoreanString(placeReview.getVisitDate()),
+                placeReview.getContent(),
+                placeReviewImages,
+                LocalDate.from(placeReview.getCreatedAt())
+        );
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public GetPlaceReviewsResponse getReviews(final Long placeId) {
+        Place place = placeRepository.findById(placeId)
+                .orElseThrow(() -> new PlaceNotFoundException(placeId));
+        List<PlaceReview> placeReviews = placeReviewRepository.findAllByPlaceIdOrderByPlaceReviewIdDesc(placeId);
+
+        List<PlaceReviewDTO> placeReviewDTOS = new ArrayList<>();
+        for (PlaceReview placeReview : placeReviews) {
+            List<PlaceReviewImage> placeReviewImages = placeReviewImageRepository.findByPlaceReviewId(placeReview.getPlaceReviewId());
+
+            placeReviewDTOS.add(PlaceReviewDTO.of(
+                            place.getPlaceId(),
+                            place.getTitle(),
+                            place.getContentsLabel(),
+                            place.getRegionLabel(),
+                            formatToKoreanString(placeReview.getVisitDate()),
+                            placeReview.getContent(),
+                            placeReviewImages,
+                            LocalDate.from(placeReview.getCreatedAt())
+                    )
+            );
+        }
+        return GetPlaceReviewsResponse.from(placeReviewDTOS);
     }
 
     private String formatTags(final String tag) {
@@ -473,7 +508,7 @@ public class PlaceServiceImpl implements PlaceService {
     }
 
     private String formatToKoreanString(LocalDate date) {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy년 M월 여행", Locale.KOREAN);
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy년 M월 d일 방문", Locale.KOREAN);
         return date.format(formatter);
     }
 }

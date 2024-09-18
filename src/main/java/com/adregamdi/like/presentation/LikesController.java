@@ -60,6 +60,37 @@ public class LikesController {
                         .build());
     }
 
+    @GetMapping("/content-list/place")
+    @MemberAuthorize
+    public ResponseEntity<ApiResponse<GetLikesContentsResponse<?>>> getLikesContentsOfPlace(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @RequestParam(value = "like_id", defaultValue = "0") Long lastLikeId,
+            @RequestParam(value = "size") @Positive int size
+    ) {
+        GetLikesContentsRequest request = new GetLikesContentsRequest(userDetails.getUsername(), lastLikeId, size);
+        return ResponseEntity.ok()
+                .body(ApiResponse.<GetLikesContentsResponse<?>>builder()
+                        .statusCode(HttpStatus.OK.value())
+                        .data(likesService.getLikesContentsOfPlace(request))
+                        .build());
+    }
+
+    @GetMapping("/content-list/shorts")
+    @MemberAuthorize
+    public ResponseEntity<ApiResponse<GetLikesContentsResponse<?>>> getLikesContentsOfShorts(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @RequestParam(value = "like_id", defaultValue = "0") Long lastLikeId,
+            @RequestParam(value = "size") @Positive int size
+    ) {
+        GetLikesContentsRequest request = new GetLikesContentsRequest(userDetails.getUsername(), lastLikeId, size);
+        return ResponseEntity.ok()
+                .body(ApiResponse.<GetLikesContentsResponse<?>>builder()
+                        .statusCode(HttpStatus.OK.value())
+                        .data(likesService.getLikesContentsOfShorts(request))
+                        .build());
+    }
+
+
     @PostMapping()
     @MemberAuthorize
     public ResponseEntity<ApiResponse<Void>> create(

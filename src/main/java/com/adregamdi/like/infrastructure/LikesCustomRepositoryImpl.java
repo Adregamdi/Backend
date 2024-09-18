@@ -7,7 +7,6 @@ import com.adregamdi.like.dto.ShortsContentDTO;
 import com.adregamdi.like.dto.TravelogueContentDTO;
 import com.adregamdi.like.dto.request.GetLikesContentsRequest;
 import com.adregamdi.like.dto.response.GetLikesContentsResponse;
-import com.querydsl.core.Tuple;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.JPAExpressions;
@@ -16,16 +15,17 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
 
-import java.util.*;
+import java.util.List;
+import java.util.UUID;
 
 import static com.adregamdi.like.domain.QLike.like;
 import static com.adregamdi.member.domain.QMember.member;
 import static com.adregamdi.place.domain.QPlace.place;
+import static com.adregamdi.place.domain.QPlaceReview.placeReview;
+import static com.adregamdi.place.domain.QPlaceReviewImage.placeReviewImage;
 import static com.adregamdi.shorts.domain.QShorts.shorts;
 import static com.adregamdi.travelogue.domain.QTravelogue.travelogue;
 import static com.adregamdi.travelogue.domain.QTravelogueImage.travelogueImage;
-import static com.adregamdi.place.domain.QPlaceReview.placeReview;
-import static com.adregamdi.place.domain.QPlaceReviewImage.placeReviewImage;
 
 @Slf4j
 @Repository
@@ -59,9 +59,9 @@ public class LikesCustomRepositoryImpl implements LikesCustomRepository{
                                 )
                                 .otherwise((String) null)))
                 .from(like)
-                .leftJoin(shorts).on(like.contentId.eq(shorts.shortsId).and(like.contentType.eq(ContentType.SHORTS)))
-                .leftJoin(place).on(like.contentId.eq(place.placeId).and(like.contentType.eq(ContentType.PLACE)))
-                .leftJoin(travelogue).on(like.contentId.eq(travelogue.travelogueId).and(like.contentType.eq(ContentType.TRAVELOGUE)))
+                .join(shorts).on(like.contentId.eq(shorts.shortsId).and(like.contentType.eq(ContentType.SHORTS)))
+                .join(place).on(like.contentId.eq(place.placeId).and(like.contentType.eq(ContentType.PLACE)))
+                .join(travelogue).on(like.contentId.eq(travelogue.travelogueId).and(like.contentType.eq(ContentType.TRAVELOGUE)))
                 .where(
                         like.memberId.eq(UUID.fromString(request.memberId())),
                         like.likeId.lt(request.lastLikeId()))
@@ -92,7 +92,7 @@ public class LikesCustomRepositoryImpl implements LikesCustomRepository{
                 .where(
                         like.memberId.eq(UUID.fromString(request.memberId())),
                         like.contentType.eq(ContentType.SHORTS),
-                        like.likeId.gt(request.lastLikeId())
+                        like.likeId.lt(request.lastLikeId())
                 )
                 .orderBy(like.createAt.desc())
                 .limit(request.size() + 1)
@@ -109,50 +109,35 @@ public class LikesCustomRepositoryImpl implements LikesCustomRepository{
     @Override
     public GetLikesContentsResponse<List<TravelogueContentDTO>> getLikesContentsOfTravelogue(GetLikesContentsRequest request) {
 
-        List<Tuple> results = jpaQueryFactory
-                .select(
+        List<TravelogueContentDTO> contents = jpaQueryFactory
+                .select(Projections.constructor(TravelogueContentDTO.class,
                         travelogue.travelogueId,
                         travelogue.title,
+                        JPAExpressions
+                                .select(travelogueImage.url)
+                                .from(travelogueImage)
+                                .where(travelogueImage.travelogueId.eq(travelogue.travelogueId))
+                                .orderBy(travelogueImage.travelogueImageId.asc())
+                                .limit(5),
                         member.name,
-                        member.profile,
-                        travelogueImage.url
-                )
+                        member.profile
+                ))
                 .from(like)
-                .leftJoin(travelogue).on(like.contentId.eq(travelogue.travelogueId).and(like.contentType.eq(ContentType.TRAVELOGUE)))
-                .leftJoin(member).on(travelogue.memberId.eq(member.memberId))
-                .leftJoin(travelogueImage).on(travelogue.travelogueId.eq(travelogueImage.travelogueId))
+                .join(travelogue).on(like.contentId.eq(travelogue.travelogueId).and(like.contentType.eq(ContentType.TRAVELOGUE)))
+                .join(member).on(travelogue.memberId.eq(member.memberId))
                 .where(
                         like.memberId.eq(UUID.fromString(request.memberId())),
                         like.contentType.eq(ContentType.TRAVELOGUE),
-                        like.likeId.gt(request.lastLikeId()))
-                .orderBy(like.likeId.desc(), travelogueImage.travelogueImageId.desc())
+                        like.likeId.lt(request.lastLikeId())
+                )
+                .groupBy(travelogue.travelogueId, travelogue.title, member.name, member.profile)
+                .orderBy(like.likeId.desc())
+                .limit(request.size() + 1)
                 .fetch();
-
-        Map<Long, TravelogueContentDTO> contentMap = new LinkedHashMap<>();
-        for (Tuple tuple : results) {
-            Long travelogueId = tuple.get(travelogue.travelogueId);
-            TravelogueContentDTO dto = contentMap.get(travelogueId);
-            if (dto == null) {
-                dto = new TravelogueContentDTO(
-                        travelogueId,
-                        tuple.get(travelogue.title),
-                        new ArrayList<>(),
-                        tuple.get(member.name),
-                        tuple.get(member.profile)
-                );
-                contentMap.put(travelogueId, dto);
-            }
-            String imageUrl = tuple.get(travelogueImage.url);
-            if (imageUrl != null && dto.getImageList().size() < 5) {
-                dto.getImageList().add(imageUrl);
-            }
-        }
-
-        List<TravelogueContentDTO> contents = new ArrayList<>(contentMap.values());
 
         boolean hasNext = contents.size() > request.size();
         if (hasNext) {
-            contents = contents.subList(0, request.size());
+            contents.remove(request.size());
         }
 
         return new GetLikesContentsResponse<>(hasNext, contents);
@@ -161,70 +146,48 @@ public class LikesCustomRepositoryImpl implements LikesCustomRepository{
     @Override
     public GetLikesContentsResponse<List<PlaceContentDTO>> getLikesContentsOfPlace(GetLikesContentsRequest request) {
 
-        List<Tuple> results = jpaQueryFactory
-                .select(
+        List<PlaceContentDTO> contents = jpaQueryFactory
+                .select(Projections.constructor(PlaceContentDTO.class,
                         place.placeId,
                         place.title,
-                        place.contentsLabel,
                         place.regionLabel,
                         place.region1Cd,
                         place.region2Cd,
-                        place.tag,
                         place.imgPath,
                         place.thumbnailPath,
-                        placeReviewImage.url,
-                        placeReviewImage.placeReviewImageId,
-                        JPAExpressions.select(placeReviewImage.count())
+                        JPAExpressions
+                                .select(placeReviewImage.url)
+                                .from(placeReviewImage)
+                                .join(placeReview).on(placeReviewImage.placeReviewId.eq(placeReview.placeReviewId))
+                                .where(placeReview.placeId.eq(place.placeId))
+                                .orderBy(placeReviewImage.placeReviewImageId.desc())
+                                .limit(5),
+                        JPAExpressions
+                                .select(placeReviewImage.count())
                                 .from(placeReviewImage)
                                 .join(placeReview).on(placeReviewImage.placeReviewId.eq(placeReview.placeReviewId))
                                 .where(placeReview.placeId.eq(place.placeId)),
-                        JPAExpressions.select(shorts.count())
+                        JPAExpressions
+                                .select(shorts.count())
                                 .from(shorts)
                                 .where(shorts.placeId.eq(place.placeId))
-                )
+                ))
                 .from(like)
                 .join(place).on(like.contentId.eq(place.placeId).and(like.contentType.eq(ContentType.PLACE)))
-                .leftJoin(placeReview).on(place.placeId.eq(placeReview.placeId))
-                .leftJoin(placeReviewImage).on(placeReview.placeReviewId.eq(placeReviewImage.placeReviewId))
                 .where(
                         like.memberId.eq(UUID.fromString(request.memberId())),
                         like.contentType.eq(ContentType.PLACE),
-                        like.likeId.gt(request.lastLikeId()))
-                .orderBy(like.createAt.desc(), placeReviewImage.placeReviewImageId.desc())
+                        like.likeId.lt(request.lastLikeId())
+                )
+                .groupBy(place.placeId, place.title, place.regionLabel, place.region1Cd,
+                        place.region2Cd, place.imgPath, place.thumbnailPath)
+                .orderBy(like.createAt.desc())
+                .limit(request.size() + 1)
                 .fetch();
-
-        Map<Long, PlaceContentDTO> contentMap = new LinkedHashMap<>();
-        for (Tuple tuple : results) {
-            Long placeId = tuple.get(place.placeId);
-            PlaceContentDTO dto = contentMap.get(placeId);
-            if (dto == null) {
-                dto = new PlaceContentDTO(
-                        placeId,
-                        tuple.get(place.title),
-                        tuple.get(place.contentsLabel),
-                        tuple.get(place.regionLabel),
-                        tuple.get(place.region1Cd),
-                        tuple.get(place.region2Cd),
-                        tuple.get(place.tag),
-                        tuple.get(place.imgPath),
-                        tuple.get(place.thumbnailPath),
-                        new ArrayList<>(),
-                        tuple.get("imageReviewCnt", String.class),
-                        tuple.get("shortsReviewCnt", String.class)
-                );
-                contentMap.put(placeId, dto);
-            }
-            String imageUrl = tuple.get(placeReviewImage.url);
-            if (imageUrl != null && dto.getImageList().size() < 5) {
-                dto.getImageList().add(imageUrl);
-            }
-        }
-
-        List<PlaceContentDTO> contents = new ArrayList<>(contentMap.values());
 
         boolean hasNext = contents.size() > request.size();
         if (hasNext) {
-            contents = contents.subList(0, request.size());
+            contents.remove(request.size());
         }
 
         return new GetLikesContentsResponse<>(hasNext, contents);

@@ -77,4 +77,13 @@ public class LikesService {
     public GetLikesContentsResponse<?> getLikesContentsOfTravelogue(GetLikesContentsRequest request) {
         return likesRepository.getLikesContentsOfTravelogue(request);
     }
+
+    public GetLikesContentsResponse<?> getLikesContentsOfPlace(GetLikesContentsRequest request) {
+        return likesRepository.getLikesContentsOfPlace(request);
+    }
+
+
+    public GetLikesContentsResponse<?> getLikesContentsOfShorts(GetLikesContentsRequest request) {
+        return likesRepository.getLikesContentsOfShorts(request);
+    }
 }

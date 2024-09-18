@@ -50,10 +50,6 @@ public class Shorts extends BaseTime {
     @Comment(value = "할당 여부")
     private boolean assignedStatus;
 
-//    @Column(name = "is_deleted")
-//    @Comment(value = "삭제 여부")
-//    private boolean isDeleted;
-
     @Column(name = "view_count")
     @Comment(value = "조회 수")
     private int viewCount;
@@ -86,8 +82,4 @@ public class Shorts extends BaseTime {
         this.travelogueId = request.travelogueId();
         this.assignedStatus = true;
     }
-
-//    public void delete() {
-//        this.isDeleted = true;
-//    }
 }

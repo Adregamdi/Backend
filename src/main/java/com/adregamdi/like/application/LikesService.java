@@ -2,7 +2,6 @@ package com.adregamdi.like.application;
 
 import com.adregamdi.like.domain.Like;
 import com.adregamdi.like.domain.enumtype.ContentType;
-import com.adregamdi.like.domain.enumtype.SelectedType;
 import com.adregamdi.like.dto.request.CreateLikesRequest;
 import com.adregamdi.like.dto.request.DeleteLikeRequest;
 import com.adregamdi.like.dto.request.GetLikesContentsRequest;
@@ -70,17 +69,13 @@ public class LikesService {
     }
 
     public GetLikesContentsResponse<?> getLikesContents(GetLikesContentsRequest request) {
-        SelectedType selectedType = request.getSelectedType();
-        if (selectedType == null) {
-            log.info("타입이 선택되지 않아 기본값(ALL)으로 조회합니다.");
-            selectedType = SelectedType.ALL;
-        }
-
-        return switch (selectedType) {
+        return switch (request.selectedType()) {
             case ALL -> likesRepository.getLikesContentsOfAll(request);
             case SHORTS -> likesRepository.getLikesContentsOfShorts(request);
+            case TRAVELOGUE -> likesRepository.getLikesContentsOfTravelogue(request);
             case PLACE -> likesRepository.getLikesContentsOfPlace(request);
-            case TRAVELOGUE -> likesRepository.getLikesContentsOfTravel(request);
         };
+
     }
+
 }

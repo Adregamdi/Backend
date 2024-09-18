@@ -37,14 +37,7 @@ public record CreateMyTravelogueRequest(
     public record PlaceReviewInfo(
             @NotNull
             @Positive
-            Long placeId,
-            String content,
-            List<PlaceReviewImageInfo> placeReviewImageList
-    ) {
-    }
-
-    public record PlaceReviewImageInfo(
-            String url
+            Long placeReviewId
     ) {
     }
 }

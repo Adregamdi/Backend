@@ -28,7 +28,7 @@ public class AllContentDTO{
         return switch (contentType) {
             case SHORTS -> "/api/shorts/stream/" + contentId;
             case PLACE -> "/api/places?place_id=" + contentId;
-            case TRAVELOGUE -> "/api/travelogue?travelogue_id" + contentId;
+            case TRAVELOGUE -> "/api/travelogue?travelogue_id=" + contentId;
         };
     }
 

@@ -17,6 +17,16 @@ public class TravelogueException extends RuntimeException {
         }
     }
 
+    public static class TravelogueExistException extends TravelException {
+        public TravelogueExistException() {
+            super("이미 여행기가 존재합니다.");
+        }
+
+        public TravelogueExistException(final Object object) {
+            super(String.format("이미 여행기가 존재합니다. - request info => %s", object));
+        }
+    }
+
     public static class TravelogueImageNotFoundException extends TravelogueException {
         public TravelogueImageNotFoundException() {
             super("여행기 이미지가 존재하지 않습니다.");

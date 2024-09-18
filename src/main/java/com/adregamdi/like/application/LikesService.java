@@ -2,7 +2,6 @@ package com.adregamdi.like.application;
 
 import com.adregamdi.like.domain.Like;
 import com.adregamdi.like.domain.enumtype.ContentType;
-import com.adregamdi.like.dto.AllContentDTO;
 import com.adregamdi.like.dto.request.CreateLikesRequest;
 import com.adregamdi.like.dto.request.DeleteLikeRequest;
 import com.adregamdi.like.dto.request.GetLikesContentsRequest;
@@ -16,7 +15,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
 import java.util.UUID;
 
 @Slf4j
@@ -70,20 +68,14 @@ public class LikesService {
         likesRepository.delete(like);
     }
 
-    public GetLikesContentsResponse<List<AllContentDTO>> getLikesContents(GetLikesContentsRequest request) {
-        return likesRepository.getLikesContentsOfAll(request);
+    public GetLikesContentsResponse<?> getLikesContents(GetLikesContentsRequest request) {
+        return switch (request.selectedType()) {
+            case ALL -> likesRepository.getLikesContentsOfAll(request);
+            case SHORTS -> likesRepository.getLikesContentsOfShorts(request);
+            case TRAVELOGUE -> likesRepository.getLikesContentsOfTravelogue(request);
+            case PLACE -> likesRepository.getLikesContentsOfPlace(request);
+        };
+
     }
 
-    public GetLikesContentsResponse<?> getLikesContentsOfTravelogue(GetLikesContentsRequest request) {
-        return likesRepository.getLikesContentsOfTravelogue(request);
-    }
-
-    public GetLikesContentsResponse<?> getLikesContentsOfPlace(GetLikesContentsRequest request) {
-        return likesRepository.getLikesContentsOfPlace(request);
-    }
-
-
-    public GetLikesContentsResponse<?> getLikesContentsOfShorts(GetLikesContentsRequest request) {
-        return likesRepository.getLikesContentsOfShorts(request);
-    }
 }

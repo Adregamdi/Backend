@@ -151,7 +151,7 @@ public class LikesCustomRepositoryImpl implements LikesCustomRepository{
                         tuple.get(member.name),
                         tuple.get(member.profile)
                 ))
-                .collect(Collectors.toList());
+                .toList();
 
         boolean hasNext = contents.size() > request.size();
         if (hasNext) {

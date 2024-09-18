@@ -16,11 +16,7 @@ import com.adregamdi.place.infrastructure.PlaceRepository;
 import com.adregamdi.place.infrastructure.PlaceReviewImageRepository;
 import com.adregamdi.place.infrastructure.PlaceReviewRepository;
 import com.adregamdi.shorts.infrastructure.ShortsRepository;
-import com.adregamdi.travel.domain.Travel;
-import com.adregamdi.travel.exception.TravelException;
 import com.adregamdi.travel.infrastructure.TravelRepository;
-import com.adregamdi.travelogue.domain.Travelogue;
-import com.adregamdi.travelogue.exception.TravelogueException;
 import com.adregamdi.travelogue.infrastructure.TravelogueRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -132,15 +128,21 @@ public class PlaceServiceImpl implements PlaceService {
 
     @Override
     @Transactional
-    public void createReview(final CreatePlaceReviewRequest request, final String memberId) {
-        PlaceReview placeReview = placeReviewRepository.save(new PlaceReview(memberId, request.placeId(), request.content()));
+    public CreatePlaceReviewResponse createReview(final CreatePlaceReviewRequest request, final String memberId) {
+        PlaceReview placeReview = placeReviewRepository.findByMemberIdAndPlaceIdAndVisitDate(UUID.fromString(memberId), request.placeId(), request.visitDate());
+        if (placeReview != null) {
+            throw new PlaceExistException(placeReview.getPlaceReviewId());
+        }
+        PlaceReview savePlaceReview = placeReviewRepository.save(new PlaceReview(memberId, request.placeId(), request.visitDate(), request.content()));
 
         List<CreatePlaceReviewRequest.PlaceReviewImageInfo> imageList = (request.placeReviewImageList() != null) ? request.placeReviewImageList() : Collections.emptyList();
 
         List<PlaceReviewImage> placeReviewImages = imageList.stream()
-                .map(img -> new PlaceReviewImage(placeReview.getPlaceReviewId(), img.url()))
+                .map(img -> new PlaceReviewImage(savePlaceReview.getPlaceReviewId(), img.url()))
                 .collect(Collectors.toList());
         placeReviewImageRepository.saveAll(placeReviewImages);
+
+        return new CreatePlaceReviewResponse(savePlaceReview.getPlaceReviewId());
     }
 
     @Override
@@ -273,10 +275,6 @@ public class PlaceServiceImpl implements PlaceService {
                     .orElse(new ArrayList<>());
             Place place = placeRepository.findById(placeReview.getPlaceId())
                     .orElseThrow(() -> new PlaceNotFoundException(placeReview.getPlaceId()));
-            Travelogue travelogue = travelogueRepository.findById(placeReview.getTravelogueId())
-                    .orElseThrow(() -> new TravelogueException.TravelogueNotFoundException(placeReview.getTravelogueId()));
-            Travel travel = travelRepository.findById(travelogue.getTravelId())
-                    .orElseThrow(() -> new TravelException.TravelNotFoundException(travelogue.getTravelId()));
 
             myPlaceReviews.add(MyPlaceReviewDTO.of(
                             place.getTitle(),
@@ -284,7 +282,7 @@ public class PlaceServiceImpl implements PlaceService {
                             place.getRegionLabel(),
                             imageReviewCount,
                             shortsReviewCount,
-                            formatToKoreanString(travel.getStartDate()),
+                            formatToKoreanString(placeReview.getVisitDate()),
                             placeReview.getContent(),
                             placeReviewImages,
                             LocalDate.from(placeReview.getCreatedAt())

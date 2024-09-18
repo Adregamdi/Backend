@@ -36,6 +36,7 @@ public record GetMyTravelResponse(
                                     .regionLabel(travelPlace.place().getRegionLabel())
                                     .latitude(travelPlace.place().getLatitude())
                                     .longitude(travelPlace.place().getLongitude())
+                                    .thumbnailPath(travelPlace.place().getThumbnailPath())
                                     .placeOrder(travelPlace.travelPlace().getPlaceOrder())
                                     .build())
                             .sorted(Comparator.comparing(PlaceInfo::placeOrder))
@@ -91,6 +92,7 @@ public record GetMyTravelResponse(
             String regionLabel,
             Double latitude,
             Double longitude,
+            String thumbnailPath,
             Integer placeOrder
     ) {
     }

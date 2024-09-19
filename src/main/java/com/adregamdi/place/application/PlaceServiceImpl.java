@@ -263,7 +263,7 @@ public class PlaceServiceImpl implements PlaceService {
 
     @Override
     @Transactional(readOnly = true)
-    public GetMyPlaceReviewResponse getReview(final String memberId) {
+    public GetMyPlaceReviewResponse getMyReview(final String memberId) {
         List<PlaceReview> placeReviews = placeReviewRepository.findAllByMemberIdOrderByPlaceReviewIdDesc(UUID.fromString(memberId))
                 .orElseThrow(() -> new PlaceReviewNotFoundException(memberId));
         List<MyPlaceReviewDTO> myPlaceReviews = new ArrayList<>();
@@ -271,12 +271,12 @@ public class PlaceServiceImpl implements PlaceService {
         for (PlaceReview placeReview : placeReviews) {
             int imageReviewCount = placeRepository.countPlaceReviewsWithImagesForPlace(placeReview.getPlaceId());
             int shortsReviewCount = placeRepository.countShortsReviewsForPlace(placeReview.getPlaceId());
-            List<PlaceReviewImage> placeReviewImages = placeReviewImageRepository.findAllByPlaceReviewId(placeReview.getPlaceReviewId())
-                    .orElse(new ArrayList<>());
+            List<PlaceReviewImage> placeReviewImages = placeReviewImageRepository.findByPlaceReviewIdOrderByPlaceReviewImageIdDesc(placeReview.getPlaceReviewId());
             Place place = placeRepository.findById(placeReview.getPlaceId())
                     .orElseThrow(() -> new PlaceNotFoundException(placeReview.getPlaceId()));
 
             myPlaceReviews.add(MyPlaceReviewDTO.of(
+                            place.getPlaceId(),
                             place.getTitle(),
                             place.getContentsLabel(),
                             place.getRegionLabel(),
@@ -290,6 +290,72 @@ public class PlaceServiceImpl implements PlaceService {
             );
         }
         return GetMyPlaceReviewResponse.from(myPlaceReviews);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public GetPlaceReviewResponse getReview(final Long placeReviewId) {
+        PlaceReview placeReview = placeReviewRepository.findById(placeReviewId)
+                .orElseThrow(() -> new PlaceReviewNotFoundException(placeReviewId));
+        Place place = placeRepository.findById(placeReview.getPlaceId())
+                .orElseThrow(() -> new PlaceNotFoundException(placeReview.getPlaceId()));
+        List<PlaceReviewImage> placeReviewImages = placeReviewImageRepository.findByPlaceReviewIdOrderByPlaceReviewImageIdDesc(placeReview.getPlaceReviewId());
+
+        return GetPlaceReviewResponse.of(
+                place.getPlaceId(),
+                place.getTitle(),
+                place.getContentsLabel(),
+                place.getRegionLabel(),
+                formatToKoreanString(placeReview.getVisitDate()),
+                placeReview.getContent(),
+                placeReviewImages,
+                LocalDate.from(placeReview.getCreatedAt())
+        );
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public GetPlaceReviewsResponse getReviews(final Long placeId) {
+        Place place = placeRepository.findById(placeId)
+                .orElseThrow(() -> new PlaceNotFoundException(placeId));
+        List<PlaceReview> placeReviews = placeReviewRepository.findAllByPlaceIdOrderByPlaceReviewIdDesc(placeId);
+
+        List<PlaceReviewDTO> placeReviewDTOS = new ArrayList<>();
+        for (PlaceReview placeReview : placeReviews) {
+            List<PlaceReviewImage> placeReviewImages = placeReviewImageRepository.findByPlaceReviewIdOrderByPlaceReviewImageIdDesc(placeReview.getPlaceReviewId());
+
+            placeReviewDTOS.add(PlaceReviewDTO.of(
+                            place.getPlaceId(),
+                            place.getTitle(),
+                            place.getContentsLabel(),
+                            place.getRegionLabel(),
+                            formatToKoreanString(placeReview.getVisitDate()),
+                            placeReview.getContent(),
+                            placeReviewImages,
+                            LocalDate.from(placeReview.getCreatedAt())
+                    )
+            );
+        }
+        return GetPlaceReviewsResponse.from(placeReviewDTOS);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public GetPlaceImagesResponse getPlaceImages(final Long placeId) {
+        Place place = placeRepository.findById(placeId)
+                .orElseThrow(() -> new PlaceNotFoundException(placeId));
+        List<PlaceReview> placeReviews = placeReviewRepository.findAllByPlaceIdOrderByPlaceReviewIdDesc(placeId);
+
+        List<PlaceImageDTO> placeImageDTOS = new ArrayList<>();
+        for (PlaceReview placeReview : placeReviews) {
+            List<PlaceReviewImage> placeReviewImages = placeReviewImageRepository.findByPlaceReviewIdOrderByPlaceReviewImageIdDesc(placeReview.getPlaceReviewId());
+
+            for (PlaceReviewImage placeReviewImage : placeReviewImages) {
+                placeImageDTOS.add(new PlaceImageDTO(LocalDate.from(placeReviewImage.getCreatedAt()), placeReviewImage.getUrl()));
+            }
+        }
+        placeImageDTOS.add(new PlaceImageDTO(LocalDate.from(place.getCreatedAt()), place.getImgPath()));
+        return GetPlaceImagesResponse.of(placeId, placeImageDTOS);
     }
 
     private String formatTags(final String tag) {
@@ -461,7 +527,7 @@ public class PlaceServiceImpl implements PlaceService {
     }
 
     private String formatToKoreanString(LocalDate date) {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy년 M월 여행", Locale.KOREAN);
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy년 M월 d일 방문", Locale.KOREAN);
         return date.format(formatter);
     }
 }

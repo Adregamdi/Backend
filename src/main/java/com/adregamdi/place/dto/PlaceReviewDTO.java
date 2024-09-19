@@ -7,37 +7,31 @@ import java.time.LocalDate;
 import java.util.List;
 
 @Builder
-public record MyPlaceReviewDTO(
+public record PlaceReviewDTO(
         Long placeReviewId,
         String title,
         String contentsLabel,
         String regionLabel,
-        Integer imageReviewCount,
-        Integer shortsReviewCount,
         String visitDate,
         String content,
         List<PlaceReviewImage> placeReviewImageList,
         LocalDate createdAt
 ) {
-    public static MyPlaceReviewDTO of(
+    public static PlaceReviewDTO of(
             final Long placeReviewId,
             final String title,
             final String contentsLabel,
             final String regionLabel,
-            final Integer imageReviewCount,
-            final Integer shortsReviewCount,
             final String visitDate,
             final String content,
             final List<PlaceReviewImage> placeReviewImageList,
             final LocalDate createdAt
     ) {
-        return MyPlaceReviewDTO.builder()
+        return PlaceReviewDTO.builder()
                 .placeReviewId(placeReviewId)
                 .title(title)
                 .contentsLabel(contentsLabel)
                 .regionLabel(regionLabel)
-                .imageReviewCount(imageReviewCount)
-                .shortsReviewCount(shortsReviewCount)
                 .visitDate(visitDate)
                 .content(content)
                 .placeReviewImageList(placeReviewImageList)

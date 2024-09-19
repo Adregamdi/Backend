@@ -127,13 +127,52 @@ public class PlaceController {
                 );
     }
 
-    @GetMapping("/review")
+    @GetMapping("/review/me")
     @MemberAuthorize
-    public ResponseEntity<ApiResponse<GetMyPlaceReviewResponse>> getReview(@AuthenticationPrincipal final UserDetails userDetails) {
+    public ResponseEntity<ApiResponse<GetMyPlaceReviewResponse>> getMyReview(@AuthenticationPrincipal final UserDetails userDetails) {
         return ResponseEntity.ok()
                 .body(ApiResponse.<GetMyPlaceReviewResponse>builder()
                         .statusCode(HttpStatus.OK.value())
-                        .data(placeService.getReview(userDetails.getUsername()))
+                        .data(placeService.getMyReview(userDetails.getUsername()))
+                        .build()
+                );
+    }
+
+    @GetMapping("/review")
+    @MemberAuthorize
+    public ResponseEntity<ApiResponse<GetPlaceReviewResponse>> getReview(
+            @RequestParam("place_review_id") final Long placeReviewId
+    ) {
+        return ResponseEntity.ok()
+                .body(ApiResponse.<GetPlaceReviewResponse>builder()
+                        .statusCode(HttpStatus.OK.value())
+                        .data(placeService.getReview(placeReviewId))
+                        .build()
+                );
+    }
+
+    @GetMapping("/reviews")
+    @MemberAuthorize
+    public ResponseEntity<ApiResponse<GetPlaceReviewsResponse>> getReviews(
+            @RequestParam("place_id") final Long placeId
+    ) {
+        return ResponseEntity.ok()
+                .body(ApiResponse.<GetPlaceReviewsResponse>builder()
+                        .statusCode(HttpStatus.OK.value())
+                        .data(placeService.getReviews(placeId))
+                        .build()
+                );
+    }
+
+    @GetMapping("/images")
+    @MemberAuthorize
+    public ResponseEntity<ApiResponse<GetPlaceImagesResponse>> getPlaceImages(
+            @RequestParam("place_id") final Long placeId
+    ) {
+        return ResponseEntity.ok()
+                .body(ApiResponse.<GetPlaceImagesResponse>builder()
+                        .statusCode(HttpStatus.OK.value())
+                        .data(placeService.getPlaceImages(placeId))
                         .build()
                 );
     }

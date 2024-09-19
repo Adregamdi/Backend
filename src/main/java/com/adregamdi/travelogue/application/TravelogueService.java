@@ -194,7 +194,7 @@ public class TravelogueService {
                                 .orElseThrow(() -> new PlaceException.PlaceReviewNotFoundException(tdpr.getPlaceReviewId()));
                         Place place = placeRepository.findById(placeReview.getPlaceId())
                                 .orElseThrow(() -> new PlaceException.PlaceNotFoundException(placeReview.getPlaceId()));
-                        List<PlaceReviewImage> images = placeReviewImageRepository.findByPlaceReviewId(placeReview.getPlaceReviewId());
+                        List<PlaceReviewImage> images = placeReviewImageRepository.findByPlaceReviewIdOrderByPlaceReviewImageIdDesc(placeReview.getPlaceReviewId());
 
                         return GetTravelogueResponse.PlaceReviewInfo.builder()
                                 .placeId(place.getPlaceId())

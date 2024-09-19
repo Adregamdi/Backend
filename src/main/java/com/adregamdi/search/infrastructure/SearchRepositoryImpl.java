@@ -16,10 +16,7 @@ import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.SliceImpl;
 import org.springframework.stereotype.Repository;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.adregamdi.core.utils.RepositoryUtil.makeOrderSpecifiers;
@@ -75,10 +72,12 @@ public class SearchRepositoryImpl implements SearchRepository {
                 .select(travelogueImage.travelogueId, travelogueImage.url)
                 .from(travelogueImage)
                 .where(travelogueImage.travelogueId.in(travelogueIds))
+                .orderBy(travelogueImage.travelogueImageId.desc()) // 내림차순 정렬 추가
                 .fetch()
                 .stream()
                 .collect(Collectors.groupingBy(
                         tuple -> tuple.get(travelogueImage.travelogueId),
+                        LinkedHashMap::new, // 순서 유지를 위해 LinkedHashMap 사용
                         Collectors.mapping(tuple -> tuple.get(travelogueImage.url), Collectors.toList())
                 ));
 
@@ -141,11 +140,25 @@ public class SearchRepositoryImpl implements SearchRepository {
     }
 
     private List<PlaceSearchDTO> fetchPlaceImageUrls(List<PlaceSearchDTO> places) {
+        // Fetch Place imgPaths
+        Map<Long, String> placeImgPathMap = queryFactory
+                .select(place.placeId, place.imgPath)
+                .from(place)
+                .where(place.placeId.in(places.stream().map(PlaceSearchDTO::placeId).collect(Collectors.toList())))
+                .fetch()
+                .stream()
+                .collect(Collectors.toMap(
+                        tuple -> tuple.get(place.placeId),
+                        tuple -> tuple.get(place.imgPath)
+                ));
+
+        // Fetch PlaceReviewImage urls
         Map<Long, List<String>> imageUrlMap = queryFactory
                 .select(placeReview.placeId, placeReviewImage.url)
                 .from(placeReviewImage)
                 .join(placeReview).on(placeReviewImage.placeReviewId.eq(placeReview.placeReviewId))
                 .where(placeReview.placeId.in(places.stream().map(PlaceSearchDTO::placeId).collect(Collectors.toList())))
+                .orderBy(placeReviewImage.placeReviewImageId.desc())
                 .fetch()
                 .stream()
                 .collect(Collectors.groupingBy(
@@ -154,16 +167,23 @@ public class SearchRepositoryImpl implements SearchRepository {
                 ));
 
         return places.stream()
-                .map(dto -> new PlaceSearchDTO(
-                        dto.placeId(),
-                        dto.title(),
-                        dto.contentsLabel(),
-                        dto.regionLabel(),
-                        dto.roadAddress(),
-                        dto.photoReviewCount(),
-                        dto.shortsCount(),
-                        imageUrlMap.getOrDefault(dto.placeId(), Collections.emptyList())
-                ))
+                .map(dto -> {
+                    List<String> imageUrls = new ArrayList<>(imageUrlMap.getOrDefault(dto.placeId(), Collections.emptyList()));
+                    String placeImgPath = placeImgPathMap.get(dto.placeId());
+                    if (placeImgPath != null && !placeImgPath.isEmpty()) {
+                        imageUrls.add(placeImgPath);
+                    }
+                    return new PlaceSearchDTO(
+                            dto.placeId(),
+                            dto.title(),
+                            dto.contentsLabel(),
+                            dto.regionLabel(),
+                            dto.roadAddress(),
+                            dto.photoReviewCount(),
+                            dto.shortsCount(),
+                            imageUrls
+                    );
+                })
                 .collect(Collectors.toList());
     }
 

@@ -195,7 +195,7 @@ public class TravelService {
                 if (placeReviewInfo.getPlaceReviewId() != 0) {
                     placeReview = placeService.getReview(placeReviewInfo.getPlaceReviewId());
                 }
-                travelPlaceDTOS.add(TravelPlaceDTO.of(placeReview, travelPlace, placeService.get(travelPlace.getPlaceId()).place()));
+                travelPlaceDTOS.add(TravelPlaceDTO.of(placeReview, travelPlace, placeService.get(memberId, travelPlace.getPlaceId()).place()));
             }
             travelPlaceDTOList.add(travelPlaceDTOS);
         }

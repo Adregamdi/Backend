@@ -67,11 +67,14 @@ public class PlaceController {
 
     @GetMapping
     @MemberAuthorize
-    public ResponseEntity<ApiResponse<GetPlaceResponse>> get(@RequestParam("place_id") @Positive final Long placeId) {
+    public ResponseEntity<ApiResponse<GetPlaceResponse>> get(
+            @AuthenticationPrincipal final UserDetails userDetails,
+            @RequestParam("place_id") @Positive final Long placeId
+    ) {
         return ResponseEntity.ok()
                 .body(ApiResponse.<GetPlaceResponse>builder()
                         .statusCode(HttpStatus.OK.value())
-                        .data(placeService.get(placeId))
+                        .data(placeService.get(userDetails.getUsername(), placeId))
                         .build()
                 );
     }

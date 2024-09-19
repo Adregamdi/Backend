@@ -1,5 +1,7 @@
 package com.adregamdi.place.application;
 
+import com.adregamdi.like.application.LikesService;
+import com.adregamdi.like.domain.enumtype.ContentType;
 import com.adregamdi.media.application.ImageService;
 import com.adregamdi.place.domain.Place;
 import com.adregamdi.place.domain.PlaceReview;
@@ -52,6 +54,7 @@ public class PlaceServiceImpl implements PlaceService {
     private final WebClient webClient;
     private final ObjectMapper objectMapper;
     private final ImageService imageService;
+    private final LikesService likesService;
     private final PlaceRepository placeRepository;
     private final PlaceReviewRepository placeReviewRepository;
     private final PlaceReviewImageRepository placeReviewImageRepository;
@@ -186,10 +189,11 @@ public class PlaceServiceImpl implements PlaceService {
 
     @Override
     @Transactional(readOnly = true)
-    public GetPlaceResponse get(final Long placeId) {
+    public GetPlaceResponse get(final String memberId, final Long placeId) {
         Place place = placeRepository.findById(placeId)
                 .orElseThrow(() -> new PlaceNotFoundException(placeId));
-        return GetPlaceResponse.from(place);
+        boolean isLiked = likesService.checkIsLiked(UUID.fromString(memberId), ContentType.PLACE, placeId);
+        return GetPlaceResponse.from(isLiked, place);
     }
 
     @Override

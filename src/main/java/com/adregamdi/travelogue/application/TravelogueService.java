@@ -1,5 +1,7 @@
 package com.adregamdi.travelogue.application;
 
+import com.adregamdi.like.application.LikesService;
+import com.adregamdi.like.domain.enumtype.ContentType;
 import com.adregamdi.media.application.ImageService;
 import com.adregamdi.place.domain.Place;
 import com.adregamdi.place.domain.PlaceReview;
@@ -47,6 +49,7 @@ import static com.adregamdi.media.domain.ImageTarget.TRAVELOGUE;
 @Service
 public class TravelogueService {
     private final ImageService imageService;
+    private final LikesService likesService;
     private final TravelRepository travelRepository;
     private final TravelogueRepository travelogueRepository;
     private final TravelogueImageRepository travelogueImageRepository;
@@ -196,7 +199,7 @@ public class TravelogueService {
      * 여행기 조회
      */
     @Transactional(readOnly = true)
-    public GetTravelogueResponse get(final Long travelogueId) {
+    public GetTravelogueResponse get(final String memberId, final Long travelogueId) {
         Travelogue travelogue = travelogueRepository.findById(travelogueId)
                 .orElseThrow(() -> new TravelogueNotFoundException(travelogueId));
 
@@ -233,8 +236,8 @@ public class TravelogueService {
 
             placeReviewsMap.put(travelogueDay.getTravelogueDayId(), placeReviewInfos);
         }
-
-        return GetTravelogueResponse.of(travelogue, travelogueImages, travelogueDays, placeReviewsMap);
+        boolean isLiked = likesService.checkIsLiked(UUID.fromString(memberId), ContentType.TRAVELOGUE, travelogueId);
+        return GetTravelogueResponse.of(isLiked, travelogue, travelogueImages, travelogueDays, placeReviewsMap);
     }
 
     /*

@@ -34,7 +34,7 @@ public interface PlaceService {
     /*
      * [특정 장소 조회]
      * */
-    GetPlaceResponse get(final Long placeId);
+    GetPlaceResponse get(final String memberId, final Long placeId);
 
     /*
      * [장소 리스트 조회]

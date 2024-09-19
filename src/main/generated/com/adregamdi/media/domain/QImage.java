@@ -27,7 +27,7 @@ public class QImage extends EntityPathBase<Image> {
 
     public final StringPath imageUrl = createString("imageUrl");
 
-    public final NumberPath<Long> targetNo = createNumber("targetNo", Long.class);
+    public final StringPath targetId = createString("targetId");
 
     public QImage(String variable) {
         super(Image.class, forVariable(variable));

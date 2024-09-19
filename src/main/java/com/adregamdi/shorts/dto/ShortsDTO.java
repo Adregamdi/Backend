@@ -24,7 +24,7 @@ public class ShortsDTO {
     private String shortsVideoUrl;
     private String thumbnailUrl;
     private int viewCount;
-    private boolean isLiked;
+    private Boolean isLiked;
 
     public static ShortsDTO of(Shorts shorts) {
         return new ShortsDTO(

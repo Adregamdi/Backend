@@ -75,6 +75,7 @@ public class LikesService {
         likesRepository.delete(like);
     }
 
+    @Transactional(readOnly = true)
     public GetLikesContentsResponse<?> getLikesContents(GetLikesContentsRequest request) {
         return switch (request.selectedType()) {
             case ALL -> likesRepository.getLikesContentsOfAll(request);
@@ -83,6 +84,12 @@ public class LikesService {
             case PLACE -> likesRepository.getLikesContentsOfPlace(request);
         };
 
+    }
+
+    @Transactional(readOnly = true)
+    public Boolean checkIsLiked(UUID memberId, ContentType contentType, Long contentId) {
+
+        return likesRepository.checkIsLiked(memberId, contentType, contentId);
     }
 
 }

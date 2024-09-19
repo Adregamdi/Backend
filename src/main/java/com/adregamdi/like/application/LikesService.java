@@ -5,6 +5,7 @@ import com.adregamdi.like.domain.enumtype.ContentType;
 import com.adregamdi.like.dto.request.CreateLikesRequest;
 import com.adregamdi.like.dto.request.DeleteLikeRequest;
 import com.adregamdi.like.dto.request.GetLikesContentsRequest;
+import com.adregamdi.like.dto.response.CreateLikesResponse;
 import com.adregamdi.like.dto.response.CreateShortsLikeResponse;
 import com.adregamdi.like.dto.response.GetLikesContentsResponse;
 import com.adregamdi.like.exception.LikesException;
@@ -26,7 +27,13 @@ public class LikesService {
     private final LikesRepository likesRepository;
     private final LikesValidService likesValidService;
 
-    public void create(String memberId, CreateLikesRequest request) {
+    public CreateLikesResponse create(String memberId, CreateLikesRequest request) {
+
+        boolean isLiked = likesRepository.findByContentTypeAndContentId(request.getContentType(), request.contentId()).isPresent();
+        if(isLiked) {
+            return new CreateLikesResponse(true);
+        }
+
 
         Like like = Like.builder()
                 .memberId(UUID.fromString(memberId))
@@ -34,7 +41,7 @@ public class LikesService {
                 .contentId(request.contentId())
                 .build();
 
-        likesRepository.save(like);
+        return new CreateLikesResponse(likesRepository.save(like).equals(like));
     }
 
     public CreateShortsLikeResponse createShortsLike(String memberId, Long shortsId) {

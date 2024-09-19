@@ -7,6 +7,7 @@ import com.adregamdi.like.domain.enumtype.SelectedType;
 import com.adregamdi.like.dto.request.CreateLikesRequest;
 import com.adregamdi.like.dto.request.DeleteLikeRequest;
 import com.adregamdi.like.dto.request.GetLikesContentsRequest;
+import com.adregamdi.like.dto.response.CreateLikesResponse;
 import com.adregamdi.like.dto.response.CreateShortsLikeResponse;
 import com.adregamdi.like.dto.response.GetLikesContentsResponse;
 import com.adregamdi.member.domain.Role;
@@ -55,14 +56,14 @@ public class LikesController {
 
     @PostMapping()
     @MemberAuthorize
-    public ResponseEntity<ApiResponse<Void>> create(
+    public ResponseEntity<ApiResponse<CreateLikesResponse>> create(
             @AuthenticationPrincipal UserDetails userDetails,
             @Valid @RequestBody CreateLikesRequest request
     ) {
-        likesService.create(userDetails.getUsername(), request);
         return ResponseEntity.ok()
-                .body(ApiResponse.<Void>builder()
+                .body(ApiResponse.<CreateLikesResponse>builder()
                         .statusCode(HttpStatus.OK.value())
+                        .data(likesService.create(userDetails.getUsername(), request))
                         .build());
     }
 

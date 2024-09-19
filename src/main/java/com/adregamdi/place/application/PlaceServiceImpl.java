@@ -109,13 +109,13 @@ public class PlaceServiceImpl implements PlaceService {
                                         String region1Value = item.path("region1cd").path("value").asText();
                                         String region2Value = item.path("region2cd").path("value").asText();
                                         String region2Label = item.path("region2cd").path("label").asText();
-                                        String address = item.path("address").asText();
-                                        String roadAddress = item.path("roadaddress").asText();
+                                        String address = item.path("address").asText().equals("null") ? "" : item.path("address").asText();
+                                        String roadAddress = item.path("roadaddress").asText().equals("null") ? "" : item.path("roadaddress").asText();
                                         String tag = formatTags(item.path("tag").asText());
                                         String introduction = item.path("introduction").asText();
                                         double latitude = item.path("latitude").asDouble();
                                         double longitude = item.path("longitude").asDouble();
-                                        String phoneNo = item.path("phoneno").asText();
+                                        String phoneNo = item.path("phoneno").asText().equals("null") ? "" : item.path("phoneno").asText();
                                         String imgPath = item.path("repPhoto").path("photoid").path("imgpath").asText();
                                         String thumbnailPath = item.path("repPhoto").path("photoid").path("thumbnailpath").asText();
 

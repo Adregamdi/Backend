@@ -1,5 +1,6 @@
 package com.adregamdi.travelogue.application;
 
+import com.adregamdi.media.application.ImageService;
 import com.adregamdi.place.domain.Place;
 import com.adregamdi.place.domain.PlaceReview;
 import com.adregamdi.place.domain.PlaceReviewImage;
@@ -39,11 +40,13 @@ import java.util.stream.Collectors;
 
 import static com.adregamdi.core.constant.Constant.LARGE_PAGE_SIZE;
 import static com.adregamdi.core.utils.PageUtil.generatePageDesc;
+import static com.adregamdi.media.domain.ImageTarget.TRAVELOGUE;
 
 @Slf4j
 @RequiredArgsConstructor
 @Service
 public class TravelogueService {
+    private final ImageService imageService;
     private final TravelRepository travelRepository;
     private final TravelogueRepository travelogueRepository;
     private final TravelogueImageRepository travelogueImageRepository;
@@ -67,22 +70,25 @@ public class TravelogueService {
         validateTravelEnded(travel);
 
         Travelogue travelogue;
-        List<CreateMyTravelogueRequest.TravelogueImageInfo> travelogueImageUrls = new ArrayList<>();
+        List<CreateMyTravelogueRequest.TravelogueImageInfo> requestImages = new ArrayList<>();
         if (request.travelogueImageList() == null || request.travelogueImageList().isEmpty()) {
-            travelogueImageUrls.add(new CreateMyTravelogueRequest.TravelogueImageInfo("https://adregamdi-dev2.s3.ap-northeast-2.amazonaws.com/profile/default_profile_image.png"));
+            requestImages.add(new CreateMyTravelogueRequest.TravelogueImageInfo("https://adregamdi-dev2.s3.ap-northeast-2.amazonaws.com/profile/default_profile_image.png"));
         } else {
-            travelogueImageUrls = request.travelogueImageList();
+            requestImages = request.travelogueImageList();
         }
 
+        // 등록 시
         if (request.travelogueId() == null) {
             travelogue = travelogueRepository.findByTravelId(request.travelId());
             if (travelogue != null) {
                 throw new TravelogueExistException(request.travelId());
             }
             travelogue = travelogueRepository.save(new Travelogue(memberId, request.travelId(), request.title(), request.introduction()));
-            saveTravelogueImages(request.travelogueImageList(), travelogue.getTravelogueId());
+            saveTravelogueImages(requestImages, travelogue.getTravelogueId());
             saveTravelogueDaysAndReviews(request.dayList(), travelogue.getTravelogueId());
-        } else {
+        }
+        // 수정 시
+        else {
             travelogue = travelogueRepository.findById(request.travelogueId())
                     .orElseThrow(() -> new TravelogueNotFoundException(request.travelogueId()));
             travelogue.update(request.title(), request.introduction());
@@ -90,38 +96,40 @@ public class TravelogueService {
             List<TravelogueImage> travelogueImages = travelogueImageRepository.findAllByTravelogueId(request.travelogueId());
             if (!travelogueImages.isEmpty()) {
                 // 요청 < 기존
-                if (travelogueImages.size() > travelogueImageUrls.size()) {
+                if (requestImages.size() < travelogueImages.size()) {
                     for (int i = 0; i < travelogueImages.size(); i++) {
-                        if (travelogueImageUrls.size() > i) {
-                            travelogueImages.get(i).update(request.travelogueId(), travelogueImageUrls.get(i).url());
+                        if (requestImages.size() > i) {
+                            travelogueImages.get(i).update(request.travelogueId(), requestImages.get(i).url());
                         } else {
                             travelogueImageRepository.deleteById(travelogueImages.get(i).getTravelogueImageId());
                         }
                     }
                 }
                 // 요청 == 기존
-                else if (travelogueImages.size() == travelogueImageUrls.size()) {
+                else if (requestImages.size() == travelogueImages.size()) {
                     for (int i = 0; i < travelogueImages.size(); i++) {
-                        travelogueImages.get(i).update(request.travelogueId(), travelogueImageUrls.get(i).url());
+                        travelogueImages.get(i).update(request.travelogueId(), requestImages.get(i).url());
                     }
                 }
                 // 요청 > 기존
                 else {
-                    for (int i = 0; i < travelogueImageUrls.size(); i++) {
+                    for (int i = 0; i < requestImages.size(); i++) {
                         List<TravelogueImage> newTravelogueImages = new ArrayList<>();
                         if (travelogueImages.size() > i) {
-                            travelogueImages.get(i).update(request.travelogueId(), travelogueImageUrls.get(i).url());
+                            travelogueImages.get(i).update(request.travelogueId(), requestImages.get(i).url());
                         } else {
-                            newTravelogueImages.add(new TravelogueImage(request.travelogueId(), travelogueImageUrls.get(i).url()));
+                            newTravelogueImages.add(new TravelogueImage(request.travelogueId(), requestImages.get(i).url()));
                         }
                         travelogueImageRepository.saveAll(newTravelogueImages);
                     }
                 }
+                saveOrUpdateImages(request.travelogueId(), requestImages, false);
             } else {
-                for (CreateMyTravelogueRequest.TravelogueImageInfo travelogueImageUrl : travelogueImageUrls) {
+                for (CreateMyTravelogueRequest.TravelogueImageInfo travelogueImageUrl : requestImages) {
                     travelogueImages.add(new TravelogueImage(request.travelogueId(), travelogueImageUrl.url()));
                 }
                 travelogueImageRepository.saveAll(travelogueImages);
+                saveOrUpdateImages(request.travelogueId(), requestImages, true);
             }
         }
         return CreateMyTravelogueResponse.from(travelogue.getTravelogueId());
@@ -135,16 +143,30 @@ public class TravelogueService {
     }
 
     private void saveTravelogueImages(
-            final List<CreateMyTravelogueRequest.TravelogueImageInfo> images,
+            final List<CreateMyTravelogueRequest.TravelogueImageInfo> requestImages,
             final Long travelogueId
     ) {
-        List<CreateMyTravelogueRequest.TravelogueImageInfo> imageList = (images != null) ? images : Collections.emptyList();
+        List<CreateMyTravelogueRequest.TravelogueImageInfo> imageList = (requestImages != null) ? requestImages : Collections.emptyList();
 
         List<TravelogueImage> travelogueImages = imageList.stream()
                 .map(img -> new TravelogueImage(travelogueId, img.url()))
                 .collect(Collectors.toList());
 
         travelogueImageRepository.saveAll(travelogueImages);
+        if (requestImages != null) {
+            saveOrUpdateImages(travelogueId, requestImages, true);
+        }
+    }
+
+    private void saveOrUpdateImages(Long travelogueId, List<CreateMyTravelogueRequest.TravelogueImageInfo> travelogueImages, boolean isSave) {
+        List<String> urls = travelogueImages.stream()
+                .map(CreateMyTravelogueRequest.TravelogueImageInfo::url)
+                .toList();
+        if (!travelogueImages.isEmpty() && isSave) {
+            imageService.saveTargetId(urls, TRAVELOGUE, String.valueOf(travelogueId));
+        } else if (!travelogueImages.isEmpty() || !isSave) {
+            imageService.updateImages(urls, TRAVELOGUE, String.valueOf(travelogueId));
+        }
     }
 
     private void saveTravelogueDaysAndReviews(
@@ -155,11 +177,11 @@ public class TravelogueService {
 
         for (CreateMyTravelogueRequest.DayInfo dayInfo : days) {
             TravelogueDay travelogueDay = travelogueDayRepository.save(new TravelogueDay(travelogueId, dayInfo.date(), dayInfo.day(), dayInfo.content()));
-            savePlaceReviews(dayInfo.placeReviewList(), travelogueDay.getTravelogueDayId());
+            saveTravelogueDayPlaceReview(dayInfo.placeReviewList(), travelogueDay.getTravelogueDayId());
         }
     }
 
-    private void savePlaceReviews(
+    private void saveTravelogueDayPlaceReview(
             final List<CreateMyTravelogueRequest.PlaceReviewInfo> placeReviews,
             final Long travelogueDayId
     ) {

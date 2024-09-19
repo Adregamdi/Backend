@@ -1,5 +1,6 @@
 package com.adregamdi.place.application;
 
+import com.adregamdi.media.application.ImageService;
 import com.adregamdi.place.domain.Place;
 import com.adregamdi.place.domain.PlaceReview;
 import com.adregamdi.place.domain.PlaceReviewImage;
@@ -42,16 +43,18 @@ import java.util.stream.StreamSupport;
 
 import static com.adregamdi.core.constant.Constant.NORMAL_PAGE_SIZE;
 import static com.adregamdi.core.utils.PageUtil.generatePageAsc;
+import static com.adregamdi.media.domain.ImageTarget.PLACEREVIEW;
 
 @Slf4j
 @RequiredArgsConstructor
 @Service
 public class PlaceServiceImpl implements PlaceService {
     private final WebClient webClient;
+    private final ObjectMapper objectMapper;
+    private final ImageService imageService;
     private final PlaceRepository placeRepository;
     private final PlaceReviewRepository placeReviewRepository;
     private final PlaceReviewImageRepository placeReviewImageRepository;
-    private final ObjectMapper objectMapper;
 
     @Value("${api-key.visit-jeju}")
     private String visitJejuKey;
@@ -163,6 +166,12 @@ public class PlaceServiceImpl implements PlaceService {
                 .collect(Collectors.toList());
         placeReviewImageRepository.saveAll(placeReviewImages);
 
+        List<String> urls = placeReviewImages.stream()
+                .map(PlaceReviewImage::getUrl)
+                .collect(Collectors.toList());
+        if (!imageList.isEmpty()) {
+            imageService.saveTargetId(urls, PLACEREVIEW, String.valueOf(savePlaceReview.getPlaceReviewId()));
+        }
         return new CreatePlaceReviewResponse(savePlaceReview.getPlaceReviewId());
     }
 

@@ -151,10 +151,9 @@ public class PlaceServiceImpl implements PlaceService {
     @Override
     @Transactional
     public CreatePlaceReviewResponse createReview(final CreatePlaceReviewRequest request, final String memberId) {
-        PlaceReview placeReview = placeReviewRepository.findByMemberIdAndPlaceIdAndVisitDate(UUID.fromString(memberId), request.placeId(), request.visitDate());
-        if (placeReview != null) {
-            throw new PlaceExistException(placeReview.getPlaceReviewId());
-        }
+        placeReviewRepository.findByMemberIdAndPlaceIdAndVisitDate(UUID.fromString(memberId), request.placeId(), request.visitDate())
+                .orElseThrow(PlaceExistException::new);
+
         PlaceReview savePlaceReview = placeReviewRepository.save(new PlaceReview(memberId, request.placeId(), request.visitDate(), request.content()));
 
         List<CreatePlaceReviewRequest.PlaceReviewImageInfo> imageList = (request.placeReviewImageList() != null) ? request.placeReviewImageList() : Collections.emptyList();

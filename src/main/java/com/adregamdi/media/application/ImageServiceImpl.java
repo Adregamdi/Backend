@@ -125,6 +125,12 @@ public class ImageServiceImpl implements ImageService {
 
     @Override
     @Transactional
+    public void updateImages(List<String> imageUrlList, ImageTarget imageTarget, Long targetNo) {
+        imageUrlList.forEach(url -> updateImage(url, imageTarget, targetNo));
+    }
+
+    @Override
+    @Transactional
     public void updateImage(String newImageUrl, ImageTarget target, Long targetNo) {
         Image existingImage = imageRepository.findImageByTargetNoAndImageTarget(targetNo, target)
                 .orElse(null);

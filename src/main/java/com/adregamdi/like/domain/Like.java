@@ -16,7 +16,9 @@ import java.util.UUID;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "tbl_like", indexes = {
+@Table(name = "tbl_like",
+        uniqueConstraints = @UniqueConstraint(columnNames = {"member_id", "content_type", "content_id"}),
+        indexes = {
         @Index(name = "idx_member_content", columnList = "memberId, contentType, contentId"),
         @Index(name = "idx_content", columnList = "contentType, contentId")
 })

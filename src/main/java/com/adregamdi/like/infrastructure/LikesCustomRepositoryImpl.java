@@ -232,4 +232,14 @@ public class LikesCustomRepositoryImpl implements LikesCustomRepository{
 
         return new GetLikesContentsResponse<>(hasNext, contents);
     }
+
+    @Override
+    public Boolean checkIsLiked(UUID memberId, ContentType contentType, Long contentId) {
+        return jpaQueryFactory
+                .selectFrom(like)
+                .where(like.memberId.eq(memberId)
+                        .and(like.contentType.eq(contentType))
+                        .and(like.contentId.eq(contentId)))
+                .fetchFirst() != null;
+    }
 }

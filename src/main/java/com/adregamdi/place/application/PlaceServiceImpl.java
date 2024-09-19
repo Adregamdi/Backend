@@ -316,14 +316,14 @@ public class PlaceServiceImpl implements PlaceService {
 
     @Override
     @Transactional(readOnly = true)
-    public GetPlaceReviewResponse getReview(final Long placeReviewId) {
+    public PlaceReviewDTO getReview(final Long placeReviewId) {
         PlaceReview placeReview = placeReviewRepository.findById(placeReviewId)
                 .orElseThrow(() -> new PlaceReviewNotFoundException(placeReviewId));
         Place place = placeRepository.findById(placeReview.getPlaceId())
                 .orElseThrow(() -> new PlaceNotFoundException(placeReview.getPlaceId()));
         List<PlaceReviewImage> placeReviewImages = placeReviewImageRepository.findByPlaceReviewIdOrderByPlaceReviewImageIdDesc(placeReview.getPlaceReviewId());
 
-        return GetPlaceReviewResponse.of(
+        return PlaceReviewDTO.of(
                 place.getPlaceId(),
                 place.getTitle(),
                 place.getContentsLabel(),

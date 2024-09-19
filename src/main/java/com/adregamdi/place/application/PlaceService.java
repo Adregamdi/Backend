@@ -1,6 +1,7 @@
 package com.adregamdi.place.application;
 
 
+import com.adregamdi.place.dto.PlaceReviewDTO;
 import com.adregamdi.place.dto.request.CreatePlaceRequest;
 import com.adregamdi.place.dto.request.CreatePlaceReviewRequest;
 import com.adregamdi.place.dto.request.GetSortingPlacesRequest;
@@ -63,7 +64,7 @@ public interface PlaceService {
     /*
      * [특정 리뷰 조회]
      * */
-    GetPlaceReviewResponse getReview(final Long placeReviewId);
+    PlaceReviewDTO getReview(final Long placeReviewId);
 
     /*
      * [특정 장소의 전체 리뷰 조회]

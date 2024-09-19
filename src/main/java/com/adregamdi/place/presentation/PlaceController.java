@@ -4,6 +4,7 @@ import com.adregamdi.core.annotation.AdminAuthorize;
 import com.adregamdi.core.annotation.MemberAuthorize;
 import com.adregamdi.core.handler.ApiResponse;
 import com.adregamdi.place.application.PlaceService;
+import com.adregamdi.place.dto.PlaceReviewDTO;
 import com.adregamdi.place.dto.request.CreatePlaceRequest;
 import com.adregamdi.place.dto.request.CreatePlaceReviewRequest;
 import com.adregamdi.place.dto.request.GetSortingPlacesRequest;
@@ -143,10 +144,20 @@ public class PlaceController {
     public ResponseEntity<ApiResponse<GetPlaceReviewResponse>> getReview(
             @RequestParam("place_review_id") final Long placeReviewId
     ) {
+        PlaceReviewDTO placeReview = placeService.getReview(placeReviewId);
         return ResponseEntity.ok()
                 .body(ApiResponse.<GetPlaceReviewResponse>builder()
                         .statusCode(HttpStatus.OK.value())
-                        .data(placeService.getReview(placeReviewId))
+                        .data(GetPlaceReviewResponse.of(
+                                placeReview.placeReviewId(),
+                                placeReview.title(),
+                                placeReview.contentsLabel(),
+                                placeReview.regionLabel(),
+                                placeReview.visitDate(),
+                                placeReview.content(),
+                                placeReview.placeReviewImageList(),
+                                placeReview.createdAt()
+                        ))
                         .build()
                 );
     }

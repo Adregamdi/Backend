@@ -2,12 +2,13 @@ package com.adregamdi.place.domain;
 
 import com.adregamdi.core.entity.BaseTime;
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.AccessLevel;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@AllArgsConstructor
-@Builder
 @Entity
 @Table(name = "tbl_place")
 public class Place extends BaseTime {
@@ -16,6 +17,8 @@ public class Place extends BaseTime {
     private Long placeId;
     @Column
     private String title; // 장소 이름
+    @Column
+    private String contentsId; // 콘텐츠 id
     @Column
     private String contentsLabel; // 콘텐츠 라벨
     @Column
@@ -47,35 +50,23 @@ public class Place extends BaseTime {
     @Column
     private Integer addCount; // 장소 카운트
 
-    public Place(String title, String contentsLabel, String region1Cd, String region2Cd, String regionLabel, String address, String roadAddress, String tag, String introduction, String information, double latitude, double longitude, String phoneNo, String imgPath, String thumbnailPath) {
+    @Builder
+    private Place(String title, String contentsId, String contentsLabel, String regionLabel,
+                  String region1Cd, String region2Cd, String address, String roadAddress,
+                  String tag, String introduction, String information, Double latitude,
+                  Double longitude, String phoneNo, String imgPath, String thumbnailPath
+    ) {
         this.title = title;
+        this.contentsId = contentsId;
         this.contentsLabel = contentsLabel;
+        this.regionLabel = regionLabel;
         this.region1Cd = region1Cd;
         this.region2Cd = region2Cd;
-        this.regionLabel = regionLabel;
         this.address = address;
         this.roadAddress = roadAddress;
         this.tag = tag;
         this.introduction = introduction;
         this.information = information;
-        this.latitude = latitude;
-        this.longitude = longitude;
-        this.phoneNo = phoneNo;
-        this.imgPath = imgPath;
-        this.thumbnailPath = thumbnailPath;
-        this.addCount = 0;
-    }
-
-    public Place(String title, String contentsLabel, String region1Value, String region2Value, String region2Label, String address, String roadAddress, String tag, String introduction, double latitude, double longitude, String phoneNo, String imgPath, String thumbnailPath) {
-        this.title = title;
-        this.contentsLabel = contentsLabel;
-        this.region1Cd = region1Value;
-        this.region2Cd = region2Value;
-        this.regionLabel = region2Label;
-        this.address = address;
-        this.roadAddress = roadAddress;
-        this.tag = tag;
-        this.introduction = introduction;
         this.latitude = latitude;
         this.longitude = longitude;
         this.phoneNo = phoneNo;

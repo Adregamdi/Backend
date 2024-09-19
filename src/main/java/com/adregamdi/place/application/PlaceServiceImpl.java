@@ -15,9 +15,6 @@ import com.adregamdi.place.exception.PlaceException.PlaceReviewNotFoundException
 import com.adregamdi.place.infrastructure.PlaceRepository;
 import com.adregamdi.place.infrastructure.PlaceReviewImageRepository;
 import com.adregamdi.place.infrastructure.PlaceReviewRepository;
-import com.adregamdi.shorts.infrastructure.ShortsRepository;
-import com.adregamdi.travel.infrastructure.TravelRepository;
-import com.adregamdi.travelogue.infrastructure.TravelogueRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -54,9 +51,6 @@ public class PlaceServiceImpl implements PlaceService {
     private final PlaceRepository placeRepository;
     private final PlaceReviewRepository placeReviewRepository;
     private final PlaceReviewImageRepository placeReviewImageRepository;
-    private final ShortsRepository shortsRepository;
-    private final TravelogueRepository travelogueRepository;
-    private final TravelRepository travelRepository;
     private final ObjectMapper objectMapper;
 
     @Value("${api-key.visit-jeju}")
@@ -70,13 +64,24 @@ public class PlaceServiceImpl implements PlaceService {
         if (placeRepository.findByTitleAndContentsLabel(request.title(), request.contentsLabel()).isPresent()) {
             throw new PlaceExistException(request);
         }
-        placeRepository.save(new Place(
-                request.title(), request.contentsLabel(), request.region1Cd(),
-                request.region2Cd(), request.regionLabel(), request.address(),
-                request.roadAddress(), request.tag(), request.introduction(),
-                request.information(), request.latitude(), request.longitude(),
-                request.phoneNo(), request.imgPath(), request.thumbnailPath()
-        ));
+        placeRepository.save(Place.builder()
+                .title(request.title())
+                .contentsLabel(request.contentsLabel())
+                .regionLabel(request.regionLabel())
+                .region1Cd(request.region1Cd())
+                .region2Cd(request.region2Cd())
+                .address(request.address())
+                .roadAddress(request.roadAddress())
+                .tag(request.tag())
+                .introduction(request.introduction())
+                .information(request.information())
+                .latitude(request.latitude())
+                .longitude(request.longitude())
+                .phoneNo(request.phoneNo())
+                .imgPath(request.imgPath())
+                .thumbnailPath(request.thumbnailPath())
+                .build()
+        );
     }
 
     @Override
@@ -99,6 +104,7 @@ public class PlaceServiceImpl implements PlaceService {
                             StreamSupport.stream(items.spliterator(), false)
                                     .map(item -> {
                                         String title = item.path("title").asText();
+                                        String contentsId = item.path("contentsid").asText();
                                         String contentsLabel = item.path("contentscd").path("label").asText();
                                         String region1Value = item.path("region1cd").path("value").asText();
                                         String region2Value = item.path("region2cd").path("value").asText();
@@ -113,7 +119,23 @@ public class PlaceServiceImpl implements PlaceService {
                                         String imgPath = item.path("repPhoto").path("photoid").path("imgpath").asText();
                                         String thumbnailPath = item.path("repPhoto").path("photoid").path("thumbnailpath").asText();
 
-                                        return new Place(title, contentsLabel, region1Value, region2Value, region2Label, address, roadAddress, tag, introduction, latitude, longitude, phoneNo, imgPath, thumbnailPath);
+                                        return Place.builder()
+                                                .title(title)
+                                                .contentsId(contentsId)
+                                                .contentsLabel(contentsLabel)
+                                                .regionLabel(region2Label)
+                                                .region1Cd(region1Value)
+                                                .region2Cd(region2Value)
+                                                .address(address)
+                                                .roadAddress(roadAddress)
+                                                .tag(tag)
+                                                .introduction(introduction)
+                                                .latitude(latitude)
+                                                .longitude(longitude)
+                                                .phoneNo(phoneNo)
+                                                .imgPath(imgPath)
+                                                .thumbnailPath(thumbnailPath)
+                                                .build();
                                     })
                                     .forEach(placeRepository::save);
 

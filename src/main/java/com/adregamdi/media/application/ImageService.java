@@ -16,13 +16,13 @@ public interface ImageService {
 
     void saveImages(List<String> imageUrlList, ImageTarget imageTarget);
 
-    void saveTargetNo(List<String> imageUrlList, ImageTarget imageTarget, Long targetNo);
+    void saveTargetId(List<String> imageUrlList, ImageTarget imageTarget, String targetId);
 
-    void saveTargetNo(String imageUrl, ImageTarget imageTarget, Long targetNo);
+    void saveTargetId(String imageUrl, ImageTarget imageTarget, String targetId);
 
-    void updateImages(List<String> imageUrlList, ImageTarget imageTarget, Long targetNo);
+    void updateImages(List<String> imageUrlList, ImageTarget imageTarget, String targetId);
 
-    void updateImage(String newImageUrl, ImageTarget imageTarget, Long targetNo);
+    void updateImage(String newImageUrl, ImageTarget imageTarget, String targetId);
 
     void deleteImageList(List<String> imageUrlList);
 

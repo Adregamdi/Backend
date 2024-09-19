@@ -39,10 +39,10 @@ public class ImageServiceImpl implements ImageService {
         return image;
     }
 
-    private Image getImageByImageTargetAndTargetNo(ImageTarget imageTarget, Long targetNo) {
-        Image image = imageRepository.findImageByImageTargetAndTargetNo(imageTarget, targetNo)
-                .orElseThrow(() -> new ImageException.ImageNotFoundException(targetNo));
-        log.info("성공적으로 이미지를 조회하였습니다. targetNo: {}", targetNo);
+    private Image getImageByImageTargetAndTargetNo(ImageTarget imageTarget, String targetId) {
+        Image image = imageRepository.findImageByImageTargetAndTargetId(imageTarget, targetId)
+                .orElseThrow(() -> new ImageException.ImageNotFoundException(targetId));
+        log.info("성공적으로 이미지를 조회하였습니다. targetNo: {}", targetId);
         return image;
     }
 
@@ -103,41 +103,41 @@ public class ImageServiceImpl implements ImageService {
     }
 
     @Override
-    public void saveTargetNo(List<String> imageUrlList, ImageTarget imageTarget, Long targetNo) {
+    public void saveTargetId(List<String> imageUrlList, ImageTarget imageTarget, String targetId) {
 
         for (String imageUrl : imageUrlList) {
-            saveTargetNo(imageUrl, imageTarget, targetNo);
+            this.saveTargetId(imageUrl, imageTarget, targetId);
         }
     }
 
     @Override
-    public void saveTargetNo(String imageUrl, ImageTarget imageTarget, Long targetNo) {
+    public void saveTargetId(String imageUrl, ImageTarget imageTarget, String targetId) {
 
-        log.info("이미지에 아이디를 할당합니다. imageTarget: {}, targetNo: {}", imageTarget, targetNo);
+        log.info("이미지에 아이디를 할당합니다. imageTarget: {}, targetNo: {}", imageTarget, targetId);
         String filename = imageValidService.getFileNameFromUrl(imageUrl);
         imageValidService.checkImageFile(filename);
 
         Image image = getImageByImageUrl(imageUrl);
         image.updateImageTarget(imageTarget);
-        image.updateTargetNo(targetNo);
-        log.info("{} 번의 이미지가 {} 의 {} 번의 엔테티로 할당되었습니다,", image.getImageNo(), image.getImageTarget(), image.getTargetNo());
+        image.updateTargetId(targetId);
+        log.info("{} 번의 이미지가 {} 의 {} 번의 엔테티로 할당되었습니다,", image.getImageNo(), image.getImageTarget(), image.getTargetId());
     }
 
     @Override
     @Transactional
-    public void updateImages(List<String> imageUrlList, ImageTarget imageTarget, Long targetNo) {
-        imageUrlList.forEach(url -> updateImage(url, imageTarget, targetNo));
+    public void updateImages(List<String> imageUrlList, ImageTarget imageTarget, String targetId) {
+        imageUrlList.forEach(url -> updateImage(url, imageTarget, targetId));
     }
 
     @Override
     @Transactional
-    public void updateImage(String newImageUrl, ImageTarget target, Long targetNo) {
-        Image existingImage = imageRepository.findImageByTargetNoAndImageTarget(targetNo, target)
+    public void updateImage(String newImageUrl, ImageTarget target, String targetId) {
+        Image existingImage = imageRepository.findImageByTargetIdAndImageTarget(targetId, target)
                 .orElse(null);
 
         // 새 이미지 URL이 제공되었고, 기존 이미지와 다른 경우
         if (!newImageUrl.isBlank() && (existingImage == null || !imageValidService.isSameImage(existingImage.getImageUrl(), newImageUrl))) {
-            handleNewImage(existingImage, target, targetNo, newImageUrl);
+            handleNewImage(existingImage, target, targetId, newImageUrl);
         }
         // 새 이미지 URL이 비어있는 경우 (이미지 삭제)
         else if (newImageUrl.isBlank() && existingImage != null) {
@@ -145,11 +145,11 @@ public class ImageServiceImpl implements ImageService {
         }
         // 변경사항이 없는 경우
         else {
-            log.info("이미지 변경 사항이 없습니다. target: {}, targetNo: {}", target, targetNo);
+            log.info("이미지 변경 사항이 없습니다. target: {}, targetNo: {}", target, targetId);
         }
     }
 
-    private void handleNewImage(Image existingImage, ImageTarget target, Long targetNo, String newImageUrl) {
+    private void handleNewImage(Image existingImage, ImageTarget target, String targetId, String newImageUrl) {
         // 새 이미지 URL에 대한 유효성 검사
         imageValidService.checkImageFile(imageValidService.getFileNameFromUrl(newImageUrl));
 
@@ -160,9 +160,9 @@ public class ImageServiceImpl implements ImageService {
         }
 
         // 새 이미지에 대한 targetNo와 imageTarget 할당
-        saveTargetNo(newImageUrl, target, targetNo);
+        saveTargetId(newImageUrl, target, targetId);
 
-        log.info("{} - {}의 이미지가 {}로 변경되었습니다.", target, targetNo, newImageUrl);
+        log.info("{} - {}의 이미지가 {}로 변경되었습니다.", target, targetId, newImageUrl);
     }
 
     private void handleImageDeletion(Image existingImage) {

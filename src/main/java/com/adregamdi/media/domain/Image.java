@@ -30,7 +30,7 @@ public class Image {
 
     @Column(name = "target_id")
     @Comment(value = "관련 엔티티 식별 값")
-    private Long targetNo;
+    private String targetId;
 
     @Column(name = "create_date", updatable = false)
     @Comment(value = "이미지 생성일")
@@ -38,16 +38,16 @@ public class Image {
 
 
     @Builder
-    public Image(Long imageNo, String imageUrl, ImageTarget imageTarget, Long targetNo) {
+    public Image(Long imageNo, String imageUrl, ImageTarget imageTarget, String targetId) {
         this.imageNo = imageNo;
         this.imageUrl = imageUrl;
         this.imageTarget = imageTarget;
-        this.targetNo = targetNo;
+        this.targetId = targetId;
         this.createDate = LocalDateTime.now();
     }
 
-    public void updateTargetNo(Long targetNo) {
-        this.targetNo = targetNo;
+    public void updateTargetId(String targetId) {
+        this.targetId = targetId;
     }
 
     public void updateImageTarget(ImageTarget imageTarget) {

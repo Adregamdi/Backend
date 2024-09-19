@@ -43,6 +43,7 @@ public class SearchRepositoryImpl implements SearchRepository {
                 .select(Projections.constructor(TravelogueSearchDTO.class,
                         travelogue.travelogueId,
                         travelogue.title,
+                        member.profile,
                         member.handle,
                         Expressions.constant(new ArrayList<String>())))
                 .from(travelogue)
@@ -85,6 +86,7 @@ public class SearchRepositoryImpl implements SearchRepository {
                 .map(dto -> new TravelogueSearchDTO(
                         dto.travelogueId(),
                         dto.title(),
+                        dto.profile(),
                         dto.memberHandle(),
                         imageUrlMap.getOrDefault(dto.travelogueId(), Collections.emptyList())
                 ))

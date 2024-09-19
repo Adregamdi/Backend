@@ -125,22 +125,50 @@ public class ImageServiceImpl implements ImageService {
 
     @Override
     @Transactional
-    public void updateImage(String newImageUrl, ImageTarget imageTarget, Long targetNo) {
+    public void updateImages(List<String> imageUrlList, ImageTarget imageTarget, Long targetNo) {
+        imageUrlList.forEach(url -> updateImage(url, imageTarget, targetNo));
+    }
 
-        // 이미지 유효성 검증
-        String filename = imageValidService.getFileNameFromUrl(newImageUrl);
-        imageValidService.checkImageFile(filename);
+    @Override
+    @Transactional
+    public void updateImage(String newImageUrl, ImageTarget target, Long targetNo) {
+        Image existingImage = imageRepository.findImageByTargetNoAndImageTarget(targetNo, target)
+                .orElse(null);
 
-        Image image = getImageByImageTargetAndTargetNo(imageTarget, targetNo);
-        String currentImageUrl = image.getImageUrl();
+        // 새 이미지 URL이 제공되었고, 기존 이미지와 다른 경우
+        if (!newImageUrl.isBlank() && (existingImage == null || !imageValidService.isSameImage(existingImage.getImageUrl(), newImageUrl))) {
+            handleNewImage(existingImage, target, targetNo, newImageUrl);
+        }
+        // 새 이미지 URL이 비어있는 경우 (이미지 삭제)
+        else if (newImageUrl.isBlank() && existingImage != null) {
+            handleImageDeletion(existingImage);
+        }
+        // 변경사항이 없는 경우
+        else {
+            log.info("이미지 변경 사항이 없습니다. target: {}, targetNo: {}", target, targetNo);
+        }
+    }
 
-        if (imageValidService.isSameImage(currentImageUrl, newImageUrl)) {
-            return;
+    private void handleNewImage(Image existingImage, ImageTarget target, Long targetNo, String newImageUrl) {
+        // 새 이미지 URL에 대한 유효성 검사
+        imageValidService.checkImageFile(imageValidService.getFileNameFromUrl(newImageUrl));
+
+        // 기존 이미지가 있다면 스토리지에서 삭제
+        if (existingImage != null && !existingImage.getImageUrl().isBlank()) {
+            deleteImageFromStorage(existingImage.getImageUrl());
+            imageRepository.delete(existingImage);
         }
 
-        deleteImageFromStorage(currentImageUrl);
-        image.updateImageUrl(newImageUrl);
-        log.info("{} - {}의 이미지가 변경되었습니다.", image.getImageTarget(), targetNo);
+        // 새 이미지에 대한 targetNo와 imageTarget 할당
+        saveTargetNo(newImageUrl, target, targetNo);
+
+        log.info("{} - {}의 이미지가 {}로 변경되었습니다.", target, targetNo, newImageUrl);
+    }
+
+    private void handleImageDeletion(Image existingImage) {
+        deleteImageFromStorage(existingImage.getImageUrl());
+        imageRepository.delete(existingImage);
+        log.info("{} 이미지가 삭제되었습니다.", existingImage.getImageUrl());
     }
 
     @Override

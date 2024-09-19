@@ -20,6 +20,8 @@ public interface ImageService {
 
     void saveTargetNo(String imageUrl, ImageTarget imageTarget, Long targetNo);
 
+    void updateImages(List<String> imageUrlList, ImageTarget imageTarget, Long targetNo);
+
     void updateImage(String newImageUrl, ImageTarget imageTarget, Long targetNo);
 
     void deleteImageList(List<String> imageUrlList);

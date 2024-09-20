@@ -14,6 +14,7 @@ import com.adregamdi.place.dto.request.GetSortingPlacesRequest;
 import com.adregamdi.place.dto.response.*;
 import com.adregamdi.place.exception.PlaceException.PlaceExistException;
 import com.adregamdi.place.exception.PlaceException.PlaceNotFoundException;
+import com.adregamdi.place.exception.PlaceException.PlaceReviewExistException;
 import com.adregamdi.place.exception.PlaceException.PlaceReviewNotFoundException;
 import com.adregamdi.place.infrastructure.PlaceRepository;
 import com.adregamdi.place.infrastructure.PlaceReviewImageRepository;
@@ -156,11 +157,17 @@ public class PlaceServiceImpl implements PlaceService {
 
     @Override
     @Transactional
-    public CreatePlaceReviewResponse createReview(final CreatePlaceReviewRequest request, final String memberId) {
-        placeReviewRepository.findByMemberIdAndPlaceIdAndVisitDate(UUID.fromString(memberId), request.placeId(), request.visitDate())
-                .orElseThrow(PlaceExistException::new);
+    public CreatePlaceReviewResponse createReview(final String memberId, final CreatePlaceReviewRequest request) {
+        placeReviewRepository.findByMemberIdAndPlaceId(UUID.fromString(memberId), request.placeId())
+                .ifPresent(data -> {
+                    throw new PlaceReviewExistException(data.getPlaceReviewId());
+                });
 
-        PlaceReview savePlaceReview = placeReviewRepository.save(new PlaceReview(memberId, request.placeId(), request.visitDate(), request.content()));
+        PlaceReview savePlaceReview = placeReviewRepository.save(PlaceReview.builder()
+                .memberId(memberId)
+                .placeId(request.placeId())
+                .content(request.content())
+                .build());
 
         List<CreatePlaceReviewRequest.PlaceReviewImageInfo> imageList = (request.placeReviewImageList() != null) ? request.placeReviewImageList() : Collections.emptyList();
 

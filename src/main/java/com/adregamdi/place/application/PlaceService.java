@@ -24,7 +24,7 @@ public interface PlaceService {
     /*
      * [장소 리뷰 등록]
      * */
-    CreatePlaceReviewResponse createReview(final CreatePlaceReviewRequest request, final String memberId);
+    CreatePlaceReviewResponse createReview(final String memberId, final CreatePlaceReviewRequest request);
 
     /*
      * [장소 추가 카운트 증감]

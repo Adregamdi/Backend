@@ -13,6 +13,8 @@ public interface PlaceReviewRepository extends JpaRepository<PlaceReview, Long> 
 
     List<PlaceReview> findAllByPlaceIdOrderByPlaceReviewIdDesc(Long placeId);
 
+    Optional<PlaceReview> findByMemberIdAndPlaceId(UUID memberId, Long placeId);
+
     Optional<PlaceReview> findByMemberIdAndPlaceIdAndVisitDate(UUID memberId, Long placeId, LocalDate localDate);
 
     int countByPlaceId(Long placeId);

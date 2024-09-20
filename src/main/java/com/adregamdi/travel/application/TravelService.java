@@ -189,10 +189,10 @@ public class TravelService {
                 throw new TravelPlaceNotFoundException(travel.getTravelId());
             }
             for (TravelPlace travelPlace : travelPlaceList) {
-                PlaceReview placeReviewInfo = placeReviewRepository.findByMemberIdAndPlaceIdAndVisitDate(UUID.fromString(memberId), travelPlace.getPlaceId(), travelDay.getDate())
-                        .orElse(PlaceReview.builder().placeReviewId(0L).build());
+                PlaceReview placeReviewInfo = placeReviewRepository.findByMemberIdAndPlaceId(UUID.fromString(memberId), travelPlace.getPlaceId())
+                        .orElse(PlaceReview.builder().build());
                 PlaceReviewDTO placeReview = null;
-                if (placeReviewInfo.getPlaceReviewId() != 0) {
+                if (placeReviewInfo.getPlaceReviewId() != null && placeReviewInfo.getPlaceReviewId() != 0) {
                     placeReview = placeService.getReview(placeReviewInfo.getPlaceReviewId());
                 }
                 travelPlaceDTOS.add(TravelPlaceDTO.of(placeReview, travelPlace, placeService.get(memberId, travelPlace.getPlaceId()).place()));

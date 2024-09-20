@@ -31,7 +31,6 @@ public class ShortsCustomRepositoryImpl implements ShortsCustomRepository {
     @Override
     public GetShortsResponse getShortsForMember(UUID memberId, long lastId, int size) {
 
-        // 좋아요 여부 조회
         List<ShortsDTO> content = jpaQueryFactory
                 .select(Projections.constructor(ShortsDTO.class,
                         shorts.shortsId,
@@ -58,7 +57,7 @@ public class ShortsCustomRepositoryImpl implements ShortsCustomRepository {
                 .leftJoin(place).on(shorts.placeId.eq(place.placeId))
                 .leftJoin(travelogue).on(shorts.travelogueId.eq(travelogue.travelogueId))
                 .where(
-                        shorts.shortsId.gt(lastId),
+                        shorts.shortsId.lt(lastId),
                         shorts.assignedStatus.eq(true))
                 .orderBy(shorts.shortsId.asc())
                 .limit(size + 1)

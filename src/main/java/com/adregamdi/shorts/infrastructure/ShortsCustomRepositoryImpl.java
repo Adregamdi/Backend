@@ -6,7 +6,9 @@ import com.adregamdi.shorts.dto.request.GetShortsByPlaceIdRequest;
 import com.adregamdi.shorts.dto.response.GetShortsByPlaceIdResponse;
 import com.adregamdi.shorts.dto.response.GetShortsResponse;
 import com.querydsl.core.types.ExpressionUtils;
+import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Projections;
+import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
@@ -20,6 +22,7 @@ import static com.adregamdi.shorts.domain.QShorts.shorts;
 import static com.adregamdi.place.domain.QPlace.place;
 import static com.adregamdi.travelogue.domain.QTravelogue.travelogue;
 import static com.adregamdi.like.domain.QLike.like;
+import static com.adregamdi.member.domain.QMember.member;
 
 @Slf4j
 @Repository
@@ -30,98 +33,40 @@ public class ShortsCustomRepositoryImpl implements ShortsCustomRepository {
 
     @Override
     public GetShortsResponse getShortsForMember(UUID memberId, long lastId, int size) {
-
-        List<ShortsDTO> content = jpaQueryFactory
-                .select(Projections.constructor(ShortsDTO.class,
-                        shorts.shortsId,
-                        shorts.title,
-                        shorts.memberId,
-                        shorts.placeId,
-                        place.title,
-                        shorts.travelogueId,
-                        travelogue.title,
-                        shorts.shortsVideoUrl,
-                        shorts.thumbnailUrl,
-                        shorts.viewCount,
-                        ExpressionUtils.as(
-                                JPAExpressions
-                                        .selectOne()
-                                        .from(like)
-                                        .where(like.memberId.eq(memberId)
-                                                .and(like.contentType.eq(ContentType.SHORTS))
-                                                .and(like.contentId.eq(shorts.shortsId)))
-                                        .exists(),
-                                "isLiked"
-                        )))
-                .from(shorts)
-                .leftJoin(place).on(shorts.placeId.eq(place.placeId))
-                .leftJoin(travelogue).on(shorts.travelogueId.eq(travelogue.travelogueId))
-                .where(
-                        shorts.shortsId.lt(lastId),
-                        shorts.assignedStatus.eq(true))
-                .orderBy(shorts.shortsId.asc())
-                .limit(size + 1)
-                .fetch();
-
-        boolean hasNext = content.size() > size;
-        if (hasNext) {
-            content.remove(size);
-        }
-
-        return new GetShortsResponse(content, hasNext);
+        BooleanExpression condition = shorts.shortsId.lt(lastId).and(shorts.assignedStatus.eq(true));
+        OrderSpecifier<?> orderBy = shorts.shortsId.asc();
+        return getShorts(memberId, condition, orderBy, size);
     }
+
 
     @Override
     public GetShortsResponse getUserShorts(UUID memberId, long lastShortsId, int size) {
-
-        List<ShortsDTO> content = jpaQueryFactory
-                .select(Projections.constructor(ShortsDTO.class,
-                        shorts.shortsId,
-                        shorts.title,
-                        shorts.memberId,
-                        shorts.placeId,
-                        place.title,
-                        shorts.travelogueId,
-                        travelogue.title,
-                        shorts.shortsVideoUrl,
-                        shorts.thumbnailUrl,
-                        shorts.viewCount,
-                        ExpressionUtils.as(
-                                JPAExpressions
-                                        .selectOne()
-                                        .from(like)
-                                        .where(like.memberId.eq(memberId)
-                                                .and(like.contentType.eq(ContentType.SHORTS))
-                                                .and(like.contentId.eq(shorts.shortsId)))
-                                        .exists(),
-                                "isLiked"
-                        )))
-                .from(shorts)
-                .leftJoin(place).on(shorts.placeId.eq(place.placeId))
-                .leftJoin(travelogue).on(shorts.travelogueId.eq(travelogue.travelogueId))
-                .where(
-                        shorts.shortsId.gt(lastShortsId),
-                        shorts.memberId.eq(memberId),
-                        shorts.assignedStatus.eq(true))
-                .orderBy(shorts.createdAt.desc())
-                .limit(size + 1)
-                .fetch();
-
-        boolean hasNext = content.size() > size;
-        if (hasNext) {
-            content.remove(size);
-        }
-        return new GetShortsResponse(content, hasNext);
+        BooleanExpression condition = shorts.shortsId.gt(lastShortsId)
+                .and(shorts.memberId.eq(memberId))
+                .and(shorts.assignedStatus.eq(true));
+        OrderSpecifier<?> orderBy = shorts.createdAt.desc();
+        return getShorts(memberId, condition, orderBy, size);
     }
 
     @Override
     public GetShortsByPlaceIdResponse getShortsByPlaceId(UUID memberId, GetShortsByPlaceIdRequest request) {
+        BooleanExpression condition = shorts.shortsId.gt(request.lastShortsId())
+                .and(shorts.placeId.eq(request.placeId()))
+                .and(shorts.assignedStatus.eq(true));
+        OrderSpecifier<?> orderBy = shorts.createdAt.desc();
+        GetShortsResponse response = getShorts(memberId, condition, orderBy, request.size());
+        return new GetShortsByPlaceIdResponse(response.shortsList(), response.hasNext());
+    }
 
-        List<ShortsDTO> contents = jpaQueryFactory
+    private GetShortsResponse getShorts(UUID memberId, BooleanExpression condition, OrderSpecifier<?> orderBy, int size) {
+        List<ShortsDTO> content = jpaQueryFactory
                 .select(Projections.constructor(ShortsDTO.class,
                         shorts.shortsId,
                         shorts.title,
                         shorts.memberId,
+                        member.name,
+                        member.handle,
+                        member.profile,
                         shorts.placeId,
                         place.title,
                         shorts.travelogueId,
@@ -140,20 +85,22 @@ public class ShortsCustomRepositoryImpl implements ShortsCustomRepository {
                                 "isLiked"
                         )))
                 .from(shorts)
+                .join(member).on(shorts.memberId.eq(member.memberId))
                 .leftJoin(place).on(shorts.placeId.eq(place.placeId))
                 .leftJoin(travelogue).on(shorts.travelogueId.eq(travelogue.travelogueId))
-                .where(
-                        shorts.shortsId.gt(request.lastShortsId()),
-                        shorts.placeId.eq(request.placeId()),
-                        shorts.assignedStatus.eq(true))
-                .orderBy(shorts.createdAt.desc())
-                .limit(request.size() + 1)
+                .where(condition)
+                .orderBy(orderBy)
+                .limit(size + 1)
                 .fetch();
 
-        boolean hasNext = contents.size() > request.size();
+        return processResult(content, size);
+    }
+
+    private GetShortsResponse processResult(List<ShortsDTO> content, int size) {
+        boolean hasNext = content.size() > size;
         if (hasNext) {
-            contents.remove(request.size());
+            content.remove(size);
         }
-        return new GetShortsByPlaceIdResponse(contents, hasNext);
+        return new GetShortsResponse(content, hasNext);
     }
 }

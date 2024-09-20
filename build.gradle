@@ -32,6 +32,10 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
     implementation 'org.springframework.boot:spring-boot-starter-aop'
     implementation 'org.springframework.boot:spring-boot-starter-webflux'
+    // 애플 로그인을 위한 라이브러리
+    implementation 'com.auth0:jwks-rsa:0.21.1'
+    implementation 'org.json:json:20210307'
+    implementation 'org.bouncycastle:bcprov-jdk15on'
 
     // QueryDSL
     implementation 'com.querydsl:querydsl-jpa:5.0.0:jakarta'
@@ -67,7 +71,6 @@ dependencies {
 
     // 썸네일 제작을 위한 라이브러리
     implementation 'org.bytedeco:javacv-platform:1.5.9'
-
 }
 
 tasks.named('test') {
@@ -94,7 +97,7 @@ clean {
 
 //// submodule 폴더 내 변동사항 현 플젝에 적용 task
 task copyPrivate(type: Copy) {
-    copy{
+    copy {
         from './BackEnd-Config'
         into 'src/main/resources'
     }

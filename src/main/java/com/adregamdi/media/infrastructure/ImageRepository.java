@@ -19,7 +19,7 @@ public interface ImageRepository extends JpaRepository<Image, Long> {
 
     List<Image> findByImageUrlIn(List<String> imageUrls);
 
-    @Query("SELECT i.imageUrl FROM Image i WHERE i.targetId IS NULL AND i.createDate < :date")
+    @Query("SELECT i.imageUrl FROM Image i WHERE i.targetId IS NULL AND i.createdAt < :date")
     List<String> findUnassignedImagesBeforeDate(@Param("date") LocalDateTime date);
 
     @Query("DELETE FROM Image i WHERE i.imageUrl IN :imageUrls")

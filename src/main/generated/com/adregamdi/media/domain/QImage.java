@@ -19,7 +19,10 @@ public class QImage extends EntityPathBase<Image> {
 
     public static final QImage image = new QImage("image");
 
-    public final DateTimePath<java.time.LocalDateTime> createDate = createDateTime("createDate", java.time.LocalDateTime.class);
+    public final com.adregamdi.core.entity.QBaseTime _super = new com.adregamdi.core.entity.QBaseTime(this);
+
+    //inherited
+    public final DateTimePath<java.time.LocalDateTime> createdAt = _super.createdAt;
 
     public final NumberPath<Long> imageNo = createNumber("imageNo", Long.class);
 
@@ -28,6 +31,9 @@ public class QImage extends EntityPathBase<Image> {
     public final StringPath imageUrl = createString("imageUrl");
 
     public final StringPath targetId = createString("targetId");
+
+    //inherited
+    public final DateTimePath<java.time.LocalDateTime> updatedAt = _super.updatedAt;
 
     public QImage(String variable) {
         super(Image.class, forVariable(variable));

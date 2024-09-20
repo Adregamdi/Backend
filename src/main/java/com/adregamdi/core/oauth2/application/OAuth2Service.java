@@ -7,16 +7,31 @@ import com.adregamdi.core.oauth2.dto.OAuth2Attributes;
 import com.adregamdi.member.domain.Member;
 import com.adregamdi.member.domain.SocialType;
 import com.adregamdi.member.infrastructure.MemberRepository;
+import com.auth0.jwt.JWT;
+import com.auth0.jwt.algorithms.Algorithm;
+import com.auth0.jwt.interfaces.ECDSAKeyProvider;
+import com.auth0.jwt.interfaces.JWTVerifier;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.json.JSONArray;
+import org.json.JSONObject;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatusCode;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
-import java.util.Map;
-import java.util.Objects;
+import java.math.BigInteger;
+import java.security.KeyFactory;
+import java.security.interfaces.ECPrivateKey;
+import java.security.interfaces.ECPublicKey;
+import java.security.interfaces.RSAPublicKey;
+import java.security.spec.PKCS8EncodedKeySpec;
+import java.security.spec.RSAPublicKeySpec;
+import java.util.*;
 
 
 @Slf4j
@@ -31,32 +46,21 @@ public class OAuth2Service {
 
     @Transactional
     public LoginResponse login(LoginRequest request) {
-        Map userInfo = null;
-        String userInfoUrl;
-
-        switch (request.socialType()) {
-            case "kakao":
-                userInfoUrl = "https://kapi.kakao.com/v2/user/me";
-                userInfo = fetchUserInfo(userInfoUrl, request.oauthAccessToken());
-                break;
-
-            case "google":
-                userInfoUrl = "https://www.googleapis.com/oauth2/v3/userinfo";
-                userInfo = fetchUserInfo(userInfoUrl, request.oauthAccessToken());
-                break;
-
-            case "apple":
-                // 애플의 경우, 추가적인 처리 필요 (예: JWT 디코딩 등)
-                // userInfoUrl = "애플 사용자 정보 URL"; // 실제 URL 설정 필요
-                // userInfo = webClient.get().uri(userInfoUrl)...
-                break;
-
-            default:
-                throw new IllegalArgumentException("지원하지 않는 소셜 서비스입니다.: " + request.socialType());
-        }
+        Map<String, Object> userInfo = switch (request.socialType()) {
+            case "kakao" -> {
+                String kakaoUserInfoUrl = "https://kapi.kakao.com/v2/user/me";
+                yield fetchUserInfo(kakaoUserInfoUrl, request.oauthAccessToken());
+            }
+            case "google" -> {
+                String googleUserInfoUrl = "https://www.googleapis.com/oauth2/v3/userinfo";
+                yield fetchUserInfo(googleUserInfoUrl, request.oauthAccessToken());
+            }
+            case "apple" -> handleAppleLogin(request);
+            default -> throw new IllegalArgumentException("지원하지 않는 소셜 서비스입니다.: " + request.socialType());
+        };
 
         SocialType socialType = getSocialType(request.socialType());
-        String userNameAttributeName = (request.socialType().equals("google")) ? "sub" : "id";
+        String userNameAttributeName = getUserNameAttributeName(request.socialType());
         OAuth2Attributes extractAttributes = OAuth2Attributes.of(socialType, userNameAttributeName, userInfo);
 
         Member findMember = getMember(extractAttributes, socialType);
@@ -68,6 +72,156 @@ public class OAuth2Service {
         findMember.updateRefreshTokenStatus(true);
 
         return new LoginResponse(accessToken, refreshToken);
+    }
+
+    private Map<String, Object> handleAppleLogin(LoginRequest request) {
+        String idToken;
+        if (request.idToken() != null) { // Android case
+            idToken = request.idToken();
+        } else { // iOS case
+            idToken = getAppleIdToken(request.authorizationCode());
+        }
+
+        return verifyAndExtractUserInfo(idToken);
+    }
+
+    private String getAppleIdToken(String authorizationCode) {
+        // Apple 서버에 authorizationCode를 사용하여 idToken을 요청
+        String clientId = "YOUR_CLIENT_ID"; // Apple Developer에서 가져온 클라이언트 ID
+        String clientSecret = generateClientSecret(); // JWT 형식의 클라이언트 시크릿 생성
+
+        return webClient.post()
+                .uri("https://appleid.apple.com/auth/token")
+                .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+                .body(BodyInserters.fromFormData("client_id", clientId)
+                        .with("client_secret", clientSecret)
+                        .with("code", authorizationCode)
+                        .with("grant_type", "authorization_code"))
+                .retrieve()
+                .bodyToMono(Map.class)
+                .map(response -> (String) response.get("id_token"))
+                .block();
+    }
+
+    private String generateClientSecret() {
+        try {
+            // Apple Developer에서 가져온 정보
+            String teamId = "YOUR_TEAM_ID";
+            String clientId = "YOUR_CLIENT_ID";
+            String keyId = "YOUR_KEY_ID";
+            String privateKey = "YOUR_PRIVATE_KEY"; // .p8 파일의 내용
+
+            // JWT 헤더 설정
+            Map<String, Object> headerClaims = new HashMap<>();
+            headerClaims.put("kid", keyId);
+
+            // JWT 생성
+            return JWT.create()
+                    .withHeader(headerClaims)
+                    .withIssuer(teamId)
+                    .withIssuedAt(new Date())
+                    .withExpiresAt(new Date(System.currentTimeMillis() + 15777000000L)) // 6개월
+                    .withAudience("https://appleid.apple.com")
+                    .withSubject(clientId)
+                    .sign(Algorithm.ECDSA256(new ECDSAKeyProvider() {
+                        @Override
+                        public ECPublicKey getPublicKeyById(String keyId) {
+                            return null; // 클라이언트 시크릿 생성시에는 필요 없음
+                        }
+
+                        @Override
+                        public ECPrivateKey getPrivateKey() {
+                            try {
+                                byte[] pkcs8EncodedBytes = Base64.getDecoder().decode(privateKey);
+                                PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(pkcs8EncodedBytes);
+                                KeyFactory kf = KeyFactory.getInstance("EC");
+                                return (ECPrivateKey) kf.generatePrivate(keySpec);
+                            } catch (Exception e) {
+                                throw new RuntimeException("Failed to load private key", e);
+                            }
+                        }
+
+                        @Override
+                        public String getPrivateKeyId() {
+                            return keyId;
+                        }
+                    }));
+        } catch (Exception e) {
+            log.error("애플 클라이언트 시크릿 생성 실패", e);
+            throw new RuntimeException("애플 클라이언트 시크릿 생성 중 오류가 발생했습니다.", e);
+        }
+    }
+
+    private Map<String, Object> verifyAndExtractUserInfo(String idToken) {
+        try {
+            // Apple의 공개키 가져오기
+            String jwksJson = webClient.get()
+                    .uri("https://appleid.apple.com/auth/keys")
+                    .retrieve()
+                    .bodyToMono(String.class)
+                    .block();
+
+            JSONObject jwks = new JSONObject(jwksJson);
+            JSONArray keys = jwks.getJSONArray("keys");
+
+            // ID 토큰 파싱
+            String[] tokenParts = idToken.split("\\.");
+            String header = new String(Base64.getUrlDecoder().decode(tokenParts[0]));
+            String payload = new String(Base64.getUrlDecoder().decode(tokenParts[1]));
+
+            JSONObject headerJson = new JSONObject(header);
+            String kid = headerJson.getString("kid");
+
+            // 매칭되는 키 찾기
+            JSONObject key = findMatchingKey(keys, kid);
+            if (key == null) {
+                throw new RuntimeException("Matching key not found");
+            }
+
+            // 토큰 검증
+            RSAPublicKey publicKey = getRSAPublicKey(key);
+            Algorithm algorithm = Algorithm.RSA256(publicKey, null);
+            JWTVerifier verifier = JWT.require(algorithm)
+                    .withIssuer("https://appleid.apple.com")
+                    .build();
+
+            verifier.verify(idToken);
+
+            // 페이로드에서 사용자 정보 추출
+            JSONObject payloadJson = new JSONObject(payload);
+            Map<String, Object> userInfo = new HashMap<>();
+            userInfo.put("sub", payloadJson.getString("sub"));
+            if (payloadJson.has("email")) {
+                userInfo.put("email", payloadJson.getString("email"));
+            }
+
+            return userInfo;
+        } catch (Exception e) {
+            log.error("애플 ID 토큰 검증 실패", e);
+            throw new RuntimeException("애플 로그인 처리 중 오류가 발생했습니다.", e);
+        }
+    }
+
+    private JSONObject findMatchingKey(JSONArray keys, String kid) {
+        for (int i = 0; i < keys.length(); i++) {
+            JSONObject key = keys.getJSONObject(i);
+            if (kid.equals(key.getString("kid"))) {
+                return key;
+            }
+        }
+        return null;
+    }
+
+    private RSAPublicKey getRSAPublicKey(JSONObject key) throws Exception {
+        String nStr = key.getString("n");
+        String eStr = key.getString("e");
+
+        BigInteger n = new BigInteger(1, Base64.getUrlDecoder().decode(nStr));
+        BigInteger e = new BigInteger(1, Base64.getUrlDecoder().decode(eStr));
+
+        RSAPublicKeySpec spec = new RSAPublicKeySpec(n, e);
+        KeyFactory factory = KeyFactory.getInstance("RSA");
+        return (RSAPublicKey) factory.generatePublic(spec);
     }
 
     private Map fetchUserInfo(String userInfoUrl, String accessToken) {
@@ -92,6 +246,14 @@ public class OAuth2Service {
             return SocialType.KAKAO;
         }
         return SocialType.GOOGLE;
+    }
+
+    private String getUserNameAttributeName(String socialType) {
+        return switch (socialType) {
+            case "google", "apple" -> "sub";
+            case "kakao" -> "id";
+            default -> throw new IllegalArgumentException("지원하지 않는 소셜 서비스입니다.: " + socialType);
+        };
     }
 
     private Member getMember(final OAuth2Attributes attributes, final SocialType socialType) {

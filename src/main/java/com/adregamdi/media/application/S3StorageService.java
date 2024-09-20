@@ -34,7 +34,7 @@ public class S3StorageService implements FileUploadService{
     @Value("${cloud.aws.s3.bucket}")
     private String bucketName;
 
-    private static final int SECURE_STRING_BYTE_SIZE = 16; // 16 byte -> 영문 + 숫자 조합 22자리
+    private static final int SECURE_STRING_BYTE_SIZE = 22;
 
     @Override
     public String buildKey(MultipartFile file, String dirName) {

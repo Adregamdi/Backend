@@ -1,4 +1,4 @@
-package com.adregamdi.core.oauth2.service;
+package com.adregamdi.core.oauth2.application;
 
 
 import com.adregamdi.core.oauth2.domain.CustomOAuth2User;

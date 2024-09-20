@@ -2,9 +2,9 @@ package com.adregamdi.core.config;
 
 import com.adregamdi.core.jwt.filter.JwtAuthenticationFilter;
 import com.adregamdi.core.jwt.service.JwtService;
+import com.adregamdi.core.oauth2.application.CustomOAuth2UserService;
 import com.adregamdi.core.oauth2.handler.OAuth2LoginFailureHandler;
 import com.adregamdi.core.oauth2.handler.OAuth2LoginSuccessHandler;
-import com.adregamdi.core.oauth2.service.CustomOAuth2UserService;
 import com.adregamdi.member.infrastructure.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;

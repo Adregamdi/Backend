@@ -1,7 +1,5 @@
 package com.adregamdi.shorts.dto;
 
-import com.adregamdi.shorts.domain.Shorts;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -11,12 +9,14 @@ import java.util.UUID;
 @Getter
 @Setter
 @NoArgsConstructor
-@AllArgsConstructor
 public class ShortsDTO {
 
     private Long shortsId;
     private String title;
     private UUID memberId;
+    private String name;
+    private String handle;
+    private String profile;
     private Long placeId;
     private String placeTitle;
     private Long travelogueId;
@@ -24,21 +24,24 @@ public class ShortsDTO {
     private String shortsVideoUrl;
     private String thumbnailUrl;
     private int viewCount;
+    private int likeCount;
     private Boolean isLiked;
 
-    public static ShortsDTO of(Shorts shorts) {
-        return new ShortsDTO(
-                shorts.getShortsId(),
-                shorts.getTitle(),
-                shorts.getMemberId(),
-                shorts.getPlaceId(),
-                null,
-                shorts.getTravelogueId(),
-                null,
-                shorts.getShortsVideoUrl(),
-                shorts.getThumbnailUrl(),
-                shorts.getViewCount(),
-                false
-        );
+    public ShortsDTO(Long shortsId, String title, UUID memberId, String name, String handle, String profile, Long placeId, String placeTitle, Long travelogueId, String travelogueTitle, String shortsVideoUrl, String thumbnailUrl, Integer viewCount, Integer likeCount, Boolean isLiked) {
+        this.shortsId = shortsId;
+        this.title = title;
+        this.memberId = memberId;
+        this.name = name;
+        this.handle = handle;
+        this.profile = profile;
+        this.placeId = placeId;
+        this.placeTitle = placeTitle;
+        this.travelogueId = travelogueId;
+        this.travelogueTitle = travelogueTitle;
+        this.shortsVideoUrl = shortsVideoUrl;
+        this.thumbnailUrl = thumbnailUrl;
+        this.viewCount = viewCount == null ? 0 : viewCount;
+        this.likeCount = likeCount == null ? 0 : likeCount;
+        this.isLiked = isLiked;
     }
 }

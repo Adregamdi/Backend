@@ -1,8 +1,10 @@
 package com.adregamdi.search.infrastructure;
 
+import com.adregamdi.like.domain.enumtype.ContentType;
 import com.adregamdi.search.dto.PlaceSearchDTO;
 import com.adregamdi.search.dto.ShortsSearchDTO;
 import com.adregamdi.search.dto.TravelogueSearchDTO;
+import com.querydsl.core.types.ExpressionUtils;
 import com.querydsl.core.types.Predicate;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.EntityPathBase;
@@ -20,6 +22,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.adregamdi.core.utils.RepositoryUtil.makeOrderSpecifiers;
+import static com.adregamdi.like.domain.QLike.like;
 import static com.adregamdi.member.domain.QMember.member;
 import static com.adregamdi.place.domain.QPlace.place;
 import static com.adregamdi.place.domain.QPlaceReview.placeReview;
@@ -93,14 +96,46 @@ public class SearchRepositoryImpl implements SearchRepository {
     }
 
     @Override
-    public Slice<ShortsSearchDTO> searchShorts(final String keyword, final Pageable pageable) {
+    public Slice<ShortsSearchDTO> searchShorts(final String keyword, final Pageable pageable, final UUID memberId) {
         List<ShortsSearchDTO> results = queryFactory
                 .select(Projections.constructor(ShortsSearchDTO.class,
                         shorts.shortsId,
                         shorts.title,
-                        shorts.thumbnailUrl))
+                        shorts.memberId,
+                        member.name,
+                        member.handle,
+                        member.profile,
+                        shorts.placeId,
+                        place.title,
+                        shorts.travelogueId,
+                        travelogue.title,
+                        shorts.shortsVideoUrl,
+                        shorts.thumbnailUrl,
+                        shorts.viewCount,
+                        ExpressionUtils.as(
+                                JPAExpressions
+                                        .select(like.count().intValue())
+                                        .from(like)
+                                        .where(like.contentId.eq(shorts.shortsId)
+                                                .and(like.contentType.eq(ContentType.SHORTS))),
+                                "likeCount"
+                        ),
+                        ExpressionUtils.as(
+                                JPAExpressions
+                                        .selectOne()
+                                        .from(like)
+                                        .where(like.memberId.eq(memberId)
+                                                .and(like.contentType.eq(ContentType.SHORTS))
+                                                .and(like.contentId.eq(shorts.shortsId)))
+                                        .exists(),
+                                "isLiked"
+                        )))
                 .from(shorts)
-                .where(shorts.title.startsWith(keyword))
+                .join(member).on(shorts.memberId.eq(member.memberId))
+                .leftJoin(place).on(shorts.placeId.eq(place.placeId))
+                .leftJoin(travelogue).on(shorts.travelogueId.eq(travelogue.travelogueId))
+                .where(shorts.title.startsWith(keyword),
+                        shorts.assignedStatus.eq(true))
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize() + 1)
                 .fetch();

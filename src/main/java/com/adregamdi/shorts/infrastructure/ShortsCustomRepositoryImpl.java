@@ -41,7 +41,7 @@ public class ShortsCustomRepositoryImpl implements ShortsCustomRepository {
 
     @Override
     public GetShortsResponse getUserShorts(UUID memberId, long lastShortsId, int size) {
-        BooleanExpression condition = shorts.shortsId.gt(lastShortsId)
+        BooleanExpression condition = shorts.shortsId.lt(lastShortsId)
                 .and(shorts.memberId.eq(memberId))
                 .and(shorts.assignedStatus.eq(true));
         OrderSpecifier<?> orderBy = shorts.createdAt.desc();
@@ -50,7 +50,7 @@ public class ShortsCustomRepositoryImpl implements ShortsCustomRepository {
 
     @Override
     public GetShortsByPlaceIdResponse getShortsByPlaceId(UUID memberId, GetShortsByPlaceIdRequest request) {
-        BooleanExpression condition = shorts.shortsId.gt(request.lastShortsId())
+        BooleanExpression condition = shorts.shortsId.lt(request.lastShortsId())
                 .and(shorts.placeId.eq(request.placeId()))
                 .and(shorts.assignedStatus.eq(true));
         OrderSpecifier<?> orderBy = shorts.createdAt.desc();
@@ -59,6 +59,7 @@ public class ShortsCustomRepositoryImpl implements ShortsCustomRepository {
     }
 
     private GetShortsResponse getShorts(UUID memberId, BooleanExpression condition, OrderSpecifier<?> orderBy, int size) {
+
         List<ShortsDTO> content = jpaQueryFactory
                 .select(Projections.constructor(ShortsDTO.class,
                         shorts.shortsId,
@@ -74,6 +75,14 @@ public class ShortsCustomRepositoryImpl implements ShortsCustomRepository {
                         shorts.shortsVideoUrl,
                         shorts.thumbnailUrl,
                         shorts.viewCount,
+                        ExpressionUtils.as(
+                                JPAExpressions
+                                        .select(like.count().intValue())
+                                        .from(like)
+                                        .where(like.contentId.eq(shorts.shortsId)
+                                                .and(like.contentType.eq(ContentType.SHORTS))),
+                                "likeCount"
+                        ),
                         ExpressionUtils.as(
                                 JPAExpressions
                                         .selectOne()

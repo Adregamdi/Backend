@@ -90,6 +90,9 @@ public class LikesCustomRepositoryImpl implements LikesCustomRepository{
                         shorts.shortsId,
                         shorts.title,
                         shorts.memberId,
+                        member.name,
+                        member.handle,
+                        member.profile,
                         shorts.placeId,
                         place.title,
                         shorts.travelogueId,
@@ -97,6 +100,14 @@ public class LikesCustomRepositoryImpl implements LikesCustomRepository{
                         shorts.shortsVideoUrl,
                         shorts.thumbnailUrl,
                         shorts.viewCount,
+                        ExpressionUtils.as(
+                                JPAExpressions
+                                        .select(like.count().intValue())
+                                        .from(like)
+                                        .where(like.contentId.eq(shorts.shortsId)
+                                                .and(like.contentType.eq(ContentType.SHORTS))),
+                                "likeCount"
+                        ),
                         ExpressionUtils.as(
                                 JPAExpressions
                                         .selectOne()
@@ -109,6 +120,7 @@ public class LikesCustomRepositoryImpl implements LikesCustomRepository{
                         )))
                 .from(like)
                 .join(shorts).on(like.contentId.eq(shorts.shortsId).and(like.contentType.eq(ContentType.SHORTS)))
+                .join(member).on(shorts.memberId.eq(member.memberId))
                 .leftJoin(place).on(shorts.placeId.eq(place.placeId))
                 .leftJoin(travelogue).on(shorts.travelogueId.eq(travelogue.travelogueId))
                 .where(
@@ -148,7 +160,7 @@ public class LikesCustomRepositoryImpl implements LikesCustomRepository{
 
         List<Long> travelogueIds = results.stream()
                 .map(tuple -> tuple.get(travelogue.travelogueId))
-                .toList();
+                .collect(Collectors.toList());
 
         Map<Long, List<String>> imageMap = jpaQueryFactory
                 .select(travelogueImage.travelogueId, travelogueImage.url)
@@ -170,7 +182,7 @@ public class LikesCustomRepositoryImpl implements LikesCustomRepository{
                         tuple.get(member.name),
                         tuple.get(member.profile)
                 ))
-                .toList();
+                .collect(Collectors.toList());
 
         boolean hasNext = contents.size() > request.size();
         if (hasNext) {
@@ -199,7 +211,7 @@ public class LikesCustomRepositoryImpl implements LikesCustomRepository{
 
         List<Long> placeIds = results.stream()
                 .map(tuple -> tuple.get(place.placeId))
-                .toList();
+                .collect(Collectors.toList());
 
         Map<Long, List<String>> imageMap = jpaQueryFactory
                 .select(placeReview.placeId, placeReviewImage.url)
@@ -241,8 +253,7 @@ public class LikesCustomRepositoryImpl implements LikesCustomRepository{
                         imageMap.getOrDefault(tuple.get(place.placeId), Collections.emptyList()),
                         imageReviewCount != null ? imageReviewCount.intValue() : 0,
                         shortsReviewCount != null ? shortsReviewCount.intValue() : 0
-                ))
-                .toList();
+                )).collect(Collectors.toList());
 
         boolean hasNext = contents.size() > request.size();
         if (hasNext) {

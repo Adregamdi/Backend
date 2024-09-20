@@ -8,6 +8,7 @@ import com.adregamdi.like.dto.TravelogueContentDTO;
 import com.adregamdi.like.dto.request.GetLikesContentsRequest;
 import com.adregamdi.like.dto.response.GetLikesContentsResponse;
 import com.querydsl.core.Tuple;
+import com.querydsl.core.types.ExpressionUtils;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.JPAExpressions;
@@ -88,14 +89,32 @@ public class LikesCustomRepositoryImpl implements LikesCustomRepository{
                 .select(Projections.constructor(ShortsContentDTO.class,
                         shorts.shortsId,
                         shorts.title,
+                        shorts.memberId,
+                        shorts.placeId,
+                        place.title,
+                        shorts.travelogueId,
+                        travelogue.title,
                         shorts.shortsVideoUrl,
-                        shorts.thumbnailUrl
-                ))
+                        shorts.thumbnailUrl,
+                        shorts.viewCount,
+                        ExpressionUtils.as(
+                                JPAExpressions
+                                        .selectOne()
+                                        .from(like)
+                                        .where(like.memberId.eq(UUID.fromString(request.memberId()))
+                                                .and(like.contentType.eq(ContentType.SHORTS))
+                                                .and(like.contentId.eq(shorts.shortsId)))
+                                        .exists(),
+                                "isLiked"
+                        )))
                 .from(like)
                 .join(shorts).on(like.contentId.eq(shorts.shortsId).and(like.contentType.eq(ContentType.SHORTS)))
+                .leftJoin(place).on(shorts.placeId.eq(place.placeId))
+                .leftJoin(travelogue).on(shorts.travelogueId.eq(travelogue.travelogueId))
                 .where(
                         like.memberId.eq(UUID.fromString(request.memberId())),
                         like.contentType.eq(ContentType.SHORTS),
+                        shorts.assignedStatus.eq(true),
                         like.likeId.lt(request.lastLikeId())
                 )
                 .orderBy(like.likeId.desc())

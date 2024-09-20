@@ -34,8 +34,8 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-webflux'
     // 애플 로그인을 위한 라이브러리
     implementation 'com.auth0:jwks-rsa:0.21.1'
-    implementation 'org.json:json:20210307'
-    implementation 'org.bouncycastle:bcprov-jdk15on'
+    implementation 'org.json:json:20231013'
+    implementation 'org.bouncycastle:bcprov-jdk15on:1.70'
 
     // QueryDSL
     implementation 'com.querydsl:querydsl-jpa:5.0.0:jakarta'

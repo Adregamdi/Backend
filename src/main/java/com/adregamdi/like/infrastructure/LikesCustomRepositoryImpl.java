@@ -8,6 +8,7 @@ import com.adregamdi.like.dto.TravelogueContentDTO;
 import com.adregamdi.like.dto.request.GetLikesContentsRequest;
 import com.adregamdi.like.dto.response.GetLikesContentsResponse;
 import com.querydsl.core.Tuple;
+import com.querydsl.core.types.ExpressionUtils;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.JPAExpressions;
@@ -88,14 +89,44 @@ public class LikesCustomRepositoryImpl implements LikesCustomRepository{
                 .select(Projections.constructor(ShortsContentDTO.class,
                         shorts.shortsId,
                         shorts.title,
+                        shorts.memberId,
+                        member.name,
+                        member.handle,
+                        member.profile,
+                        shorts.placeId,
+                        place.title,
+                        shorts.travelogueId,
+                        travelogue.title,
                         shorts.shortsVideoUrl,
-                        shorts.thumbnailUrl
-                ))
+                        shorts.thumbnailUrl,
+                        shorts.viewCount,
+                        ExpressionUtils.as(
+                                JPAExpressions
+                                        .select(like.count().intValue())
+                                        .from(like)
+                                        .where(like.contentId.eq(shorts.shortsId)
+                                                .and(like.contentType.eq(ContentType.SHORTS))),
+                                "likeCount"
+                        ),
+                        ExpressionUtils.as(
+                                JPAExpressions
+                                        .selectOne()
+                                        .from(like)
+                                        .where(like.memberId.eq(UUID.fromString(request.memberId()))
+                                                .and(like.contentType.eq(ContentType.SHORTS))
+                                                .and(like.contentId.eq(shorts.shortsId)))
+                                        .exists(),
+                                "isLiked"
+                        )))
                 .from(like)
                 .join(shorts).on(like.contentId.eq(shorts.shortsId).and(like.contentType.eq(ContentType.SHORTS)))
+                .join(member).on(shorts.memberId.eq(member.memberId))
+                .leftJoin(place).on(shorts.placeId.eq(place.placeId))
+                .leftJoin(travelogue).on(shorts.travelogueId.eq(travelogue.travelogueId))
                 .where(
                         like.memberId.eq(UUID.fromString(request.memberId())),
                         like.contentType.eq(ContentType.SHORTS),
+                        shorts.assignedStatus.eq(true),
                         like.likeId.lt(request.lastLikeId())
                 )
                 .orderBy(like.likeId.desc())
@@ -129,7 +160,7 @@ public class LikesCustomRepositoryImpl implements LikesCustomRepository{
 
         List<Long> travelogueIds = results.stream()
                 .map(tuple -> tuple.get(travelogue.travelogueId))
-                .toList();
+                .collect(Collectors.toList());
 
         Map<Long, List<String>> imageMap = jpaQueryFactory
                 .select(travelogueImage.travelogueId, travelogueImage.url)
@@ -151,7 +182,7 @@ public class LikesCustomRepositoryImpl implements LikesCustomRepository{
                         tuple.get(member.name),
                         tuple.get(member.profile)
                 ))
-                .toList();
+                .collect(Collectors.toList());
 
         boolean hasNext = contents.size() > request.size();
         if (hasNext) {
@@ -180,7 +211,7 @@ public class LikesCustomRepositoryImpl implements LikesCustomRepository{
 
         List<Long> placeIds = results.stream()
                 .map(tuple -> tuple.get(place.placeId))
-                .toList();
+                .collect(Collectors.toList());
 
         Map<Long, List<String>> imageMap = jpaQueryFactory
                 .select(placeReview.placeId, placeReviewImage.url)
@@ -222,8 +253,7 @@ public class LikesCustomRepositoryImpl implements LikesCustomRepository{
                         imageMap.getOrDefault(tuple.get(place.placeId), Collections.emptyList()),
                         imageReviewCount != null ? imageReviewCount.intValue() : 0,
                         shortsReviewCount != null ? shortsReviewCount.intValue() : 0
-                ))
-                .toList();
+                )).collect(Collectors.toList());
 
         boolean hasNext = contents.size() > request.size();
         if (hasNext) {

@@ -54,12 +54,12 @@ public class ShortsController {
     @MemberAuthorize
     public ResponseEntity<ApiResponse<GetShortsResponse>> getShorts(
             @AuthenticationPrincipal final UserDetails userDetails,
-            @RequestParam(value = "shorts_id", required = false, defaultValue = "0") @PositiveOrZero final Long lastShortsId,
+            @RequestParam(value = "shorts_id", required = false) @PositiveOrZero final Long lastShortsId,
             @RequestParam(value = "size", defaultValue = "10") @Positive final int size
     ) {
 
 
-        GetShortsResponse response = shortsService.getShorts(userDetails.getUsername(), lastShortsId, size);
+        GetShortsResponse response = shortsService.getShorts(userDetails.getUsername(), lastShortsId != null ? lastShortsId : Long.MAX_VALUE, size);
 
         return ResponseEntity
                 .ok()
@@ -73,10 +73,10 @@ public class ShortsController {
     @MemberAuthorize
     public ResponseEntity<ApiResponse<GetShortsResponse>> getUserShorts(
             @AuthenticationPrincipal final UserDetails userDetails,
-            @RequestParam(value = "shorts_id", required = false, defaultValue = "0") @PositiveOrZero final Long lastShortsId,
+            @RequestParam(value = "shorts_id", required = false) @PositiveOrZero final Long lastShortsId,
             @RequestParam(value = "size", defaultValue = "10") @Positive final int size
     ) {
-        GetShortsResponse response = shortsService.getUserShorts(userDetails.getUsername(), lastShortsId, size);
+        GetShortsResponse response = shortsService.getUserShorts(userDetails.getUsername(), lastShortsId != null ? lastShortsId : Long.MAX_VALUE, size);
         return ResponseEntity
                 .ok()
                 .body(ApiResponse.<GetShortsResponse>builder()
@@ -90,11 +90,11 @@ public class ShortsController {
     public ResponseEntity<ApiResponse<GetShortsByPlaceIdResponse>> getShortsByPlaceId(
             @AuthenticationPrincipal final UserDetails userDetails,
             @RequestParam("place_id") @Positive Long placeId,
-            @RequestParam(value = "shorts_id", required = false, defaultValue = "0") @PositiveOrZero Long lastShortsId,
+            @RequestParam(value = "shorts_id", required = false) @PositiveOrZero Long lastShortsId,
             @RequestParam(value = "size", defaultValue = "10") @Positive int size
     ) {
 
-        GetShortsByPlaceIdRequest request = new GetShortsByPlaceIdRequest(placeId, lastShortsId, size);
+        GetShortsByPlaceIdRequest request = new GetShortsByPlaceIdRequest(placeId, lastShortsId != null ? lastShortsId : Long.MAX_VALUE, size);
         GetShortsByPlaceIdResponse response = shortsService.getShortsByPlaceId(userDetails.getUsername(), request);
 
         return ResponseEntity.ok()

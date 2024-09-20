@@ -8,6 +8,8 @@ import com.adregamdi.search.dto.response.SearchResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -25,6 +27,7 @@ public class SearchController {
     @GetMapping
     @MemberAuthorize
     public ResponseEntity<ApiResponse<SearchResponse>> search(
+            @AuthenticationPrincipal UserDetails userDetails,
             @RequestParam(required = false) final String keyword,
             @RequestParam(defaultValue = "0") final int page,
             @RequestParam(required = false) final Set<SearchType> types
@@ -32,7 +35,7 @@ public class SearchController {
         return ResponseEntity.ok()
                 .body(ApiResponse.<SearchResponse>builder()
                         .statusCode(HttpStatus.OK.value())
-                        .data(searchService.search(keyword == null ? "" : keyword, page, types != null ? types : EnumSet.allOf(SearchType.class)))
+                        .data(searchService.search(keyword == null ? "" : keyword, page, types != null ? types : EnumSet.allOf(SearchType.class), userDetails.getUsername()))
                         .build()
                 );
     }

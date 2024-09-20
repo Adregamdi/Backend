@@ -11,9 +11,9 @@ import java.util.UUID;
 public interface PlaceReviewRepository extends JpaRepository<PlaceReview, Long> {
     Optional<List<PlaceReview>> findAllByMemberIdOrderByPlaceReviewIdDesc(UUID memberId);
 
-    int countByPlaceId(Long placeId);
-
-    PlaceReview findByMemberIdAndPlaceIdAndVisitDate(UUID memberId, Long placeId, LocalDate localDate);
-
     List<PlaceReview> findAllByPlaceIdOrderByPlaceReviewIdDesc(Long placeId);
+
+    Optional<PlaceReview> findByMemberIdAndPlaceIdAndVisitDate(UUID memberId, Long placeId, LocalDate localDate);
+
+    int countByPlaceId(Long placeId);
 }

@@ -25,6 +25,8 @@ public class QPlace extends EntityPathBase<Place> {
 
     public final StringPath address = createString("address");
 
+    public final StringPath contentsId = createString("contentsId");
+
     public final StringPath contentsLabel = createString("contentsLabel");
 
     //inherited

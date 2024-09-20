@@ -1,5 +1,8 @@
 package com.adregamdi.place.application;
 
+import com.adregamdi.like.application.LikesService;
+import com.adregamdi.like.domain.enumtype.ContentType;
+import com.adregamdi.media.application.ImageService;
 import com.adregamdi.place.domain.Place;
 import com.adregamdi.place.domain.PlaceReview;
 import com.adregamdi.place.domain.PlaceReviewImage;
@@ -15,9 +18,6 @@ import com.adregamdi.place.exception.PlaceException.PlaceReviewNotFoundException
 import com.adregamdi.place.infrastructure.PlaceRepository;
 import com.adregamdi.place.infrastructure.PlaceReviewImageRepository;
 import com.adregamdi.place.infrastructure.PlaceReviewRepository;
-import com.adregamdi.shorts.infrastructure.ShortsRepository;
-import com.adregamdi.travel.infrastructure.TravelRepository;
-import com.adregamdi.travelogue.infrastructure.TravelogueRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -45,19 +45,19 @@ import java.util.stream.StreamSupport;
 
 import static com.adregamdi.core.constant.Constant.NORMAL_PAGE_SIZE;
 import static com.adregamdi.core.utils.PageUtil.generatePageAsc;
+import static com.adregamdi.media.domain.ImageTarget.PLACEREVIEW;
 
 @Slf4j
 @RequiredArgsConstructor
 @Service
 public class PlaceServiceImpl implements PlaceService {
     private final WebClient webClient;
+    private final ObjectMapper objectMapper;
+    private final ImageService imageService;
+    private final LikesService likesService;
     private final PlaceRepository placeRepository;
     private final PlaceReviewRepository placeReviewRepository;
     private final PlaceReviewImageRepository placeReviewImageRepository;
-    private final ShortsRepository shortsRepository;
-    private final TravelogueRepository travelogueRepository;
-    private final TravelRepository travelRepository;
-    private final ObjectMapper objectMapper;
 
     @Value("${api-key.visit-jeju}")
     private String visitJejuKey;
@@ -70,13 +70,24 @@ public class PlaceServiceImpl implements PlaceService {
         if (placeRepository.findByTitleAndContentsLabel(request.title(), request.contentsLabel()).isPresent()) {
             throw new PlaceExistException(request);
         }
-        placeRepository.save(new Place(
-                request.title(), request.contentsLabel(), request.region1Cd(),
-                request.region2Cd(), request.regionLabel(), request.address(),
-                request.roadAddress(), request.tag(), request.introduction(),
-                request.information(), request.latitude(), request.longitude(),
-                request.phoneNo(), request.imgPath(), request.thumbnailPath()
-        ));
+        placeRepository.save(Place.builder()
+                .title(request.title())
+                .contentsLabel(request.contentsLabel())
+                .regionLabel(request.regionLabel())
+                .region1Cd(request.region1Cd())
+                .region2Cd(request.region2Cd())
+                .address(request.address())
+                .roadAddress(request.roadAddress())
+                .tag(request.tag())
+                .introduction(request.introduction())
+                .information(request.information())
+                .latitude(request.latitude())
+                .longitude(request.longitude())
+                .phoneNo(request.phoneNo())
+                .imgPath(request.imgPath())
+                .thumbnailPath(request.thumbnailPath())
+                .build()
+        );
     }
 
     @Override
@@ -99,21 +110,38 @@ public class PlaceServiceImpl implements PlaceService {
                             StreamSupport.stream(items.spliterator(), false)
                                     .map(item -> {
                                         String title = item.path("title").asText();
+                                        String contentsId = item.path("contentsid").asText();
                                         String contentsLabel = item.path("contentscd").path("label").asText();
                                         String region1Value = item.path("region1cd").path("value").asText();
                                         String region2Value = item.path("region2cd").path("value").asText();
                                         String region2Label = item.path("region2cd").path("label").asText();
-                                        String address = item.path("address").asText();
-                                        String roadAddress = item.path("roadaddress").asText();
+                                        String address = item.path("address").asText().equals("null") ? "" : item.path("address").asText();
+                                        String roadAddress = item.path("roadaddress").asText().equals("null") ? "" : item.path("roadaddress").asText();
                                         String tag = formatTags(item.path("tag").asText());
                                         String introduction = item.path("introduction").asText();
                                         double latitude = item.path("latitude").asDouble();
                                         double longitude = item.path("longitude").asDouble();
-                                        String phoneNo = item.path("phoneno").asText();
+                                        String phoneNo = item.path("phoneno").asText().equals("null") ? "" : item.path("phoneno").asText();
                                         String imgPath = item.path("repPhoto").path("photoid").path("imgpath").asText();
                                         String thumbnailPath = item.path("repPhoto").path("photoid").path("thumbnailpath").asText();
 
-                                        return new Place(title, contentsLabel, region1Value, region2Value, region2Label, address, roadAddress, tag, introduction, latitude, longitude, phoneNo, imgPath, thumbnailPath);
+                                        return Place.builder()
+                                                .title(title)
+                                                .contentsId(contentsId)
+                                                .contentsLabel(contentsLabel)
+                                                .regionLabel(region2Label)
+                                                .region1Cd(region1Value)
+                                                .region2Cd(region2Value)
+                                                .address(address)
+                                                .roadAddress(roadAddress)
+                                                .tag(tag)
+                                                .introduction(introduction)
+                                                .latitude(latitude)
+                                                .longitude(longitude)
+                                                .phoneNo(phoneNo)
+                                                .imgPath(imgPath)
+                                                .thumbnailPath(thumbnailPath)
+                                                .build();
                                     })
                                     .forEach(placeRepository::save);
 
@@ -129,10 +157,9 @@ public class PlaceServiceImpl implements PlaceService {
     @Override
     @Transactional
     public CreatePlaceReviewResponse createReview(final CreatePlaceReviewRequest request, final String memberId) {
-        PlaceReview placeReview = placeReviewRepository.findByMemberIdAndPlaceIdAndVisitDate(UUID.fromString(memberId), request.placeId(), request.visitDate());
-        if (placeReview != null) {
-            throw new PlaceExistException(placeReview.getPlaceReviewId());
-        }
+        placeReviewRepository.findByMemberIdAndPlaceIdAndVisitDate(UUID.fromString(memberId), request.placeId(), request.visitDate())
+                .orElseThrow(PlaceExistException::new);
+
         PlaceReview savePlaceReview = placeReviewRepository.save(new PlaceReview(memberId, request.placeId(), request.visitDate(), request.content()));
 
         List<CreatePlaceReviewRequest.PlaceReviewImageInfo> imageList = (request.placeReviewImageList() != null) ? request.placeReviewImageList() : Collections.emptyList();
@@ -142,6 +169,12 @@ public class PlaceServiceImpl implements PlaceService {
                 .collect(Collectors.toList());
         placeReviewImageRepository.saveAll(placeReviewImages);
 
+        List<String> urls = placeReviewImages.stream()
+                .map(PlaceReviewImage::getUrl)
+                .collect(Collectors.toList());
+        if (!imageList.isEmpty()) {
+            imageService.saveTargetId(urls, PLACEREVIEW, String.valueOf(savePlaceReview.getPlaceReviewId()));
+        }
         return new CreatePlaceReviewResponse(savePlaceReview.getPlaceReviewId());
     }
 
@@ -156,10 +189,11 @@ public class PlaceServiceImpl implements PlaceService {
 
     @Override
     @Transactional(readOnly = true)
-    public GetPlaceResponse get(final Long placeId) {
+    public GetPlaceResponse get(final String memberId, final Long placeId) {
         Place place = placeRepository.findById(placeId)
                 .orElseThrow(() -> new PlaceNotFoundException(placeId));
-        return GetPlaceResponse.from(place);
+        boolean isLiked = likesService.checkIsLiked(UUID.fromString(memberId), ContentType.PLACE, placeId);
+        return GetPlaceResponse.from(isLiked, place);
     }
 
     @Override
@@ -294,14 +328,14 @@ public class PlaceServiceImpl implements PlaceService {
 
     @Override
     @Transactional(readOnly = true)
-    public GetPlaceReviewResponse getReview(final Long placeReviewId) {
+    public PlaceReviewDTO getReview(final Long placeReviewId) {
         PlaceReview placeReview = placeReviewRepository.findById(placeReviewId)
                 .orElseThrow(() -> new PlaceReviewNotFoundException(placeReviewId));
         Place place = placeRepository.findById(placeReview.getPlaceId())
                 .orElseThrow(() -> new PlaceNotFoundException(placeReview.getPlaceId()));
         List<PlaceReviewImage> placeReviewImages = placeReviewImageRepository.findByPlaceReviewIdOrderByPlaceReviewImageIdDesc(placeReview.getPlaceReviewId());
 
-        return GetPlaceReviewResponse.of(
+        return PlaceReviewDTO.of(
                 place.getPlaceId(),
                 place.getTitle(),
                 place.getContentsLabel(),

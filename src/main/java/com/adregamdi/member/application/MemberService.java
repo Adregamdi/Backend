@@ -1,5 +1,6 @@
 package com.adregamdi.member.application;
 
+import com.adregamdi.media.application.ImageService;
 import com.adregamdi.member.domain.Member;
 import com.adregamdi.member.domain.Role;
 import com.adregamdi.member.domain.SocialType;
@@ -23,11 +24,14 @@ import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
+import static com.adregamdi.media.domain.ImageTarget.PROFILE;
+
 @Slf4j
 @RequiredArgsConstructor
 @Service
 public class MemberService {
     private final WebClient webClient;
+    private final ImageService imageService;
     private final MemberRepository memberRepository;
 
     /*
@@ -55,6 +59,7 @@ public class MemberService {
         }
 
         member.updateMember(request.profile(), request.handle());
+        imageService.saveTargetId(request.profile(), PROFILE, String.valueOf(member.getMemberId()));
     }
 
     /*

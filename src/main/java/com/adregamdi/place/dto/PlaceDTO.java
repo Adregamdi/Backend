@@ -13,6 +13,7 @@ import lombok.NoArgsConstructor;
 public class PlaceDTO {
     private Long placeId;
     private String title;
+    private String contentsId;
     private String contentsLabel;
     private String regionLabel;
     private String region1Cd;
@@ -32,6 +33,7 @@ public class PlaceDTO {
         return PlaceDTO.builder()
                 .placeId(place.getPlaceId())
                 .title(place.getTitle())
+                .contentsId(place.getContentsId())
                 .contentsLabel(place.getContentsLabel())
                 .regionLabel(place.getRegionLabel())
                 .region1Cd(place.getRegion1Cd())

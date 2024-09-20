@@ -1,6 +1,9 @@
 package com.adregamdi.travel.application;
 
 import com.adregamdi.place.application.PlaceService;
+import com.adregamdi.place.domain.PlaceReview;
+import com.adregamdi.place.dto.PlaceReviewDTO;
+import com.adregamdi.place.infrastructure.PlaceReviewRepository;
 import com.adregamdi.travel.domain.Travel;
 import com.adregamdi.travel.domain.TravelDay;
 import com.adregamdi.travel.domain.TravelPlace;
@@ -37,6 +40,7 @@ import static com.adregamdi.core.utils.PageUtil.generatePageDesc;
 @Service
 public class TravelService {
     private final PlaceService placeService;
+    private final PlaceReviewRepository placeReviewRepository;
     private final TravelRepository travelRepository;
     private final TravelDayRepository travelDayRepository;
     private final TravelPlaceRepository travelPlaceRepository;
@@ -171,14 +175,13 @@ public class TravelService {
      * */
     @Transactional(readOnly = true)
     public GetMyTravelResponse getMyTravel(final Long travelId, final String memberId) {
-        List<List<TravelPlaceDTO>> travelPlaceDTOList = new ArrayList<>();
-
         Travel travel = travelRepository.findByTravelIdAndMemberId(travelId, UUID.fromString(memberId))
                 .orElseThrow(() -> new TravelNotFoundException(memberId));
 
         List<TravelDay> travelDays = travelDayRepository.findByTravelId(travelId)
                 .orElseThrow(() -> new TravelDayNotFoundException(travelId));
 
+        List<List<TravelPlaceDTO>> travelPlaceDTOList = new ArrayList<>();
         for (TravelDay travelDay : travelDays) {
             List<TravelPlace> travelPlaceList = travelPlaceRepository.findByTravelDayId(travelDay.getTravelDayId());
             List<TravelPlaceDTO> travelPlaceDTOS = new ArrayList<>();
@@ -186,11 +189,16 @@ public class TravelService {
                 throw new TravelPlaceNotFoundException(travel.getTravelId());
             }
             for (TravelPlace travelPlace : travelPlaceList) {
-                travelPlaceDTOS.add(TravelPlaceDTO.of(travelPlace, placeService.get(travelPlace.getPlaceId()).place()));
+                PlaceReview placeReviewInfo = placeReviewRepository.findByMemberIdAndPlaceIdAndVisitDate(UUID.fromString(memberId), travelPlace.getPlaceId(), travelDay.getDate())
+                        .orElse(PlaceReview.builder().placeReviewId(0L).build());
+                PlaceReviewDTO placeReview = null;
+                if (placeReviewInfo.getPlaceReviewId() != 0) {
+                    placeReview = placeService.getReview(placeReviewInfo.getPlaceReviewId());
+                }
+                travelPlaceDTOS.add(TravelPlaceDTO.of(placeReview, travelPlace, placeService.get(memberId, travelPlace.getPlaceId()).place()));
             }
             travelPlaceDTOList.add(travelPlaceDTOS);
         }
-
         return GetMyTravelResponse.of(travel, travelDays, travelPlaceDTOList);
     }
 

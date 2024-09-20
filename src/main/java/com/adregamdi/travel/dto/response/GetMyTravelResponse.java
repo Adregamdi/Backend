@@ -1,5 +1,6 @@
 package com.adregamdi.travel.dto.response;
 
+import com.adregamdi.place.dto.PlaceReviewDTO;
 import com.adregamdi.travel.domain.Travel;
 import com.adregamdi.travel.domain.TravelDay;
 import com.adregamdi.travel.dto.TravelPlaceDTO;
@@ -30,6 +31,7 @@ public record GetMyTravelResponse(
                     List<PlaceInfo> placeInfos = placesByDayId.getOrDefault(travelDay.getTravelDayId(), Collections.emptyList())
                             .stream()
                             .map(travelPlace -> PlaceInfo.builder()
+                                    .placeReview(travelPlace.placeReview())
                                     .placeId(travelPlace.place().getPlaceId())
                                     .title(travelPlace.place().getTitle())
                                     .contentsLabel(travelPlace.place().getContentsLabel())
@@ -86,6 +88,7 @@ public record GetMyTravelResponse(
 
     @Builder
     public record PlaceInfo(
+            PlaceReviewDTO placeReview,
             Long placeId,
             String title,
             String contentsLabel,

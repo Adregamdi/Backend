@@ -13,6 +13,7 @@ import java.util.stream.Collectors;
 
 @Builder
 public record GetTravelogueResponse(
+        boolean isLiked,
         Long travelogueId,
         Long travelId,
         String title,
@@ -21,6 +22,7 @@ public record GetTravelogueResponse(
         List<DayInfo> dayList
 ) {
     public static GetTravelogueResponse of(
+            final boolean isLiked,
             final Travelogue travelogue,
             final List<TravelogueImage> travelogueImages,
             final List<TravelogueDay> travelogueDays,
@@ -40,6 +42,7 @@ public record GetTravelogueResponse(
                 .collect(Collectors.toList());
 
         return GetTravelogueResponse.builder()
+                .isLiked(isLiked)
                 .travelogueId(travelogue.getTravelogueId())
                 .travelId(travelogue.getTravelId())
                 .title(travelogue.getTitle())

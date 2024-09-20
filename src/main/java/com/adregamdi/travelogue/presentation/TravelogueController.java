@@ -41,11 +41,14 @@ public class TravelogueController {
 
     @GetMapping
     @MemberAuthorize
-    public ResponseEntity<ApiResponse<GetTravelogueResponse>> get(@RequestParam("travelogue_id") @Positive Long travelogueId) {
+    public ResponseEntity<ApiResponse<GetTravelogueResponse>> get(
+            @AuthenticationPrincipal final UserDetails userDetails,
+            @RequestParam("travelogue_id") @Positive Long travelogueId
+    ) {
         return ResponseEntity.ok()
                 .body(ApiResponse.<GetTravelogueResponse>builder()
                         .statusCode(HttpStatus.OK.value())
-                        .data(travelogueService.get(travelogueId))
+                        .data(travelogueService.get(userDetails.getUsername(), travelogueId))
                         .build()
                 );
     }

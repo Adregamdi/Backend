@@ -1,6 +1,5 @@
 package com.adregamdi.shorts.dto;
 
-import com.adregamdi.shorts.domain.Shorts;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -17,6 +16,9 @@ public class ShortsDTO {
     private Long shortsId;
     private String title;
     private UUID memberId;
+    private String name;
+    private String handle;
+    private String profile;
     private Long placeId;
     private String placeTitle;
     private Long travelogueId;
@@ -26,19 +28,4 @@ public class ShortsDTO {
     private int viewCount;
     private Boolean isLiked;
 
-    public static ShortsDTO of(Shorts shorts) {
-        return new ShortsDTO(
-                shorts.getShortsId(),
-                shorts.getTitle(),
-                shorts.getMemberId(),
-                shorts.getPlaceId(),
-                null,
-                shorts.getTravelogueId(),
-                null,
-                shorts.getShortsVideoUrl(),
-                shorts.getThumbnailUrl(),
-                shorts.getViewCount(),
-                false
-        );
-    }
 }

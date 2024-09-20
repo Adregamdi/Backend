@@ -14,10 +14,7 @@ import org.springframework.data.domain.SliceImpl;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Collections;
-import java.util.EnumMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import static com.adregamdi.core.constant.Constant.LARGE_PAGE_SIZE;
 import static com.adregamdi.core.utils.PageUtil.generatePageAsc;
@@ -29,7 +26,7 @@ public class SearchService {
     private final SearchRepository searchRepository;
 
     @Transactional(readOnly = true)
-    public SearchResponse search(String keyword, int page, Set<SearchType> types) {
+    public SearchResponse search(String keyword, int page, Set<SearchType> types, String memberId) {
         int pageSize = LARGE_PAGE_SIZE;
         Slice<TravelogueSearchDTO> travelogues = emptySlice(page, pageSize);
         Slice<ShortsSearchDTO> shorts = emptySlice(page, pageSize);
@@ -41,7 +38,7 @@ public class SearchService {
             totalCounts.put(SearchType.TRAVELOGUE, searchRepository.countTravelogues(keyword));
         }
         if (types.contains(SearchType.SHORTS)) {
-            shorts = searchRepository.searchShorts(keyword, generatePageAsc(page, pageSize, "title"));
+            shorts = searchRepository.searchShorts(keyword, generatePageAsc(page, pageSize, "title"), UUID.fromString(memberId));
             totalCounts.put(SearchType.SHORTS, searchRepository.countShorts(keyword));
         }
         if (types.contains(SearchType.PLACE)) {

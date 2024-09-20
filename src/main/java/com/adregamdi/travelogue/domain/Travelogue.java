@@ -16,7 +16,7 @@ public class Travelogue extends BaseTime {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long travelogueId;
-    @Column
+    @Column(name = "member_id", updatable = false, nullable = false, columnDefinition = "CHAR(36)")
     private UUID memberId; // 회원 id
     @Column
     private Long travelId; // 일정 id

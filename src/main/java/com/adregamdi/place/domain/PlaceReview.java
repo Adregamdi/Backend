@@ -17,7 +17,7 @@ public class PlaceReview extends BaseTime {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long placeReviewId;
-    @Column
+    @Column(name = "member_id", updatable = false, nullable = false, columnDefinition = "CHAR(36)")
     private UUID memberId; // 회원 id
     @Column
     private Long placeId; // 장소 id

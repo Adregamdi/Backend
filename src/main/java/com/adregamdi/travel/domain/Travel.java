@@ -18,7 +18,7 @@ public class Travel extends BaseTime {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long travelId;
-    @Column
+    @Column(name = "member_id", updatable = false, nullable = false, columnDefinition = "CHAR(36)")
     private UUID memberId; // 회원 id
     @Column
     private LocalDate startDate; // 시작일

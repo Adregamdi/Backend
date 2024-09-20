@@ -26,7 +26,7 @@ public class Shorts extends BaseTime {
     @Comment(value = "쇼츠 제목")
     private String title;
 
-    @Column(name = "member_id")
+    @Column(name = "member_id", updatable = false, nullable = false, columnDefinition = "CHAR(36)")
     @Comment(value = "작성자")
     private UUID memberId;
 

@@ -15,7 +15,8 @@ import java.util.UUID;
 @Table(name = "tbl_member")
 public class Member extends BaseTime {
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
+    @GeneratedValue(generator = "UUID")
+    @Column(name = "member_id", updatable = false, nullable = false, columnDefinition = "CHAR(36)")
     private UUID memberId;
     @Column
     private String name; // 이름

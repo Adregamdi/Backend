@@ -4,7 +4,6 @@ import com.adregamdi.core.jwt.service.JwtService;
 import com.adregamdi.core.oauth2.dto.LoginRequest;
 import com.adregamdi.core.oauth2.dto.LoginResponse;
 import com.adregamdi.core.oauth2.dto.OAuth2Attributes;
-import com.adregamdi.media.application.ImageService;
 import com.adregamdi.member.domain.Member;
 import com.adregamdi.member.domain.SocialType;
 import com.adregamdi.member.infrastructure.MemberRepository;
@@ -35,8 +34,6 @@ import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.RSAPublicKeySpec;
 import java.util.*;
 
-import static com.adregamdi.media.domain.ImageTarget.PROFILE;
-
 
 @Slf4j
 @RequiredArgsConstructor
@@ -45,7 +42,6 @@ public class OAuth2Service {
     private static final String APPLE = "apple";
     private static final String KAKAO = "kakao";
     private final JwtService jwtService;
-    private final ImageService imageService;
     private final MemberRepository memberRepository;
     private final WebClient webClient;
 
@@ -305,7 +301,6 @@ public class OAuth2Service {
 
     private Member saveMember(final OAuth2Attributes attributes, final SocialType socialType) {
         Member createdMember = attributes.toEntity(socialType, attributes.getOauth2UserInfo());
-        imageService.saveTargetId(createdMember.getProfile(), PROFILE, String.valueOf(createdMember.getMemberId()));
         return memberRepository.save(createdMember);
     }
 }

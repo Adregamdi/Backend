@@ -166,7 +166,7 @@ public class TravelogueService {
                 .map(CreateMyTravelogueRequest.TravelogueImageInfo::url)
                 .toList();
 
-        imageService.updateImages(urls, TRAVELOGUE, String.valueOf(travelogueId));
+        imageService.saveTargetId(urls, TRAVELOGUE, String.valueOf(travelogueId));
     }
 
     private void saveTravelogueDaysAndReviews(

@@ -184,7 +184,7 @@ public class PlaceServiceImpl implements PlaceService {
                 .map(PlaceReviewImage::getUrl)
                 .collect(Collectors.toList());
         if (!imageList.isEmpty()) {
-            imageService.updateImages(urls, PLACEREVIEW, String.valueOf(savePlaceReview.getPlaceReviewId()));
+            imageService.saveTargetId(urls, PLACEREVIEW, String.valueOf(savePlaceReview.getPlaceReviewId()));
         }
         return new CreatePlaceReviewResponse(savePlaceReview.getPlaceReviewId());
     }

@@ -49,17 +49,17 @@ public class MemberService {
      * [내 정보 수정]
      */
     @Transactional
-    public void update(final UpdateMyMemberRequest request, final String username) {
+    public void update(final UpdateMyMemberRequest request, final String memberId) {
         Member another = memberRepository.findByHandle(request.handle());
-        Member member = memberRepository.findById(UUID.fromString(username))
-                .orElseThrow(() -> new MemberNotFoundException(username));
+        Member member = memberRepository.findById(UUID.fromString(memberId))
+                .orElseThrow(() -> new MemberNotFoundException(memberId));
 
         if (another != null && !Objects.equals(another.getHandle(), member.getHandle())) {
             throw new HandleExistException(request.handle());
         }
 
-        member.updateMember(request.profile(), request.handle());
-        imageService.saveTargetId(request.profile(), PROFILE, String.valueOf(member.getMemberId()));
+        member.updateMember(request.profile(), request.name(), request.handle());
+        imageService.updateImage(request.profile(), PROFILE, memberId);
     }
 
     /*

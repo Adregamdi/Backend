@@ -9,6 +9,9 @@ public record UpdateMyMemberRequest(
         String profile,
         @NotNull
         @NotEmpty
+        String name,
+        @NotNull
+        @NotEmpty
         String handle
 ) {
 }

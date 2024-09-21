@@ -15,6 +15,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
@@ -44,8 +45,17 @@ public class OAuth2Service {
     private final MemberRepository memberRepository;
     private final WebClient webClient;
 
+    @Value("${social-login.provider.apple.team-id}")
+    private String teamId; // Apple Developer에서 가져온 팀 ID
+    @Value("${social-login.provider.apple.client-id}")
+    private String clientId; // Apple Developer에서 가져온 클라이언트 ID
+    @Value("${social-login.provider.apple.key-id}")
+    private String keyId; // Apple Developer에서 가져온 키 ID
+    @Value("${social-login.provider.apple.private-key}")
+    private String privateKey; // .p8 파일의 내용
+
     @Transactional
-    public LoginResponse login(LoginRequest request) {
+    public LoginResponse login(final LoginRequest request) {
         Map<String, Object> userInfo = switch (request.socialType()) {
             case "kakao" -> {
                 String kakaoUserInfoUrl = "https://kapi.kakao.com/v2/user/me";
@@ -64,7 +74,13 @@ public class OAuth2Service {
         OAuth2Attributes extractAttributes = OAuth2Attributes.of(socialType, userNameAttributeName, userInfo);
 
         Member findMember = getMember(extractAttributes, socialType);
-        findMember.updateSocialAccessToken(request.oauthAccessToken());
+        if (request.oauthAccessToken() != null) {
+            findMember.updateSocialAccessToken(request.oauthAccessToken());
+        } else if (request.idToken() != null) {
+            findMember.updateSocialAccessToken(request.idToken());
+        } else {
+            findMember.updateSocialAccessToken(request.authorizationCode());
+        }
 
         String accessToken = jwtService.createAccessToken(String.valueOf(findMember.getMemberId()), findMember.getRole());
         String refreshToken = jwtService.createRefreshToken();
@@ -74,7 +90,7 @@ public class OAuth2Service {
         return new LoginResponse(accessToken, refreshToken);
     }
 
-    private Map<String, Object> handleAppleLogin(LoginRequest request) {
+    private Map<String, Object> handleAppleLogin(final LoginRequest request) {
         String idToken;
         if (request.idToken() != null) { // Android case
             idToken = request.idToken();
@@ -85,9 +101,8 @@ public class OAuth2Service {
         return verifyAndExtractUserInfo(idToken);
     }
 
-    private String getAppleIdToken(String authorizationCode) {
+    private String getAppleIdToken(final String authorizationCode) {
         // Apple 서버에 authorizationCode를 사용하여 idToken을 요청
-        String clientId = "YOUR_CLIENT_ID"; // Apple Developer에서 가져온 클라이언트 ID
         String clientSecret = generateClientSecret(); // JWT 형식의 클라이언트 시크릿 생성
 
         return webClient.post()
@@ -98,19 +113,37 @@ public class OAuth2Service {
                         .with("code", authorizationCode)
                         .with("grant_type", "authorization_code"))
                 .retrieve()
+                .onStatus(HttpStatusCode::is4xxClientError, response ->
+                        response.bodyToMono(String.class)
+                                .flatMap(body -> {
+                                    log.error("Apple Auth Client Error: {}", body);
+                                    return Mono.error(new RuntimeException("Apple authentication failed: " + body));
+                                })
+                )
+                .onStatus(HttpStatusCode::is5xxServerError, response ->
+                        response.bodyToMono(String.class)
+                                .flatMap(body -> {
+                                    log.error("Apple Auth Server Error: {}", body);
+                                    return Mono.error(new RuntimeException("Apple server error: " + body));
+                                })
+                )
                 .bodyToMono(Map.class)
-                .map(response -> (String) response.get("id_token"))
+                .doOnNext(response -> {
+                    if (response.containsKey("error")) {
+                        log.error("Apple Auth Error in response body: {}", response);
+                        throw new RuntimeException("Apple authentication failed: " + response.get("error"));
+                    }
+                })
+                .map(response -> {
+                    log.info("Apple Auth Response: {}", response);
+                    return (String) response.get("id_token");
+                })
+                .doOnError(error -> log.error("Error during Apple authentication", error))
                 .block();
     }
 
     private String generateClientSecret() {
         try {
-            // Apple Developer에서 가져온 정보
-            String teamId = "YOUR_TEAM_ID";
-            String clientId = "YOUR_CLIENT_ID";
-            String keyId = "YOUR_KEY_ID";
-            String privateKey = "YOUR_PRIVATE_KEY"; // .p8 파일의 내용
-
             // JWT 헤더 설정
             Map<String, Object> headerClaims = new HashMap<>();
             headerClaims.put("kid", keyId);
@@ -152,7 +185,7 @@ public class OAuth2Service {
         }
     }
 
-    private Map<String, Object> verifyAndExtractUserInfo(String idToken) {
+    private Map<String, Object> verifyAndExtractUserInfo(final String idToken) {
         try {
             // Apple의 공개키 가져오기
             String jwksJson = webClient.get()
@@ -202,7 +235,7 @@ public class OAuth2Service {
         }
     }
 
-    private JSONObject findMatchingKey(JSONArray keys, String kid) {
+    private JSONObject findMatchingKey(final JSONArray keys, final String kid) {
         for (int i = 0; i < keys.length(); i++) {
             JSONObject key = keys.getJSONObject(i);
             if (kid.equals(key.getString("kid"))) {
@@ -212,7 +245,7 @@ public class OAuth2Service {
         return null;
     }
 
-    private RSAPublicKey getRSAPublicKey(JSONObject key) throws Exception {
+    private RSAPublicKey getRSAPublicKey(final JSONObject key) throws Exception {
         String nStr = key.getString("n");
         String eStr = key.getString("e");
 
@@ -224,7 +257,7 @@ public class OAuth2Service {
         return (RSAPublicKey) factory.generatePublic(spec);
     }
 
-    private Map fetchUserInfo(String userInfoUrl, String accessToken) {
+    private Map fetchUserInfo(final String userInfoUrl, final String accessToken) {
         return webClient
                 .get()
                 .uri(userInfoUrl)
@@ -248,7 +281,7 @@ public class OAuth2Service {
         return SocialType.GOOGLE;
     }
 
-    private String getUserNameAttributeName(String socialType) {
+    private String getUserNameAttributeName(final String socialType) {
         return switch (socialType) {
             case "google", "apple" -> "sub";
             case "kakao" -> "id";

@@ -126,13 +126,13 @@ public class TravelogueService {
                         travelogueImageRepository.saveAll(newTravelogueImages);
                     }
                 }
-                saveOrUpdateImages(request.travelogueId(), requestImages, false);
+                saveOrUpdateImages(request.travelogueId(), requestImages);
             } else {
                 for (CreateMyTravelogueRequest.TravelogueImageInfo travelogueImageUrl : requestImages) {
                     travelogueImages.add(new TravelogueImage(request.travelogueId(), travelogueImageUrl.url()));
                 }
                 travelogueImageRepository.saveAll(travelogueImages);
-                saveOrUpdateImages(request.travelogueId(), requestImages, true);
+                saveOrUpdateImages(request.travelogueId(), requestImages);
             }
         }
         return CreateMyTravelogueResponse.from(travelogue.getTravelogueId());
@@ -157,19 +157,16 @@ public class TravelogueService {
 
         travelogueImageRepository.saveAll(travelogueImages);
         if (requestImages != null) {
-            saveOrUpdateImages(travelogueId, requestImages, true);
+            saveOrUpdateImages(travelogueId, requestImages);
         }
     }
 
-    private void saveOrUpdateImages(Long travelogueId, List<CreateMyTravelogueRequest.TravelogueImageInfo> travelogueImages, boolean isSave) {
+    private void saveOrUpdateImages(Long travelogueId, List<CreateMyTravelogueRequest.TravelogueImageInfo> travelogueImages) {
         List<String> urls = travelogueImages.stream()
                 .map(CreateMyTravelogueRequest.TravelogueImageInfo::url)
                 .toList();
-        if (!travelogueImages.isEmpty() && isSave) {
-            imageService.saveTargetId(urls, TRAVELOGUE, String.valueOf(travelogueId));
-        } else if (!travelogueImages.isEmpty() || !isSave) {
-            imageService.updateImages(urls, TRAVELOGUE, String.valueOf(travelogueId));
-        }
+
+        imageService.updateImages(urls, TRAVELOGUE, String.valueOf(travelogueId));
     }
 
     private void saveTravelogueDaysAndReviews(

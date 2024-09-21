@@ -14,7 +14,10 @@ import org.springframework.data.domain.SliceImpl;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.EnumMap;
+import java.util.Map;
+import java.util.Set;
 
 import static com.adregamdi.core.constant.Constant.LARGE_PAGE_SIZE;
 import static com.adregamdi.core.utils.PageUtil.generatePageAsc;
@@ -38,7 +41,7 @@ public class SearchService {
             totalCounts.put(SearchType.TRAVELOGUE, searchRepository.countTravelogues(keyword));
         }
         if (types.contains(SearchType.SHORTS)) {
-            shorts = searchRepository.searchShorts(keyword, generatePageAsc(page, pageSize, "title"), UUID.fromString(memberId));
+            shorts = searchRepository.searchShorts(keyword, generatePageAsc(page, pageSize, "title"), memberId);
             totalCounts.put(SearchType.SHORTS, searchRepository.countShorts(keyword));
         }
         if (types.contains(SearchType.PLACE)) {

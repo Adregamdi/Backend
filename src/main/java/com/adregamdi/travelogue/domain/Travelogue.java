@@ -4,8 +4,6 @@ import com.adregamdi.core.entity.BaseTime;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.util.UUID;
-
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
@@ -16,8 +14,8 @@ public class Travelogue extends BaseTime {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long travelogueId;
-    @Column(name = "member_id", updatable = false, nullable = false, columnDefinition = "CHAR(36)")
-    private UUID memberId; // 회원 id
+    @Column(name = "member_id", updatable = false, nullable = false, columnDefinition = "VARCHAR(36)")
+    private String memberId;  // 회원 id
     @Column
     private Long travelId; // 일정 id
     @Column
@@ -26,7 +24,7 @@ public class Travelogue extends BaseTime {
     private String introduction; // 소개
 
     public Travelogue(String memberId, Long travelId, String title, String introduction) {
-        this.memberId = UUID.fromString(memberId);
+        this.memberId = memberId;
         this.travelId = travelId;
         this.title = title;
         this.introduction = introduction;

@@ -30,7 +30,7 @@ public class QLike extends EntityPathBase<Like> {
 
     public final NumberPath<Long> likeId = createNumber("likeId", Long.class);
 
-    public final ComparablePath<java.util.UUID> memberId = createComparable("memberId", java.util.UUID.class);
+    public final StringPath memberId = createString("memberId");
 
     //inherited
     public final DateTimePath<java.time.LocalDateTime> updatedAt = _super.updatedAt;

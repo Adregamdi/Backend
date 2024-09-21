@@ -26,7 +26,7 @@ public class QTravel extends EntityPathBase<Travel> {
 
     public final DatePath<java.time.LocalDate> endDate = createDate("endDate", java.time.LocalDate.class);
 
-    public final ComparablePath<java.util.UUID> memberId = createComparable("memberId", java.util.UUID.class);
+    public final StringPath memberId = createString("memberId");
 
     public final DatePath<java.time.LocalDate> startDate = createDate("startDate", java.time.LocalDate.class);
 

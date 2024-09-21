@@ -19,7 +19,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.UUID;
 
 @Slf4j
 @Service
@@ -34,17 +33,17 @@ public class ShortsServiceImpl implements ShortsService {
 
     @Override
     public GetShortsResponse getShorts(String memberId, long lastId, int size) {
-        return shortsRepository.getShortsForMember(UUID.fromString(memberId), lastId, size);
+        return shortsRepository.getShortsForMember(memberId, lastId, size);
     }
 
     @Override
     public GetShortsResponse getUserShorts(String memberId, long lastShortsId, int size) {
-        return shortsRepository.getUserShorts(UUID.fromString(memberId), lastShortsId, size);
+        return shortsRepository.getUserShorts(memberId, lastShortsId, size);
     }
 
     @Override
     public GetShortsByPlaceIdResponse getShortsByPlaceId(String memberId, GetShortsByPlaceIdRequest request) {
-        return shortsRepository.getShortsByPlaceId(UUID.fromString(memberId), request);
+        return shortsRepository.getShortsByPlaceId(memberId, request);
     }
 
     @Override
@@ -60,7 +59,7 @@ public class ShortsServiceImpl implements ShortsService {
 
         Shorts savedShorts = shortsRepository.save(
                 Shorts.builder()
-                        .memberId(UUID.fromString(memberId))
+                        .memberId(memberId)
                         .shortsVideoUrl(videoUrls.getVideoUrl())
                         .thumbnailUrl(videoUrls.getVideoThumbnailUrl())
                         .build()

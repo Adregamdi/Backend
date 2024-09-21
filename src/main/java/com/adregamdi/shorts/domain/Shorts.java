@@ -10,8 +10,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.Comment;
 
-import java.util.UUID;
-
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -25,10 +23,10 @@ public class Shorts extends BaseTime {
     @Column(name = "title")
     @Comment(value = "쇼츠 제목")
     private String title;
-
-    @Column(name = "member_id", updatable = false, nullable = false, columnDefinition = "CHAR(36)")
     @Comment(value = "작성자")
-    private UUID memberId;
+
+    @Column(name = "member_id", updatable = false, nullable = false, columnDefinition = "VARCHAR(36)")
+    private String memberId;
 
     @Column(name = "place_id")
     @Comment(value = "장소 id")
@@ -55,7 +53,7 @@ public class Shorts extends BaseTime {
     private int viewCount;
 
     @Builder
-    public Shorts(Long shortsId, String title, UUID memberId, Long placeId, Long travelogueId, String shortsVideoUrl, String thumbnailUrl) {
+    public Shorts(Long shortsId, String title, String memberId, Long placeId, Long travelogueId, String shortsVideoUrl, String thumbnailUrl) {
         this.shortsId = shortsId;
         this.title = title;
         this.memberId = memberId;

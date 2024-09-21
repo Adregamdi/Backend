@@ -20,7 +20,6 @@ import org.springframework.stereotype.Repository;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static com.adregamdi.like.domain.QLike.like;
@@ -35,7 +34,7 @@ import static com.adregamdi.travelogue.domain.QTravelogueImage.travelogueImage;
 @Slf4j
 @Repository
 @RequiredArgsConstructor
-public class LikesCustomRepositoryImpl implements LikesCustomRepository{
+public class LikesCustomRepositoryImpl implements LikesCustomRepository {
 
     private final JPAQueryFactory jpaQueryFactory;
 
@@ -68,7 +67,7 @@ public class LikesCustomRepositoryImpl implements LikesCustomRepository{
                 .leftJoin(place).on(like.contentId.eq(place.placeId).and(like.contentType.eq(ContentType.PLACE)))
                 .leftJoin(travelogue).on(like.contentId.eq(travelogue.travelogueId).and(like.contentType.eq(ContentType.TRAVELOGUE)))
                 .where(
-                        like.memberId.eq(UUID.fromString(request.memberId())),
+                        like.memberId.eq(request.memberId()),
                         like.likeId.lt(request.lastLikeId()))
                 .orderBy(like.likeId.desc())
                 .limit(request.size() + 1)
@@ -112,7 +111,7 @@ public class LikesCustomRepositoryImpl implements LikesCustomRepository{
                                 JPAExpressions
                                         .selectOne()
                                         .from(like)
-                                        .where(like.memberId.eq(UUID.fromString(request.memberId()))
+                                        .where(like.memberId.eq(request.memberId())
                                                 .and(like.contentType.eq(ContentType.SHORTS))
                                                 .and(like.contentId.eq(shorts.shortsId)))
                                         .exists(),
@@ -120,11 +119,11 @@ public class LikesCustomRepositoryImpl implements LikesCustomRepository{
                         )))
                 .from(like)
                 .join(shorts).on(like.contentId.eq(shorts.shortsId).and(like.contentType.eq(ContentType.SHORTS)))
-                .join(member).on(shorts.memberId.eq(member.memberId))
+                .join(member).on(shorts.memberId.eq(String.valueOf(member.memberId)))
                 .leftJoin(place).on(shorts.placeId.eq(place.placeId))
                 .leftJoin(travelogue).on(shorts.travelogueId.eq(travelogue.travelogueId))
                 .where(
-                        like.memberId.eq(UUID.fromString(request.memberId())),
+                        like.memberId.eq(request.memberId()),
                         like.contentType.eq(ContentType.SHORTS),
                         shorts.assignedStatus.eq(true),
                         like.likeId.lt(request.lastLikeId())
@@ -148,9 +147,9 @@ public class LikesCustomRepositoryImpl implements LikesCustomRepository{
                 .select(travelogue.travelogueId, travelogue.title, member.name, member.profile)
                 .from(like)
                 .leftJoin(travelogue).on(like.contentId.eq(travelogue.travelogueId).and(like.contentType.eq(ContentType.TRAVELOGUE)))
-                .leftJoin(member).on(travelogue.memberId.eq(member.memberId))
+                .leftJoin(member).on(travelogue.memberId.eq(String.valueOf(member.memberId)))
                 .where(
-                        like.memberId.eq(UUID.fromString(request.memberId())),
+                        like.memberId.eq(request.memberId()),
                         like.contentType.eq(ContentType.TRAVELOGUE),
                         like.likeId.lt(request.lastLikeId())
                 )
@@ -201,7 +200,7 @@ public class LikesCustomRepositoryImpl implements LikesCustomRepository{
                 .from(like)
                 .join(place).on(like.contentId.eq(place.placeId).and(like.contentType.eq(ContentType.PLACE)))
                 .where(
-                        like.memberId.eq(UUID.fromString(request.memberId())),
+                        like.memberId.eq(request.memberId()),
                         like.contentType.eq(ContentType.PLACE),
                         like.likeId.lt(request.lastLikeId())
                 )
@@ -264,7 +263,7 @@ public class LikesCustomRepositoryImpl implements LikesCustomRepository{
     }
 
     @Override
-    public Boolean checkIsLiked(UUID memberId, ContentType contentType, Long contentId) {
+    public Boolean checkIsLiked(String memberId, ContentType contentType, Long contentId) {
         return jpaQueryFactory
                 .selectFrom(like)
                 .where(like.memberId.eq(memberId)

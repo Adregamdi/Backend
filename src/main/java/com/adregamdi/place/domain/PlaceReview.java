@@ -8,7 +8,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
-import java.util.UUID;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -18,8 +17,8 @@ public class PlaceReview extends BaseTime {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long placeReviewId;
-    @Column(name = "member_id", updatable = false, nullable = false, columnDefinition = "CHAR(36)")
-    private UUID memberId; // 회원 id
+    @Column(name = "member_id", updatable = false, nullable = false, columnDefinition = "VARCHAR(36)")
+    private String memberId;  // 회원 id
     @Column
     private Long placeId; // 장소 id
     @Column
@@ -29,7 +28,7 @@ public class PlaceReview extends BaseTime {
 
     @Builder
     public PlaceReview(String memberId, Long placeId, LocalDate visitDate, String content) {
-        this.memberId = UUID.fromString(memberId);
+        this.memberId = memberId;
         this.placeId = placeId;
         this.visitDate = visitDate;
         this.content = content;

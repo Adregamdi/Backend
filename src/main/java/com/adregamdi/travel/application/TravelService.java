@@ -30,7 +30,6 @@ import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 import static com.adregamdi.core.constant.Constant.LARGE_PAGE_SIZE;
 import static com.adregamdi.core.utils.PageUtil.generatePageDesc;
@@ -58,11 +57,16 @@ public class TravelService {
 
         Travel travel;
         if (request.travelId() == null) {
-            travel = travelRepository.save(new Travel(request, memberId));
+            travel = travelRepository.save(Travel.builder()
+                    .memberId(memberId)
+                    .startDate(request.startDate())
+                    .endDate(request.endDate())
+                    .title(request.title())
+                    .build());
         } else {
             travel = travelRepository.findById(request.travelId())
                     .orElseThrow(() -> new TravelNotFoundException(request.travelId()));
-            travel.update(request, memberId);
+            travel.update(memberId, request.startDate(), request.endDate(), request.title());
         }
 
         List<TravelDay> existingDays = travelDayRepository.findAllByTravelId(travel.getTravelId());
@@ -175,7 +179,7 @@ public class TravelService {
      * */
     @Transactional(readOnly = true)
     public GetMyTravelResponse getMyTravel(final Long travelId, final String memberId) {
-        Travel travel = travelRepository.findByTravelIdAndMemberId(travelId, UUID.fromString(memberId))
+        Travel travel = travelRepository.findByTravelIdAndMemberId(travelId, memberId)
                 .orElseThrow(() -> new TravelNotFoundException(memberId));
 
         List<TravelDay> travelDays = travelDayRepository.findByTravelId(travelId)
@@ -189,7 +193,7 @@ public class TravelService {
                 throw new TravelPlaceNotFoundException(travel.getTravelId());
             }
             for (TravelPlace travelPlace : travelPlaceList) {
-                PlaceReview placeReviewInfo = placeReviewRepository.findByMemberIdAndPlaceId(UUID.fromString(memberId), travelPlace.getPlaceId())
+                PlaceReview placeReviewInfo = placeReviewRepository.findByMemberIdAndPlaceId(memberId, travelPlace.getPlaceId())
                         .orElse(PlaceReview.builder().build());
                 PlaceReviewDTO placeReview = null;
                 if (placeReviewInfo.getPlaceReviewId() != null && placeReviewInfo.getPlaceReviewId() != 0) {

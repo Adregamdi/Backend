@@ -3,8 +3,6 @@ package com.adregamdi.shorts.dto.response;
 import com.adregamdi.shorts.domain.Shorts;
 import lombok.*;
 
-import java.util.UUID;
-
 @Getter
 @Setter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -13,7 +11,7 @@ public class CreateShortsResponse {
 
     private Long shortsId;
     private String title;
-    private UUID memberId;
+    private String memberId;
     private Long placeId;
     private Long travelogueId;
 

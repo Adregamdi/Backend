@@ -9,8 +9,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.Comment;
 
-import java.util.UUID;
-
 @Entity
 @Getter
 @NoArgsConstructor
@@ -27,9 +25,9 @@ public class Like extends BaseTime {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long likeId;
 
-    @Column(name = "member_id", updatable = false, nullable = false, columnDefinition = "CHAR(36)")
+    @Column(name = "member_id", updatable = false, nullable = false, columnDefinition = "VARCHAR(36)")
     @Comment("회원 id")
-    private UUID memberId;
+    private String memberId;
 
     @Column(name = "content_type", nullable = false)
     @Comment("컨텐츠 타입")
@@ -41,7 +39,7 @@ public class Like extends BaseTime {
     private Long contentId;
 
     @Builder
-    public Like(UUID memberId, ContentType contentType, Long contentId) {
+    public Like(String memberId, ContentType contentType, Long contentId) {
         this.memberId = memberId;
         this.contentType = contentType;
         this.contentId = contentId;

@@ -9,7 +9,10 @@ import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.SliceImpl;
 import org.springframework.stereotype.Repository;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 import static com.adregamdi.core.utils.RepositoryUtil.makeOrderSpecifiers;
 import static com.adregamdi.member.domain.QMember.member;
@@ -29,9 +32,9 @@ public class TravelogueCustomRepositoryImpl implements TravelogueCustomRepositor
                         member.handle,
                         travelogueImage.url)
                 .from(travelogue)
-                .join(member).on(travelogue.memberId.eq(member.memberId))
+                .join(member).on(travelogue.memberId.eq(String.valueOf(member.memberId)))
                 .leftJoin(travelogueImage).on(travelogue.travelogueId.eq(travelogueImage.travelogueId))
-                .where(travelogue.memberId.eq(UUID.fromString(memberId)))
+                .where(travelogue.memberId.eq(memberId))
                 .orderBy(makeOrderSpecifiers(travelogue, pageable))
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize() + 1)
@@ -72,7 +75,7 @@ public class TravelogueCustomRepositoryImpl implements TravelogueCustomRepositor
                         member.handle,
                         travelogueImage.url)
                 .from(travelogue)
-                .join(member).on(travelogue.memberId.eq(member.memberId))
+                .join(member).on(travelogue.memberId.eq(String.valueOf(member.memberId)))
                 .leftJoin(travelogueImage).on(travelogue.travelogueId.eq(travelogueImage.travelogueId))
                 .orderBy(makeOrderSpecifiers(travelogue, pageable))
                 .offset(pageable.getOffset())

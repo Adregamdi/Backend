@@ -236,7 +236,7 @@ public class TravelogueService {
 
             placeReviewsMap.put(travelogueDay.getTravelogueDayId(), placeReviewInfos);
         }
-        boolean isLiked = likesService.checkIsLiked(UUID.fromString(memberId), ContentType.TRAVELOGUE, travelogueId);
+        boolean isLiked = likesService.checkIsLiked(memberId, ContentType.TRAVELOGUE, travelogueId);
         return GetTravelogueResponse.of(isLiked, travelogue, travelogueImages, travelogueDays, placeReviewsMap);
     }
 

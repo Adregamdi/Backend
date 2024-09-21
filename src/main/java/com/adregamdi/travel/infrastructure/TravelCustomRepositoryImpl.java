@@ -10,7 +10,6 @@ import org.springframework.data.domain.SliceImpl;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
-import java.util.UUID;
 
 import static com.adregamdi.core.utils.RepositoryUtil.makeOrderSpecifiers;
 import static com.adregamdi.travel.domain.QTravel.travel;
@@ -29,7 +28,7 @@ public class TravelCustomRepositoryImpl implements TravelCustomRepository {
                         travel.endDate,
                         travel.title))
                 .from(travel)
-                .where(travel.memberId.eq(UUID.fromString(memberId)))
+                .where(travel.memberId.eq(memberId))
                 .orderBy(makeOrderSpecifiers(travel, pageable))
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize() + 1)

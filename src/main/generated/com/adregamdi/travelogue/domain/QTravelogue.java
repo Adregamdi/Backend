@@ -26,7 +26,7 @@ public class QTravelogue extends EntityPathBase<Travelogue> {
 
     public final StringPath introduction = createString("introduction");
 
-    public final ComparablePath<java.util.UUID> memberId = createComparable("memberId", java.util.UUID.class);
+    public final StringPath memberId = createString("memberId");
 
     public final StringPath title = createString("title");
 

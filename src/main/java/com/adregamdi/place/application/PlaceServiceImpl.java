@@ -39,7 +39,10 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Locale;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.StreamSupport;
@@ -158,7 +161,7 @@ public class PlaceServiceImpl implements PlaceService {
     @Override
     @Transactional
     public CreatePlaceReviewResponse createReview(final String memberId, final CreatePlaceReviewRequest request) {
-        placeReviewRepository.findByMemberIdAndPlaceId(UUID.fromString(memberId), request.placeId())
+        placeReviewRepository.findByMemberIdAndPlaceId(memberId, request.placeId())
                 .ifPresent(data -> {
                     throw new PlaceReviewExistException(data.getPlaceReviewId());
                 });
@@ -199,7 +202,7 @@ public class PlaceServiceImpl implements PlaceService {
     public GetPlaceResponse get(final String memberId, final Long placeId) {
         Place place = placeRepository.findById(placeId)
                 .orElseThrow(() -> new PlaceNotFoundException(placeId));
-        boolean isLiked = likesService.checkIsLiked(UUID.fromString(memberId), ContentType.PLACE, placeId);
+        boolean isLiked = likesService.checkIsLiked(memberId, ContentType.PLACE, placeId);
         return GetPlaceResponse.from(isLiked, place);
     }
 
@@ -305,7 +308,7 @@ public class PlaceServiceImpl implements PlaceService {
     @Override
     @Transactional(readOnly = true)
     public GetMyPlaceReviewResponse getMyReview(final String memberId) {
-        List<PlaceReview> placeReviews = placeReviewRepository.findAllByMemberIdOrderByPlaceReviewIdDesc(UUID.fromString(memberId))
+        List<PlaceReview> placeReviews = placeReviewRepository.findAllByMemberIdOrderByPlaceReviewIdDesc(memberId)
                 .orElseThrow(() -> new PlaceReviewNotFoundException(memberId));
         List<MyPlaceReviewDTO> myPlaceReviews = new ArrayList<>();
 

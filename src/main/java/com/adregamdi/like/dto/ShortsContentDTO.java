@@ -5,8 +5,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.util.UUID;
-
 @Getter
 @Setter
 @NoArgsConstructor
@@ -15,7 +13,7 @@ public class ShortsContentDTO {
 
     private Long shortsId;
     private String title;
-    private UUID memberId;
+    private String memberId;
     private String name;
     private String handle;
     private String profile;
@@ -29,7 +27,7 @@ public class ShortsContentDTO {
     private int likeCount;
     private Boolean isLiked;
 
-    public ShortsContentDTO(Long shortsId, String title, UUID memberId, String name, String handle, String profile, Long placeId, String placeTitle, Long travelogueId, String travelogueTitle, String shortsVideoUrl, String thumbnailUrl, Integer viewCount, Integer likeCount, Boolean isLiked) {
+    public ShortsContentDTO(Long shortsId, String title, String memberId, String name, String handle, String profile, Long placeId, String placeTitle, Long travelogueId, String travelogueTitle, String shortsVideoUrl, String thumbnailUrl, Integer viewCount, Integer likeCount, Boolean isLiked) {
         this.shortsId = shortsId;
         this.title = title;
         this.memberId = memberId;

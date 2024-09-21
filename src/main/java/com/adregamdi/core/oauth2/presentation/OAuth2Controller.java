@@ -1,9 +1,9 @@
 package com.adregamdi.core.oauth2.presentation;
 
 import com.adregamdi.core.handler.ApiResponse;
+import com.adregamdi.core.oauth2.application.OAuth2Service;
 import com.adregamdi.core.oauth2.dto.LoginRequest;
 import com.adregamdi.core.oauth2.dto.LoginResponse;
-import com.adregamdi.core.oauth2.service.OAuth2Service;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;

@@ -1,18 +1,17 @@
 package com.adregamdi.media.domain;
 
+import com.adregamdi.core.entity.BaseTime;
 import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.Comment;
 
-import java.time.LocalDateTime;
-
 @Entity
 @Getter
 @NoArgsConstructor
 @Table(name = "tbl_image")
-public class Image {
+public class Image extends BaseTime {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -32,18 +31,12 @@ public class Image {
     @Comment(value = "관련 엔티티 식별 값")
     private String targetId;
 
-    @Column(name = "create_date", updatable = false)
-    @Comment(value = "이미지 생성일")
-    private LocalDateTime createDate;
-
-
     @Builder
     public Image(Long imageNo, String imageUrl, ImageTarget imageTarget, String targetId) {
         this.imageNo = imageNo;
         this.imageUrl = imageUrl;
         this.imageTarget = imageTarget;
         this.targetId = targetId;
-        this.createDate = LocalDateTime.now();
     }
 
     public void updateTargetId(String targetId) {

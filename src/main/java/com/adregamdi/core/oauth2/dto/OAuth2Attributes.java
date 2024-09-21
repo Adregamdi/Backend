@@ -1,9 +1,9 @@
 package com.adregamdi.core.oauth2.dto;
 
-import com.adregamdi.core.oauth2.service.AppleOAuth2UserInfo;
-import com.adregamdi.core.oauth2.service.GoogleOAuth2UserInfo;
-import com.adregamdi.core.oauth2.service.KakaoOAuth2UserInfo;
-import com.adregamdi.core.oauth2.service.OAuth2UserInfo;
+import com.adregamdi.core.oauth2.application.AppleOAuth2UserInfo;
+import com.adregamdi.core.oauth2.application.GoogleOAuth2UserInfo;
+import com.adregamdi.core.oauth2.application.KakaoOAuth2UserInfo;
+import com.adregamdi.core.oauth2.application.OAuth2UserInfo;
 import com.adregamdi.member.domain.Member;
 import com.adregamdi.member.domain.SocialType;
 import lombok.Builder;
@@ -77,6 +77,7 @@ public class OAuth2Attributes {
     ) {
         String uuid = String.valueOf(UUID.randomUUID());
         String name = "미지정";
+        String profile = "https://adregamdi-dev2.s3.ap-northeast-2.amazonaws.com/profile/default_profile_image.png";
         String handle = uuid + "-ad";
         String email = uuid + "@adregamdi.com";
         String age = "Unknown";
@@ -106,16 +107,15 @@ public class OAuth2Attributes {
             name = oauth2UserInfo.getName();
         }
 
-        SignUpDTO signUpDTO = new SignUpDTO(
-                name,
-                handle,
-                email,
-                age,
-                gender,
-                oauth2UserInfo.getId(),
-                socialType
-        );
-
-        return new Member(signUpDTO);
+        return Member.builder()
+                .name(name)
+                .profile(profile)
+                .handle(handle)
+                .email(email)
+                .age(age)
+                .gender(gender)
+                .socialId(oauth2UserInfo.getId())
+                .socialType(socialType)
+                .build();
     }
 }

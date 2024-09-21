@@ -19,15 +19,21 @@ public class QLike extends EntityPathBase<Like> {
 
     public static final QLike like = new QLike("like1");
 
+    public final com.adregamdi.core.entity.QBaseTime _super = new com.adregamdi.core.entity.QBaseTime(this);
+
     public final NumberPath<Long> contentId = createNumber("contentId", Long.class);
 
     public final EnumPath<com.adregamdi.like.domain.enumtype.ContentType> contentType = createEnum("contentType", com.adregamdi.like.domain.enumtype.ContentType.class);
 
-    public final DateTimePath<java.time.LocalDateTime> createAt = createDateTime("createAt", java.time.LocalDateTime.class);
+    //inherited
+    public final DateTimePath<java.time.LocalDateTime> createdAt = _super.createdAt;
 
     public final NumberPath<Long> likeId = createNumber("likeId", Long.class);
 
-    public final ComparablePath<java.util.UUID> memberId = createComparable("memberId", java.util.UUID.class);
+    public final StringPath memberId = createString("memberId");
+
+    //inherited
+    public final DateTimePath<java.time.LocalDateTime> updatedAt = _super.updatedAt;
 
     public QLike(String variable) {
         super(Like.class, forVariable(variable));

@@ -26,7 +26,7 @@ public class QPlaceReview extends EntityPathBase<PlaceReview> {
     //inherited
     public final DateTimePath<java.time.LocalDateTime> createdAt = _super.createdAt;
 
-    public final ComparablePath<java.util.UUID> memberId = createComparable("memberId", java.util.UUID.class);
+    public final StringPath memberId = createString("memberId");
 
     public final NumberPath<Long> placeId = createNumber("placeId", Long.class);
 

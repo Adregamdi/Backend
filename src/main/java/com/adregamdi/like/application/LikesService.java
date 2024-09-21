@@ -16,8 +16,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.UUID;
-
 @Slf4j
 @Service
 @Transactional
@@ -30,13 +28,13 @@ public class LikesService {
     public CreateLikesResponse create(String memberId, CreateLikesRequest request) {
 
         boolean isLiked = likesRepository.findByContentTypeAndContentId(request.getContentType(), request.contentId()).isPresent();
-        if(isLiked) {
+        if (isLiked) {
             return new CreateLikesResponse(true);
         }
 
 
         Like like = Like.builder()
-                .memberId(UUID.fromString(memberId))
+                .memberId(memberId)
                 .contentType(request.getContentType())
                 .contentId(request.contentId())
                 .build();
@@ -47,7 +45,7 @@ public class LikesService {
     public CreateShortsLikeResponse createShortsLike(String memberId, Long shortsId) {
 
         Like like = Like.builder()
-                .memberId(UUID.fromString(memberId))
+                .memberId(memberId)
                 .contentType(ContentType.SHORTS)
                 .contentId(shortsId)
                 .build();
@@ -67,7 +65,7 @@ public class LikesService {
 
         if (memberRole == Role.ADMIN) {
             log.info("관리자 권한으로 좋아요를 삭제합니다. 좋아요 ID: {}", like.getLikeId());
-        } else if (!likesValidService.isWriter(like.getMemberId().toString(), memberId)) {
+        } else if (!likesValidService.isWriter(like.getMemberId(), memberId)) {
             log.warn("작성자 외에 요청으로 인해 메서드를 종료합니다.");
             return;
         }
@@ -87,7 +85,7 @@ public class LikesService {
     }
 
     @Transactional(readOnly = true)
-    public Boolean checkIsLiked(UUID memberId, ContentType contentType, Long contentId) {
+    public Boolean checkIsLiked(String memberId, ContentType contentType, Long contentId) {
 
         return likesRepository.checkIsLiked(memberId, contentType, contentId);
     }

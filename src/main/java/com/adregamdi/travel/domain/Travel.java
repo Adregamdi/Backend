@@ -1,25 +1,24 @@
 package com.adregamdi.travel.domain;
 
 import com.adregamdi.core.entity.BaseTime;
-import com.adregamdi.travel.dto.request.CreateMyTravelRequest;
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.AccessLevel;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
-import java.util.UUID;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@AllArgsConstructor
-@Builder
 @Entity
 @Table(name = "tbl_travel")
 public class Travel extends BaseTime {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long travelId;
-    @Column
-    private UUID memberId; // 회원 id
+    @Column(name = "member_id", updatable = false, nullable = false, columnDefinition = "VARCHAR(36)")
+    private String memberId;  // 회원 id
     @Column
     private LocalDate startDate; // 시작일
     @Column
@@ -27,17 +26,18 @@ public class Travel extends BaseTime {
     @Column
     private String title; // 제목
 
-    public Travel(CreateMyTravelRequest request, String memberId) {
-        this.memberId = UUID.fromString(memberId);
-        this.startDate = request.startDate();
-        this.endDate = request.endDate();
-        this.title = request.title();
+    @Builder
+    public Travel(String memberId, LocalDate startDate, LocalDate endDate, String title) {
+        this.memberId = memberId;
+        this.startDate = startDate;
+        this.endDate = endDate;
+        this.title = title;
     }
 
-    public void update(CreateMyTravelRequest request, String memberId) {
-        this.memberId = UUID.fromString(memberId);
-        this.startDate = request.startDate();
-        this.endDate = request.endDate();
-        this.title = request.title();
+    public void update(String memberId, LocalDate startDate, LocalDate endDate, String title) {
+        this.memberId = memberId;
+        this.startDate = startDate;
+        this.endDate = endDate;
+        this.title = title;
     }
 }

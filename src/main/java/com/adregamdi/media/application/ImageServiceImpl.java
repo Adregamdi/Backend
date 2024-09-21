@@ -26,11 +26,10 @@ import java.util.Objects;
 @RequiredArgsConstructor
 public class ImageServiceImpl implements ImageService {
 
+    private final static int IMAGE_RESIZE_TARGET_WIDTH = 650;
     private final FileUploadService fileUploadService;
     private final ImageValidService imageValidService;
     private final ImageRepository imageRepository;
-
-    private final static int IMAGE_RESIZE_TARGET_WIDTH = 650;
 
     private Image getImageByImageUrl(String imageUrl) {
         Image image = imageRepository.findImageByImageUrl(imageUrl)
@@ -117,9 +116,14 @@ public class ImageServiceImpl implements ImageService {
         String filename = imageValidService.getFileNameFromUrl(imageUrl);
         imageValidService.checkImageFile(filename);
 
-        Image image = getImageByImageUrl(imageUrl);
-        image.updateImageTarget(imageTarget);
-        image.updateTargetId(targetId);
+//        Image image = getImageByImageUrl(imageUrl);
+//        image.updateImageTarget(imageTarget);
+//        image.updateTargetId(targetId);
+        Image image = imageRepository.save(Image.builder()
+                .imageUrl(imageUrl)
+                .imageTarget(imageTarget)
+                .targetId(targetId)
+                .build());
         log.info("{} 번의 이미지가 {} 의 {} 번의 엔테티로 할당되었습니다,", image.getImageNo(), image.getImageTarget(), image.getTargetId());
     }
 

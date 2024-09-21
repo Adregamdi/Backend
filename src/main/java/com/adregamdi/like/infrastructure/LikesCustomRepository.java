@@ -8,7 +8,6 @@ import com.adregamdi.like.dto.request.GetLikesContentsRequest;
 import com.adregamdi.like.dto.response.GetLikesContentsResponse;
 
 import java.util.List;
-import java.util.UUID;
 
 public interface LikesCustomRepository {
 
@@ -20,5 +19,5 @@ public interface LikesCustomRepository {
 
     GetLikesContentsResponse<?> getLikesContentsOfTravelogue(GetLikesContentsRequest request);
 
-    Boolean checkIsLiked(UUID memberId, ContentType contentType, Long contentId);
+    Boolean checkIsLiked(String memberId, ContentType contentType, Long contentId);
 }

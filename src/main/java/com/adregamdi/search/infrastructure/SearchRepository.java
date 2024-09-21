@@ -6,12 +6,10 @@ import com.adregamdi.search.dto.TravelogueSearchDTO;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 
-import java.util.UUID;
-
 public interface SearchRepository {
     Slice<TravelogueSearchDTO> searchTravelogues(String keyword, Pageable pageable);
 
-    Slice<ShortsSearchDTO> searchShorts(String keyword, Pageable pageable, UUID memberId);
+    Slice<ShortsSearchDTO> searchShorts(String keyword, Pageable pageable, String memberId);
 
     Slice<PlaceSearchDTO> searchPlaces(String keyword, Pageable pageable);
 

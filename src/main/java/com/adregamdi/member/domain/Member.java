@@ -1,16 +1,16 @@
 package com.adregamdi.member.domain;
 
 import com.adregamdi.core.entity.BaseTime;
-import com.adregamdi.core.oauth2.dto.SignUpDTO;
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.AccessLevel;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import java.util.UUID;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@AllArgsConstructor
-@Builder
 @Entity
 @Table(name = "tbl_member")
 public class Member extends BaseTime {
@@ -48,21 +48,23 @@ public class Member extends BaseTime {
     @Enumerated(EnumType.STRING)
     private Role role; // 회원 권한
 
-    public Member(SignUpDTO signUpDTO) {
-        this.name = signUpDTO.getName();
-        this.profile = "https://adregamdi-dev2.s3.ap-northeast-2.amazonaws.com/profile/default_profile_image.png";
-        this.handle = signUpDTO.getHandle();
-        this.email = signUpDTO.getEmail();
-        this.age = signUpDTO.getAge();
-        this.gender = signUpDTO.getGender();
-        this.socialId = signUpDTO.getSocialId();
-        this.socialType = signUpDTO.getSocialType();
+    @Builder
+    public Member(String name, String profile, String handle, String email, String age, String gender, String socialId, SocialType socialType) {
+        this.name = name;
+        this.profile = profile;
+        this.handle = handle;
+        this.email = email;
+        this.age = age;
+        this.gender = gender;
+        this.socialId = socialId;
+        this.socialType = socialType;
         this.role = Role.MEMBER;
         this.refreshTokenStatus = false;
         this.memberStatus = true;
     }
 
-    public void updateMember(String profile, String handle) {
+    public void updateMember(String name, String profile, String handle) {
+        this.name = name;
         this.profile = profile;
         this.handle = handle;
     }

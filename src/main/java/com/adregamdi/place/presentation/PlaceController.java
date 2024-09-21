@@ -54,13 +54,13 @@ public class PlaceController {
     @PostMapping("/review")
     @MemberAuthorize
     public ResponseEntity<ApiResponse<CreatePlaceReviewResponse>> createReview(
-            @RequestBody @Valid final CreatePlaceReviewRequest request,
-            @AuthenticationPrincipal final UserDetails userDetails
+            @AuthenticationPrincipal final UserDetails userDetails,
+            @RequestBody @Valid final CreatePlaceReviewRequest request
     ) {
         return ResponseEntity.ok()
                 .body(ApiResponse.<CreatePlaceReviewResponse>builder()
                         .statusCode(HttpStatus.CREATED.value())
-                        .data(placeService.createReview(request, userDetails.getUsername()))
+                        .data(placeService.createReview(userDetails.getUsername(), request))
                         .build()
                 );
     }
@@ -159,7 +159,10 @@ public class PlaceController {
                                 placeReview.visitDate(),
                                 placeReview.content(),
                                 placeReview.placeReviewImageList(),
-                                placeReview.createdAt()
+                                placeReview.createdAt(),
+                                placeReview.name(),
+                                placeReview.profile(),
+                                placeReview.handle()
                         ))
                         .build()
                 );

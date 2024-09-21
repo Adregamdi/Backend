@@ -4,8 +4,9 @@ import jakarta.validation.constraints.NotBlank;
 
 public record LoginRequest(
         @NotBlank
+        String socialType,
         String oauthAccessToken,
-        @NotBlank
-        String socialType
+        String authorizationCode,
+        String idToken
 ) {
 }

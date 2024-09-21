@@ -113,6 +113,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(value = {
             MemberException.HandleExistException.class,
             PlaceException.PlaceExistException.class,
+            PlaceException.PlaceReviewExistException.class,
             ShortsException.ShortsExistException.class,
             TravelogueException.TravelogueExistException.class
     })

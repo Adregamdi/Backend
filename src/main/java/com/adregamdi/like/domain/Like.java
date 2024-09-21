@@ -1,5 +1,6 @@
 package com.adregamdi.like.domain;
 
+import com.adregamdi.core.entity.BaseTime;
 import com.adregamdi.like.domain.enumtype.ContentType;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -7,10 +8,6 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.Comment;
-import org.hibernate.annotations.CreationTimestamp;
-
-import java.time.LocalDateTime;
-import java.util.UUID;
 
 @Entity
 @Getter
@@ -19,18 +16,18 @@ import java.util.UUID;
 @Table(name = "tbl_like",
         uniqueConstraints = @UniqueConstraint(columnNames = {"member_id", "content_type", "content_id"}),
         indexes = {
-        @Index(name = "idx_member_content", columnList = "memberId, contentType, contentId"),
-        @Index(name = "idx_content", columnList = "contentType, contentId")
-})
-public class Like {
+                @Index(name = "idx_member_content", columnList = "memberId, contentType, contentId"),
+                @Index(name = "idx_content", columnList = "contentType, contentId")
+        })
+public class Like extends BaseTime {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long likeId;
 
-    @Column(name = "member_id", updatable = false, nullable = false)
+    @Column(name = "member_id", updatable = false, nullable = false, columnDefinition = "VARCHAR(36)")
     @Comment("회원 id")
-    private UUID memberId;
+    private String memberId;
 
     @Column(name = "content_type", nullable = false)
     @Comment("컨텐츠 타입")
@@ -41,17 +38,11 @@ public class Like {
     @Comment("컨텐츠 id")
     private Long contentId;
 
-    @Column(name = "create_at", updatable = false)
-    @Comment("생성 시간")
-    @CreationTimestamp
-    private LocalDateTime createAt;
-
     @Builder
-    public Like(UUID memberId, ContentType contentType, Long contentId, LocalDateTime createAt) {
+    public Like(String memberId, ContentType contentType, Long contentId) {
         this.memberId = memberId;
         this.contentType = contentType;
         this.contentId = contentId;
-        this.createAt = createAt;
     }
 
 }

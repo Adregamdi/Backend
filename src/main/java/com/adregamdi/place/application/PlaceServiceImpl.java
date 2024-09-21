@@ -3,6 +3,9 @@ package com.adregamdi.place.application;
 import com.adregamdi.like.application.LikesService;
 import com.adregamdi.like.domain.enumtype.ContentType;
 import com.adregamdi.media.application.ImageService;
+import com.adregamdi.member.domain.Member;
+import com.adregamdi.member.exception.MemberException;
+import com.adregamdi.member.infrastructure.MemberRepository;
 import com.adregamdi.place.domain.Place;
 import com.adregamdi.place.domain.PlaceReview;
 import com.adregamdi.place.domain.PlaceReviewImage;
@@ -14,6 +17,7 @@ import com.adregamdi.place.dto.request.GetSortingPlacesRequest;
 import com.adregamdi.place.dto.response.*;
 import com.adregamdi.place.exception.PlaceException.PlaceExistException;
 import com.adregamdi.place.exception.PlaceException.PlaceNotFoundException;
+import com.adregamdi.place.exception.PlaceException.PlaceReviewExistException;
 import com.adregamdi.place.exception.PlaceException.PlaceReviewNotFoundException;
 import com.adregamdi.place.infrastructure.PlaceRepository;
 import com.adregamdi.place.infrastructure.PlaceReviewImageRepository;
@@ -55,6 +59,7 @@ public class PlaceServiceImpl implements PlaceService {
     private final ObjectMapper objectMapper;
     private final ImageService imageService;
     private final LikesService likesService;
+    private final MemberRepository memberRepository;
     private final PlaceRepository placeRepository;
     private final PlaceReviewRepository placeReviewRepository;
     private final PlaceReviewImageRepository placeReviewImageRepository;
@@ -156,11 +161,17 @@ public class PlaceServiceImpl implements PlaceService {
 
     @Override
     @Transactional
-    public CreatePlaceReviewResponse createReview(final CreatePlaceReviewRequest request, final String memberId) {
-        placeReviewRepository.findByMemberIdAndPlaceIdAndVisitDate(UUID.fromString(memberId), request.placeId(), request.visitDate())
-                .orElseThrow(PlaceExistException::new);
+    public CreatePlaceReviewResponse createReview(final String memberId, final CreatePlaceReviewRequest request) {
+        placeReviewRepository.findByMemberIdAndPlaceId(memberId, request.placeId())
+                .ifPresent(data -> {
+                    throw new PlaceReviewExistException(data.getPlaceReviewId());
+                });
 
-        PlaceReview savePlaceReview = placeReviewRepository.save(new PlaceReview(memberId, request.placeId(), request.visitDate(), request.content()));
+        PlaceReview savePlaceReview = placeReviewRepository.save(PlaceReview.builder()
+                .memberId(memberId)
+                .placeId(request.placeId())
+                .content(request.content())
+                .build());
 
         List<CreatePlaceReviewRequest.PlaceReviewImageInfo> imageList = (request.placeReviewImageList() != null) ? request.placeReviewImageList() : Collections.emptyList();
 
@@ -192,7 +203,7 @@ public class PlaceServiceImpl implements PlaceService {
     public GetPlaceResponse get(final String memberId, final Long placeId) {
         Place place = placeRepository.findById(placeId)
                 .orElseThrow(() -> new PlaceNotFoundException(placeId));
-        boolean isLiked = likesService.checkIsLiked(UUID.fromString(memberId), ContentType.PLACE, placeId);
+        boolean isLiked = likesService.checkIsLiked(memberId, ContentType.PLACE, placeId);
         return GetPlaceResponse.from(isLiked, place);
     }
 
@@ -298,7 +309,9 @@ public class PlaceServiceImpl implements PlaceService {
     @Override
     @Transactional(readOnly = true)
     public GetMyPlaceReviewResponse getMyReview(final String memberId) {
-        List<PlaceReview> placeReviews = placeReviewRepository.findAllByMemberIdOrderByPlaceReviewIdDesc(UUID.fromString(memberId))
+        Member member = memberRepository.findById(UUID.fromString(memberId))
+                .orElseThrow(() -> new MemberException.MemberNotFoundException(memberId));
+        List<PlaceReview> placeReviews = placeReviewRepository.findAllByMemberIdOrderByPlaceReviewIdDesc(memberId)
                 .orElseThrow(() -> new PlaceReviewNotFoundException(memberId));
         List<MyPlaceReviewDTO> myPlaceReviews = new ArrayList<>();
 
@@ -319,7 +332,10 @@ public class PlaceServiceImpl implements PlaceService {
                             formatToKoreanString(placeReview.getVisitDate()),
                             placeReview.getContent(),
                             placeReviewImages,
-                            LocalDate.from(placeReview.getCreatedAt())
+                            LocalDate.from(placeReview.getCreatedAt()),
+                            member.getName(),
+                            member.getProfile(),
+                            member.getHandle()
                     )
             );
         }
@@ -333,6 +349,8 @@ public class PlaceServiceImpl implements PlaceService {
                 .orElseThrow(() -> new PlaceReviewNotFoundException(placeReviewId));
         Place place = placeRepository.findById(placeReview.getPlaceId())
                 .orElseThrow(() -> new PlaceNotFoundException(placeReview.getPlaceId()));
+        Member member = memberRepository.findById(UUID.fromString(placeReview.getMemberId()))
+                .orElseThrow(() -> new MemberException.MemberNotFoundException(placeReview.getMemberId()));
         List<PlaceReviewImage> placeReviewImages = placeReviewImageRepository.findByPlaceReviewIdOrderByPlaceReviewImageIdDesc(placeReview.getPlaceReviewId());
 
         return PlaceReviewDTO.of(
@@ -343,7 +361,10 @@ public class PlaceServiceImpl implements PlaceService {
                 formatToKoreanString(placeReview.getVisitDate()),
                 placeReview.getContent(),
                 placeReviewImages,
-                LocalDate.from(placeReview.getCreatedAt())
+                LocalDate.from(placeReview.getCreatedAt()),
+                member.getName(),
+                member.getProfile(),
+                member.getHandle()
         );
     }
 
@@ -356,6 +377,8 @@ public class PlaceServiceImpl implements PlaceService {
 
         List<PlaceReviewDTO> placeReviewDTOS = new ArrayList<>();
         for (PlaceReview placeReview : placeReviews) {
+            Member member = memberRepository.findById(UUID.fromString(placeReview.getMemberId()))
+                    .orElseThrow(() -> new MemberException.MemberNotFoundException(placeReview.getMemberId()));
             List<PlaceReviewImage> placeReviewImages = placeReviewImageRepository.findByPlaceReviewIdOrderByPlaceReviewImageIdDesc(placeReview.getPlaceReviewId());
 
             placeReviewDTOS.add(PlaceReviewDTO.of(
@@ -366,7 +389,10 @@ public class PlaceServiceImpl implements PlaceService {
                             formatToKoreanString(placeReview.getVisitDate()),
                             placeReview.getContent(),
                             placeReviewImages,
-                            LocalDate.from(placeReview.getCreatedAt())
+                            LocalDate.from(placeReview.getCreatedAt()),
+                            member.getName(),
+                            member.getProfile(),
+                            member.getHandle()
                     )
             );
         }
@@ -561,7 +587,10 @@ public class PlaceServiceImpl implements PlaceService {
     }
 
     private String formatToKoreanString(LocalDate date) {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy년 M월 d일 방문", Locale.KOREAN);
-        return date.format(formatter);
+        if (date != null) {
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy년 M월 d일 방문", Locale.KOREAN);
+            return date.format(formatter);
+        }
+        return null;
     }
 }

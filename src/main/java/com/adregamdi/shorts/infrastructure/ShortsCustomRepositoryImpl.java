@@ -16,13 +16,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
-import java.util.UUID;
 
-import static com.adregamdi.shorts.domain.QShorts.shorts;
-import static com.adregamdi.place.domain.QPlace.place;
-import static com.adregamdi.travelogue.domain.QTravelogue.travelogue;
 import static com.adregamdi.like.domain.QLike.like;
 import static com.adregamdi.member.domain.QMember.member;
+import static com.adregamdi.place.domain.QPlace.place;
+import static com.adregamdi.shorts.domain.QShorts.shorts;
+import static com.adregamdi.travelogue.domain.QTravelogue.travelogue;
 
 @Slf4j
 @Repository
@@ -32,7 +31,7 @@ public class ShortsCustomRepositoryImpl implements ShortsCustomRepository {
     private final JPAQueryFactory jpaQueryFactory;
 
     @Override
-    public GetShortsResponse getShortsForMember(UUID memberId, long lastId, int size) {
+    public GetShortsResponse getShortsForMember(String memberId, long lastId, int size) {
         BooleanExpression condition = shorts.shortsId.lt(lastId).and(shorts.assignedStatus.eq(true));
         OrderSpecifier<?> orderBy = shorts.shortsId.asc();
         return getShorts(memberId, condition, orderBy, size);
@@ -40,7 +39,7 @@ public class ShortsCustomRepositoryImpl implements ShortsCustomRepository {
 
 
     @Override
-    public GetShortsResponse getUserShorts(UUID memberId, long lastShortsId, int size) {
+    public GetShortsResponse getUserShorts(String memberId, long lastShortsId, int size) {
         BooleanExpression condition = shorts.shortsId.lt(lastShortsId)
                 .and(shorts.memberId.eq(memberId))
                 .and(shorts.assignedStatus.eq(true));
@@ -49,7 +48,7 @@ public class ShortsCustomRepositoryImpl implements ShortsCustomRepository {
     }
 
     @Override
-    public GetShortsByPlaceIdResponse getShortsByPlaceId(UUID memberId, GetShortsByPlaceIdRequest request) {
+    public GetShortsByPlaceIdResponse getShortsByPlaceId(String memberId, GetShortsByPlaceIdRequest request) {
         BooleanExpression condition = shorts.shortsId.lt(request.lastShortsId())
                 .and(shorts.placeId.eq(request.placeId()))
                 .and(shorts.assignedStatus.eq(true));
@@ -58,7 +57,7 @@ public class ShortsCustomRepositoryImpl implements ShortsCustomRepository {
         return new GetShortsByPlaceIdResponse(response.shortsList(), response.hasNext());
     }
 
-    private GetShortsResponse getShorts(UUID memberId, BooleanExpression condition, OrderSpecifier<?> orderBy, int size) {
+    private GetShortsResponse getShorts(String memberId, BooleanExpression condition, OrderSpecifier<?> orderBy, int size) {
 
         List<ShortsDTO> content = jpaQueryFactory
                 .select(Projections.constructor(ShortsDTO.class,
@@ -94,7 +93,7 @@ public class ShortsCustomRepositoryImpl implements ShortsCustomRepository {
                                 "isLiked"
                         )))
                 .from(shorts)
-                .join(member).on(shorts.memberId.eq(member.memberId))
+                .join(member).on(shorts.memberId.eq(String.valueOf(member.memberId)))
                 .leftJoin(place).on(shorts.placeId.eq(place.placeId))
                 .leftJoin(travelogue).on(shorts.travelogueId.eq(travelogue.travelogueId))
                 .where(condition)

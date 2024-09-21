@@ -568,7 +568,10 @@ public class PlaceServiceImpl implements PlaceService {
     }
 
     private String formatToKoreanString(LocalDate date) {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy년 M월 d일 방문", Locale.KOREAN);
-        return date.format(formatter);
+        if (date != null) {
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy년 M월 d일 방문", Locale.KOREAN);
+            return date.format(formatter);
+        }
+        return null;
     }
 }

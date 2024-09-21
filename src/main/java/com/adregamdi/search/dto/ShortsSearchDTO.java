@@ -1,11 +1,9 @@
 package com.adregamdi.search.dto;
 
-import java.util.UUID;
-
 public record ShortsSearchDTO(
         Long shortsId,
         String title,
-        UUID memberId,
+        String memberId,
         String name,
         String handle,
         String profile,

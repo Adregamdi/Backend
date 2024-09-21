@@ -85,8 +85,16 @@ public class LikesController {
     @MemberAuthorize
     public ResponseEntity<ApiResponse<Void>> delete(
             @AuthenticationPrincipal UserDetails userDetails,
-            @Valid @ModelAttribute DeleteLikeRequest request
+            @RequestParam(value = "content_type")
+            @Pattern(regexp = "(?i)PLACE|TRAVELOGUE|SHORTS", message = "장소 혹은 여행기, 쇼츠만 입력 가능합니다.")
+            String contentType,
+            @RequestParam(value = "content_id")
+            @Positive(message = "식별 값은 자연수만 가능합니다.")
+            Long contentId
     ) {
+
+        DeleteLikeRequest request = new DeleteLikeRequest(contentType, contentId);
+
         String role = userDetails.getAuthorities().stream()
                 .findFirst()
                 .map(GrantedAuthority::getAuthority)

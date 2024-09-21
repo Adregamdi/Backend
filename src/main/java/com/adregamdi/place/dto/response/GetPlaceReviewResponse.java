@@ -15,7 +15,10 @@ public record GetPlaceReviewResponse(
         String visitDate,
         String content,
         List<PlaceReviewImage> placeReviewImageList,
-        LocalDate createdAt
+        LocalDate createdAt,
+        String name,
+        String profile,
+        String handle
 ) {
     public static GetPlaceReviewResponse of(
             final Long placeReviewId,
@@ -25,7 +28,10 @@ public record GetPlaceReviewResponse(
             final String visitDate,
             final String content,
             final List<PlaceReviewImage> placeReviewImages,
-            final LocalDate createdAt
+            final LocalDate createdAt,
+            final String name,
+            final String profile,
+            final String handle
     ) {
         return GetPlaceReviewResponse.builder()
                 .placeReviewId(placeReviewId)
@@ -36,6 +42,9 @@ public record GetPlaceReviewResponse(
                 .content(content)
                 .placeReviewImageList(placeReviewImages)
                 .createdAt(createdAt)
+                .name(name)
+                .profile(profile)
+                .handle(handle)
                 .build();
     }
 }

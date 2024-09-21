@@ -15,7 +15,10 @@ public record PlaceReviewDTO(
         String visitDate,
         String content,
         List<PlaceReviewImage> placeReviewImageList,
-        LocalDate createdAt
+        LocalDate createdAt,
+        String name,
+        String profile,
+        String handle
 ) {
     public static PlaceReviewDTO of(
             final Long placeReviewId,
@@ -25,7 +28,10 @@ public record PlaceReviewDTO(
             final String visitDate,
             final String content,
             final List<PlaceReviewImage> placeReviewImageList,
-            final LocalDate createdAt
+            final LocalDate createdAt,
+            final String name,
+            final String profile,
+            final String handle
     ) {
         return PlaceReviewDTO.builder()
                 .placeReviewId(placeReviewId)
@@ -36,6 +42,9 @@ public record PlaceReviewDTO(
                 .content(content)
                 .placeReviewImageList(placeReviewImageList)
                 .createdAt(createdAt)
+                .name(name)
+                .profile(profile)
+                .handle(handle)
                 .build();
     }
 }

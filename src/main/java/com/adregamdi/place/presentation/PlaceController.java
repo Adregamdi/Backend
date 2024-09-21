@@ -159,7 +159,10 @@ public class PlaceController {
                                 placeReview.visitDate(),
                                 placeReview.content(),
                                 placeReview.placeReviewImageList(),
-                                placeReview.createdAt()
+                                placeReview.createdAt(),
+                                placeReview.name(),
+                                placeReview.profile(),
+                                placeReview.handle()
                         ))
                         .build()
                 );

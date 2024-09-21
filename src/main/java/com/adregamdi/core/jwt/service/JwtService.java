@@ -57,6 +57,18 @@ public class JwtService {
                 .sign(Algorithm.HMAC512(secretKey));
     }
 
+    public String createNoExpiresAtAccessToken(
+            final String memberId,
+            final Role role
+    ) {
+        Date now = new Date();
+        return JWT.create()
+                .withSubject(ACCESS_TOKEN_SUBJECT)
+                .withClaim(MEMBER_ID_CLAIM, memberId)
+                .withClaim(ROLE, role.toString())
+                .sign(Algorithm.HMAC512(secretKey));
+    }
+
     public String createRefreshToken() {
         Date now = new Date();
         return JWT.create()

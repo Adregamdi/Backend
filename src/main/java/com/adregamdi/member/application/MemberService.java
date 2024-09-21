@@ -58,7 +58,7 @@ public class MemberService {
             throw new HandleExistException(request.handle());
         }
 
-        member.updateMember(request.profile(), request.name(), request.handle());
+        member.updateMember(request.name(), request.profile(), request.handle());
         imageService.updateImage(request.profile(), PROFILE, memberId);
     }
 

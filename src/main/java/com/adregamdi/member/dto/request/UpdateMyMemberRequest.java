@@ -6,10 +6,10 @@ import jakarta.validation.constraints.NotNull;
 public record UpdateMyMemberRequest(
         @NotNull
         @NotEmpty
-        String profile,
+        String name,
         @NotNull
         @NotEmpty
-        String name,
+        String profile,
         @NotNull
         @NotEmpty
         String handle

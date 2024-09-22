@@ -18,4 +18,13 @@ public record CreateShortsRequest(
         @NotEmpty(message = "썸네일이 포함되지 않았습니다.")
         String thumbnailUrl
 ) {
+        public CreateShortsRequest {
+                if (placeId == null) {
+                        placeId = 0L;
+                }
+
+                if (travelogueId == null) {
+                        travelogueId = 0L;
+                }
+        }
 }

@@ -66,8 +66,9 @@ dependencies {
     implementation group: 'org.imgscalr', name: 'imgscalr-lib', version: '4.2'
 
     // 동영상 압축을 위한 라이브러리
-    implementation 'ws.schild:jave-core:3.3.1'
-    implementation 'ws.schild:jave-all-deps:3.3.1'
+    implementation 'ws.schild:jave-core:3.5.0'
+    implementation 'ws.schild:jave-all-deps:3.5.0'
+
 
     // 썸네일 제작을 위한 라이브러리
     implementation 'org.bytedeco:javacv-platform:1.5.9'

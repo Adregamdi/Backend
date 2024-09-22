@@ -18,4 +18,6 @@ public interface ShortsService {
     String getS3KeyByShortId(Long shortsId);
 
     GetShortsByPlaceIdResponse getShortsByPlaceId(String memberId, GetShortsByPlaceIdRequest request);
+
+    GetShortsResponse getHotShorts(String memberId, long lastShortsId, int size);
 }

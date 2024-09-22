@@ -85,6 +85,21 @@ public class ShortsController {
                         .build());
     }
 
+    @GetMapping("/list/hot")
+    @MemberAuthorize
+    public ResponseEntity<ApiResponse<GetShortsResponse>> getHotShorts(
+            @AuthenticationPrincipal final UserDetails userDetails,
+            @RequestParam(value = "shorts_id", required = false) @PositiveOrZero final Long lastShortsId,
+            @RequestParam(value = "size", defaultValue = "10") @Positive final int size
+    ) {
+        GetShortsResponse response = shortsService.getHotShorts(userDetails.getUsername(), lastShortsId != null ? lastShortsId : Long.MAX_VALUE, size);
+        return ResponseEntity.ok()
+                .body(ApiResponse.<GetShortsResponse>builder()
+                        .statusCode(HttpStatus.OK.value())
+                        .data(response)
+                        .build());
+    }
+
     @GetMapping("/place")
     @MemberAuthorize
     public ResponseEntity<ApiResponse<GetShortsByPlaceIdResponse>> getShortsByPlaceId(

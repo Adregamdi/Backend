@@ -42,6 +42,11 @@ public class ShortsServiceImpl implements ShortsService {
     }
 
     @Override
+    public GetShortsResponse getHotShorts(String memberId, long lastShortsId, int size) {
+        return shortsRepository.getHotShorts(memberId, lastShortsId, size);
+    }
+
+    @Override
     public GetShortsByPlaceIdResponse getShortsByPlaceId(String memberId, GetShortsByPlaceIdRequest request) {
         return shortsRepository.getShortsByPlaceId(memberId, request);
     }

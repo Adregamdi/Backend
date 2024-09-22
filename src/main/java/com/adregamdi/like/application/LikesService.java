@@ -27,7 +27,7 @@ public class LikesService {
 
     public CreateLikesResponse create(String memberId, CreateLikesRequest request) {
 
-        boolean isLiked = likesRepository.findByContentTypeAndContentId(request.getContentType(), request.contentId()).isPresent();
+        boolean isLiked = likesRepository.findByMemberIdAndContentTypeAndContentId(memberId, request.getContentType(), request.contentId()).isPresent();
         if (isLiked) {
             return new CreateLikesResponse(true);
         }
@@ -60,7 +60,7 @@ public class LikesService {
 
     public void delete(String memberId, Role memberRole, DeleteLikeRequest request) {
 
-        Like like = likesRepository.findByContentTypeAndContentId(request.getContentType(), request.contentId())
+        Like like = likesRepository.findByMemberIdAndContentTypeAndContentId(memberId, request.getContentType(), request.contentId())
                 .orElseThrow(() -> new LikesException.LikesNotFoundException(request));
 
         if (memberRole == Role.ADMIN) {

@@ -17,13 +17,17 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import static com.adregamdi.like.domain.QLike.like;
 import static com.adregamdi.member.domain.QMember.member;
 import static com.adregamdi.place.domain.QPlace.place;
 import static com.adregamdi.shorts.domain.QShorts.shorts;
 import static com.adregamdi.travelogue.domain.QTravelogue.travelogue;
+import static com.adregamdi.travelogue.domain.QTravelogueImage.travelogueImage;
 
 @Slf4j
 @Repository
@@ -126,8 +130,10 @@ public class ShortsCustomRepositoryImpl implements ShortsCustomRepository {
                         member.profile,
                         shorts.placeId,
                         place.title,
+                        place.thumbnailPath,
                         shorts.travelogueId,
                         travelogue.title,
+                        travelogueImage.url,
                         shorts.shortsVideoUrl,
                         shorts.thumbnailUrl,
                         shorts.viewCount,
@@ -153,12 +159,20 @@ public class ShortsCustomRepositoryImpl implements ShortsCustomRepository {
                 .leftJoin(member).on(shorts.memberId.eq(String.valueOf(member.memberId)))
                 .leftJoin(place).on(shorts.placeId.eq(place.placeId))
                 .leftJoin(travelogue).on(shorts.travelogueId.eq(travelogue.travelogueId))
+                .leftJoin(travelogueImage).on(travelogue.travelogueId.eq(travelogueImage.travelogueId))
                 .where(condition)
                 .orderBy(orderBy)
                 .limit(size + 1)
                 .fetch();
 
-        return processResult(contents, size);
+        Map<Long, ShortsDTO> uniqueShorts = new LinkedHashMap<>();
+        for (ShortsDTO dto : contents) {
+            uniqueShorts.putIfAbsent(dto.getShortsId(), dto);
+        }
+
+        List<ShortsDTO> finalContents = new ArrayList<>(uniqueShorts.values());
+
+        return processResult(finalContents, size);
     }
 
     private GetShortsResponse processResult(List<ShortsDTO> content, int size) {

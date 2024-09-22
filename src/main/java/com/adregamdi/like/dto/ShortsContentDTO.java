@@ -19,15 +19,17 @@ public class ShortsContentDTO {
     private String profile;
     private Long placeId;
     private String placeTitle;
+    private String placeImage;
     private Long travelogueId;
     private String travelogueTitle;
+    private String travelogueImage;
     private String shortsVideoUrl;
     private String thumbnailUrl;
     private int viewCount;
     private int likeCount;
     private Boolean isLiked;
 
-    public ShortsContentDTO(Long shortsId, String title, String memberId, String name, String handle, String profile, Long placeId, String placeTitle, Long travelogueId, String travelogueTitle, String shortsVideoUrl, String thumbnailUrl, Integer viewCount, Integer likeCount, Boolean isLiked) {
+    public ShortsContentDTO(Long shortsId, String title, String memberId, String name, String handle, String profile, Long placeId, String placeTitle, String placeImage, Long travelogueId, String travelogueTitle, String travelogueImage, String shortsVideoUrl, String thumbnailUrl, Integer viewCount, Integer likeCount, Boolean isLiked) {
         this.shortsId = shortsId;
         this.title = title;
         this.memberId = memberId;
@@ -36,8 +38,10 @@ public class ShortsContentDTO {
         this.profile = profile;
         this.placeId = placeId;
         this.placeTitle = placeTitle;
+        this.placeImage = placeImage;
         this.travelogueId = travelogueId;
         this.travelogueTitle = travelogueTitle;
+        this.travelogueImage = travelogueImage;
         this.shortsVideoUrl = shortsVideoUrl;
         this.thumbnailUrl = thumbnailUrl;
         this.viewCount = viewCount == null ? 0 : viewCount;

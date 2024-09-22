@@ -33,7 +33,7 @@ public class ShortsCustomRepositoryImpl implements ShortsCustomRepository {
     @Override
     public GetShortsResponse getShortsForMember(String memberId, long lastId, int size) {
         BooleanExpression condition = shorts.shortsId.lt(lastId).and(shorts.assignedStatus.eq(true));
-        OrderSpecifier<?> orderBy = shorts.shortsId.asc();
+        OrderSpecifier<?> orderBy = shorts.shortsId.desc();
         return getShorts(memberId, condition, orderBy, size);
     }
 
@@ -43,7 +43,7 @@ public class ShortsCustomRepositoryImpl implements ShortsCustomRepository {
         BooleanExpression condition = shorts.shortsId.lt(lastShortsId)
                 .and(shorts.memberId.eq(memberId))
                 .and(shorts.assignedStatus.eq(true));
-        OrderSpecifier<?> orderBy = shorts.createdAt.desc();
+        OrderSpecifier<?> orderBy = shorts.shortsId.desc();
         return getShorts(memberId, condition, orderBy, size);
     }
 
@@ -52,7 +52,7 @@ public class ShortsCustomRepositoryImpl implements ShortsCustomRepository {
         BooleanExpression condition = shorts.shortsId.lt(request.lastShortsId())
                 .and(shorts.placeId.eq(request.placeId()))
                 .and(shorts.assignedStatus.eq(true));
-        OrderSpecifier<?> orderBy = shorts.createdAt.desc();
+        OrderSpecifier<?> orderBy = shorts.shortsId.desc();
         GetShortsResponse response = getShorts(memberId, condition, orderBy, request.size());
         return new GetShortsByPlaceIdResponse(response.shortsList(), response.hasNext());
     }
@@ -93,7 +93,7 @@ public class ShortsCustomRepositoryImpl implements ShortsCustomRepository {
                                 "isLiked"
                         )))
                 .from(shorts)
-                .join(member).on(shorts.memberId.eq(String.valueOf(member.memberId)))
+                .leftJoin(member).on(shorts.memberId.eq(String.valueOf(member.memberId)))
                 .leftJoin(place).on(shorts.placeId.eq(place.placeId))
                 .leftJoin(travelogue).on(shorts.travelogueId.eq(travelogue.travelogueId))
                 .where(condition)

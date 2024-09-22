@@ -34,6 +34,6 @@ public class VideoValidateService {
 
     public String getFileExtension(String fileName) {
         int dotIndex = fileName.lastIndexOf(".");
-        return fileName.substring(dotIndex + 1);
+        return fileName.substring(dotIndex + 1).toLowerCase();
     }
 }

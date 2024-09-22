@@ -10,5 +10,5 @@ public interface LikesRepository extends JpaRepository<Like, Long>, LikesCustomR
 
     int countByContentTypeAndContentId(ContentType contentType, Long contentId);
 
-    Optional<Like> findByContentTypeAndContentId(ContentType contentType, Long contentId);
+    Optional<Like> findByMemberIdAndContentTypeAndContentId(String memberId, ContentType contentType, Long contentId);
 }

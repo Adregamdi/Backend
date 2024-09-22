@@ -36,11 +36,11 @@ public class Shorts extends BaseTime {
     @Comment(value = "여행기 id")
     private Long travelogueId;
 
-    @Column(name = "shorts_video_url", nullable = false, unique = true)
+    @Column(name = "shorts_video_url", nullable = false)
     @Comment(value = "동영상 업로드 url")
     private String shortsVideoUrl;
 
-    @Column(name = "thumbnail_url", nullable = false, unique = true)
+    @Column(name = "thumbnail_url", nullable = false)
     @Comment(value = "동영상 썸네일 url")
     private String thumbnailUrl;
 

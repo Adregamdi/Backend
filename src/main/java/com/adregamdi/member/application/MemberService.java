@@ -22,7 +22,6 @@ import reactor.core.publisher.Mono;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
-import java.util.UUID;
 
 import static com.adregamdi.media.domain.ImageTarget.PROFILE;
 
@@ -39,7 +38,7 @@ public class MemberService {
      */
     @Transactional
     public GetMyMemberResponse getMyMember(final String username) {
-        Member member = memberRepository.findById(UUID.fromString(username))
+        Member member = memberRepository.findById(username)
                 .orElseThrow(() -> new MemberNotFoundException(username));
 
         return GetMyMemberResponse.from(member);
@@ -51,7 +50,7 @@ public class MemberService {
     @Transactional
     public void update(final UpdateMyMemberRequest request, final String memberId) {
         Member another = memberRepository.findByHandle(request.handle());
-        Member member = memberRepository.findById(UUID.fromString(memberId))
+        Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new MemberNotFoundException(memberId));
 
         if (another != null && !Objects.equals(another.getHandle(), member.getHandle())) {
@@ -67,7 +66,7 @@ public class MemberService {
      */
     @Transactional
     public void logout(final String memberId) {
-        Member member = memberRepository.findByMemberIdAndMemberStatus(UUID.fromString(memberId), true)
+        Member member = memberRepository.findByMemberIdAndMemberStatus(memberId, true)
                 .orElseThrow(() -> new MemberNotFoundException(memberId));
 
         member.updateRefreshTokenStatus(false);
@@ -78,7 +77,7 @@ public class MemberService {
      */
     @Transactional
     public void delete(final String memberId) {
-        Member member = memberRepository.findByMemberIdAndMemberStatus(UUID.fromString(memberId), true)
+        Member member = memberRepository.findByMemberIdAndMemberStatus(memberId, true)
                 .orElseThrow(() -> new MemberNotFoundException(memberId));
 
         member.updateAuthorization(Role.GUEST);
@@ -108,7 +107,7 @@ public class MemberService {
         memberRepository.deleteByMemberStatusAndUpdatedAt(date);
     }
 
-    private void deleteData(final UUID memberId) {
+    private void deleteData(final String memberId) {
 
     }
 

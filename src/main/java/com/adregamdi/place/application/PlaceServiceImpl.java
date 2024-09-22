@@ -42,7 +42,10 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Locale;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.StreamSupport;
@@ -309,7 +312,7 @@ public class PlaceServiceImpl implements PlaceService {
     @Override
     @Transactional(readOnly = true)
     public GetMyPlaceReviewResponse getMyReview(final String memberId) {
-        Member member = memberRepository.findById(UUID.fromString(memberId))
+        Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new MemberException.MemberNotFoundException(memberId));
         List<PlaceReview> placeReviews = placeReviewRepository.findAllByMemberIdOrderByPlaceReviewIdDesc(memberId)
                 .orElseThrow(() -> new PlaceReviewNotFoundException(memberId));
@@ -349,7 +352,7 @@ public class PlaceServiceImpl implements PlaceService {
                 .orElseThrow(() -> new PlaceReviewNotFoundException(placeReviewId));
         Place place = placeRepository.findById(placeReview.getPlaceId())
                 .orElseThrow(() -> new PlaceNotFoundException(placeReview.getPlaceId()));
-        Member member = memberRepository.findById(UUID.fromString(placeReview.getMemberId()))
+        Member member = memberRepository.findById(placeReview.getMemberId())
                 .orElseThrow(() -> new MemberException.MemberNotFoundException(placeReview.getMemberId()));
         List<PlaceReviewImage> placeReviewImages = placeReviewImageRepository.findByPlaceReviewIdOrderByPlaceReviewImageIdDesc(placeReview.getPlaceReviewId());
 
@@ -377,7 +380,7 @@ public class PlaceServiceImpl implements PlaceService {
 
         List<PlaceReviewDTO> placeReviewDTOS = new ArrayList<>();
         for (PlaceReview placeReview : placeReviews) {
-            Member member = memberRepository.findById(UUID.fromString(placeReview.getMemberId()))
+            Member member = memberRepository.findById(placeReview.getMemberId())
                     .orElseThrow(() -> new MemberException.MemberNotFoundException(placeReview.getMemberId()));
             List<PlaceReviewImage> placeReviewImages = placeReviewImageRepository.findByPlaceReviewIdOrderByPlaceReviewImageIdDesc(placeReview.getPlaceReviewId());
 

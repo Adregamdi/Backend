@@ -10,12 +10,11 @@ import org.springframework.data.repository.query.Param;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
-public interface MemberRepository extends JpaRepository<Member, UUID> {
+public interface MemberRepository extends JpaRepository<Member, String> {
     Optional<Member> findByRefreshToken(String refreshToken);
 
-    Optional<Member> findByMemberIdAndMemberStatus(UUID memberId, boolean memberStatus);
+    Optional<Member> findByMemberIdAndMemberStatus(String memberId, boolean memberStatus);
 
     Optional<Member> findBySocialTypeAndSocialId(SocialType socialType, String id);
 

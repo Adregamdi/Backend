@@ -112,8 +112,11 @@ public class PlaceServiceImpl implements PlaceService {
                             JsonNode jsonNode = objectMapper.readTree(response);
                             JsonNode items = jsonNode.path("items");
 
-                            StreamSupport.stream(items.spliterator(), false)
+                            List<Place> places = StreamSupport.stream(items.spliterator(), false)
                                     .map(item -> {
+                                        if (item.path("latitude").asDouble() == 0 || item.path("longitude").asDouble() == 0) {
+                                            return null;
+                                        }
                                         String title = item.path("title").asText();
                                         String contentsId = item.path("contentsid").asText();
                                         String contentsLabel = item.path("contentscd").path("label").asText();
@@ -148,7 +151,10 @@ public class PlaceServiceImpl implements PlaceService {
                                                 .thumbnailPath(thumbnailPath)
                                                 .build();
                                     })
-                                    .forEach(placeRepository::save);
+                                    .filter(Objects::nonNull)
+                                    .toList();
+                            
+                            placeRepository.saveAll(places);
 
                             return "Data saved successfully";
                         } catch (Exception e) {
@@ -309,7 +315,7 @@ public class PlaceServiceImpl implements PlaceService {
     @Override
     @Transactional(readOnly = true)
     public GetMyPlaceReviewResponse getMyReview(final String memberId) {
-        Member member = memberRepository.findById(UUID.fromString(memberId))
+        Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new MemberException.MemberNotFoundException(memberId));
         List<PlaceReview> placeReviews = placeReviewRepository.findAllByMemberIdOrderByPlaceReviewIdDesc(memberId)
                 .orElseThrow(() -> new PlaceReviewNotFoundException(memberId));
@@ -349,7 +355,7 @@ public class PlaceServiceImpl implements PlaceService {
                 .orElseThrow(() -> new PlaceReviewNotFoundException(placeReviewId));
         Place place = placeRepository.findById(placeReview.getPlaceId())
                 .orElseThrow(() -> new PlaceNotFoundException(placeReview.getPlaceId()));
-        Member member = memberRepository.findById(UUID.fromString(placeReview.getMemberId()))
+        Member member = memberRepository.findById(placeReview.getMemberId())
                 .orElseThrow(() -> new MemberException.MemberNotFoundException(placeReview.getMemberId()));
         List<PlaceReviewImage> placeReviewImages = placeReviewImageRepository.findByPlaceReviewIdOrderByPlaceReviewImageIdDesc(placeReview.getPlaceReviewId());
 
@@ -377,7 +383,7 @@ public class PlaceServiceImpl implements PlaceService {
 
         List<PlaceReviewDTO> placeReviewDTOS = new ArrayList<>();
         for (PlaceReview placeReview : placeReviews) {
-            Member member = memberRepository.findById(UUID.fromString(placeReview.getMemberId()))
+            Member member = memberRepository.findById(placeReview.getMemberId())
                     .orElseThrow(() -> new MemberException.MemberNotFoundException(placeReview.getMemberId()));
             List<PlaceReviewImage> placeReviewImages = placeReviewImageRepository.findByPlaceReviewIdOrderByPlaceReviewImageIdDesc(placeReview.getPlaceReviewId());
 

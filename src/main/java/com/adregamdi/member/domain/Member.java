@@ -15,8 +15,8 @@ import java.util.UUID;
 @Table(name = "tbl_member")
 public class Member extends BaseTime {
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    private UUID memberId;
+    @Column(columnDefinition = "VARCHAR(36)")
+    private String memberId;
     @Column
     private String name; // 이름
     @Column
@@ -50,6 +50,7 @@ public class Member extends BaseTime {
 
     @Builder
     public Member(String name, String profile, String handle, String email, String age, String gender, String socialId, SocialType socialType) {
+        this.memberId = UUID.randomUUID().toString();
         this.name = name;
         this.profile = profile;
         this.handle = handle;

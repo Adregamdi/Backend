@@ -4,12 +4,10 @@ import com.adregamdi.core.annotation.MemberAuthorize;
 import com.adregamdi.core.handler.ApiResponse;
 import com.adregamdi.travelogue.application.TravelogueService;
 import com.adregamdi.travelogue.dto.request.CreateMyTravelogueRequest;
-import com.adregamdi.travelogue.dto.response.CreateMyTravelogueResponse;
-import com.adregamdi.travelogue.dto.response.GetMyTraveloguesResponse;
-import com.adregamdi.travelogue.dto.response.GetRecentTraveloguesResponse;
-import com.adregamdi.travelogue.dto.response.GetTravelogueResponse;
+import com.adregamdi.travelogue.dto.response.*;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.PositiveOrZero;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -76,5 +74,18 @@ public class TravelogueController {
                         .data(travelogueService.getRecentTravelogues(page))
                         .build()
                 );
+    }
+
+    @GetMapping("/list/hot")
+    @MemberAuthorize
+    public ResponseEntity<ApiResponse<GetHotTraveloguesResponse>> getHotTravelogues(
+            @RequestParam(value = "like_count", required = false) @PositiveOrZero Integer lastLikeCount,
+            @RequestParam(value = "size", defaultValue = "10") @Positive final int size
+            ) {
+        return ResponseEntity.ok()
+                .body(ApiResponse.<GetHotTraveloguesResponse>builder()
+                        .statusCode(HttpStatus.OK.value())
+                        .data(travelogueService.getHotTravelogue(lastLikeCount != null ? lastLikeCount : Integer.MAX_VALUE, size))
+                        .build());
     }
 }

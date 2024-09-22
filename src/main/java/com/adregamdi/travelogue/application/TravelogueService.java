@@ -19,10 +19,7 @@ import com.adregamdi.travelogue.domain.TravelogueDayPlaceReview;
 import com.adregamdi.travelogue.domain.TravelogueImage;
 import com.adregamdi.travelogue.dto.TravelogueDTO;
 import com.adregamdi.travelogue.dto.request.CreateMyTravelogueRequest;
-import com.adregamdi.travelogue.dto.response.CreateMyTravelogueResponse;
-import com.adregamdi.travelogue.dto.response.GetMyTraveloguesResponse;
-import com.adregamdi.travelogue.dto.response.GetRecentTraveloguesResponse;
-import com.adregamdi.travelogue.dto.response.GetTravelogueResponse;
+import com.adregamdi.travelogue.dto.response.*;
 import com.adregamdi.travelogue.exception.TravelogueException;
 import com.adregamdi.travelogue.exception.TravelogueException.TravelogueExistException;
 import com.adregamdi.travelogue.exception.TravelogueException.TravelogueNotFoundException;
@@ -263,5 +260,9 @@ public class TravelogueService {
                 travelogues.hasNext(),
                 travelogues.getContent()
         );
+    }
+
+    public GetHotTraveloguesResponse getHotTravelogue(int lastLikeCount, int size) {
+        return travelogueRepository.findOrderByLikeCount(lastLikeCount, size);
     }
 }

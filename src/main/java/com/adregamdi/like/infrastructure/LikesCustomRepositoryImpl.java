@@ -17,9 +17,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.adregamdi.like.domain.QLike.like;
@@ -94,8 +92,10 @@ public class LikesCustomRepositoryImpl implements LikesCustomRepository {
                         member.profile,
                         shorts.placeId,
                         place.title,
+                        place.thumbnailPath,
                         shorts.travelogueId,
                         travelogue.title,
+                        travelogueImage.url,
                         shorts.shortsVideoUrl,
                         shorts.thumbnailUrl,
                         shorts.viewCount,
@@ -122,6 +122,7 @@ public class LikesCustomRepositoryImpl implements LikesCustomRepository {
                 .leftJoin(member).on(shorts.memberId.eq(member.memberId))
                 .leftJoin(place).on(shorts.placeId.eq(place.placeId))
                 .leftJoin(travelogue).on(shorts.travelogueId.eq(travelogue.travelogueId))
+                .leftJoin(travelogueImage).on(travelogue.travelogueId.eq(travelogueImage.travelogueId))
                 .where(
                         like.memberId.eq(request.memberId()),
                         like.contentType.eq(ContentType.SHORTS),
@@ -132,12 +133,19 @@ public class LikesCustomRepositoryImpl implements LikesCustomRepository {
                 .limit(request.size() + 1)
                 .fetch();
 
-        boolean hasNext = contents.size() > request.size();
-        if (hasNext) {
-            contents.remove(request.size());
+        Map<Long, ShortsContentDTO> uniqueShorts = new LinkedHashMap<>();
+        for (ShortsContentDTO dto : contents) {
+            uniqueShorts.putIfAbsent(dto.getShortsId(), dto);
         }
 
-        return new GetLikesContentsResponse<>(hasNext, contents);
+        List<ShortsContentDTO> finalContents = new ArrayList<>(uniqueShorts.values());
+
+        boolean hasNext = finalContents.size() > request.size();
+        if (hasNext) {
+            finalContents.remove(request.size());
+        }
+
+        return new GetLikesContentsResponse<>(hasNext, finalContents);
     }
 
     @Override

@@ -129,7 +129,7 @@ public class TravelogueCustomRepositoryImpl implements TravelogueCustomRepositor
                         likeCountExpression.as("likeCount")
                 )
                 .from(travelogue)
-                .leftJoin(member).on(travelogue.memberId.eq(String.valueOf(member.memberId)))
+                .leftJoin(member).on(travelogue.memberId.eq(member.memberId))
                 .leftJoin(like).on(like.contentId.eq(travelogue.travelogueId)
                         .and(like.contentType.eq(ContentType.TRAVELOGUE)))
                 .groupBy(travelogue.travelogueId, travelogue.title, travelogue.memberId, member.handle, member.profile)
@@ -141,8 +141,6 @@ public class TravelogueCustomRepositoryImpl implements TravelogueCustomRepositor
         List<Long> travelogueIds = results.stream()
                 .map(tuple -> tuple.get(travelogue.travelogueId))
                 .collect(Collectors.toList());
-
-        results.stream().forEach(tuple -> System.out.println(tuple));
 
         Map<Long, List<String>> imageMap = jpaQueryFactory
                 .select(travelogueImage.travelogueId, travelogueImage.url)

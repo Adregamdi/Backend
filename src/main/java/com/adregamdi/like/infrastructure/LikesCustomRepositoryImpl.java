@@ -17,9 +17,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.adregamdi.like.domain.QLike.like;
@@ -41,31 +39,25 @@ public class LikesCustomRepositoryImpl implements LikesCustomRepository {
     @Override
     public GetLikesContentsResponse<List<AllContentDTO>> getLikesContentsOfAll(GetLikesContentsRequest request) {
 
-        List<AllContentDTO> contents = jpaQueryFactory
-                .select(Projections.constructor(AllContentDTO.class,
+        List<Tuple> results = jpaQueryFactory
+                .select(
+                        like.contentType,
+                        like.contentId,
                         Expressions.cases()
                                 .when(like.contentType.eq(ContentType.SHORTS)).then(shorts.title)
                                 .when(like.contentType.eq(ContentType.PLACE)).then(place.title)
                                 .when(like.contentType.eq(ContentType.TRAVELOGUE)).then(travelogue.title)
                                 .otherwise((String) null),
-                        like.contentType,
-                        like.contentId,
                         Expressions.cases()
                                 .when(like.contentType.eq(ContentType.SHORTS)).then(shorts.thumbnailUrl)
                                 .when(like.contentType.eq(ContentType.PLACE)).then(place.thumbnailPath)
-                                .when(like.contentType.eq(ContentType.TRAVELOGUE))
-                                .then(
-                                        JPAExpressions.select(travelogueImage.url)
-                                                .from(travelogueImage)
-                                                .where(travelogueImage.travelogueId.eq(travelogue.travelogueId))
-                                                .orderBy(travelogueImage.travelogueImageId.desc())
-                                                .limit(1)
-                                )
-                                .otherwise((String) null)))
+                                .when(like.contentType.eq(ContentType.TRAVELOGUE)).then(travelogueImage.url)
+                                .otherwise((String) null))
                 .from(like)
                 .leftJoin(shorts).on(like.contentId.eq(shorts.shortsId).and(like.contentType.eq(ContentType.SHORTS)))
                 .leftJoin(place).on(like.contentId.eq(place.placeId).and(like.contentType.eq(ContentType.PLACE)))
                 .leftJoin(travelogue).on(like.contentId.eq(travelogue.travelogueId).and(like.contentType.eq(ContentType.TRAVELOGUE)))
+                .leftJoin(travelogueImage).on(travelogue.travelogueId.eq(travelogueImage.travelogueId))
                 .where(
                         like.memberId.eq(request.memberId()),
                         like.likeId.lt(request.lastLikeId()))
@@ -73,9 +65,29 @@ public class LikesCustomRepositoryImpl implements LikesCustomRepository {
                 .limit(request.size() + 1)
                 .fetch();
 
+
+        List<AllContentDTO> contents = new ArrayList<>();
+        Map<Long, AllContentDTO> travelogueMap = new HashMap<>();
+
+        for (Tuple tuple : results) {
+            ContentType contentType = tuple.get(0, ContentType.class);
+            Long contentId = tuple.get(1, Long.class);
+            String title = tuple.get(2, String.class);
+            String imageUrl = tuple.get(3, String.class);
+
+            if (contentType == ContentType.TRAVELOGUE) {
+                travelogueMap.computeIfAbsent(contentId, k -> new AllContentDTO(title, contentType, contentId, imageUrl));
+            } else {
+                contents.add(new AllContentDTO(title, contentType, contentId, imageUrl));
+            }
+        }
+
+        contents.addAll(travelogueMap.values());
+        contents.sort((a, b) -> Long.compare(b.getContentId(), a.getContentId()));
+
         boolean hasNext = contents.size() > request.size();
         if (hasNext) {
-            contents.remove(request.size());
+            contents = contents.subList(0, request.size());
         }
 
         return new GetLikesContentsResponse<>(hasNext, contents);
@@ -94,8 +106,10 @@ public class LikesCustomRepositoryImpl implements LikesCustomRepository {
                         member.profile,
                         shorts.placeId,
                         place.title,
+                        place.thumbnailPath,
                         shorts.travelogueId,
                         travelogue.title,
+                        travelogueImage.url,
                         shorts.shortsVideoUrl,
                         shorts.thumbnailUrl,
                         shorts.viewCount,
@@ -122,6 +136,7 @@ public class LikesCustomRepositoryImpl implements LikesCustomRepository {
                 .leftJoin(member).on(shorts.memberId.eq(member.memberId))
                 .leftJoin(place).on(shorts.placeId.eq(place.placeId))
                 .leftJoin(travelogue).on(shorts.travelogueId.eq(travelogue.travelogueId))
+                .leftJoin(travelogueImage).on(travelogue.travelogueId.eq(travelogueImage.travelogueId))
                 .where(
                         like.memberId.eq(request.memberId()),
                         like.contentType.eq(ContentType.SHORTS),
@@ -132,12 +147,19 @@ public class LikesCustomRepositoryImpl implements LikesCustomRepository {
                 .limit(request.size() + 1)
                 .fetch();
 
-        boolean hasNext = contents.size() > request.size();
-        if (hasNext) {
-            contents.remove(request.size());
+        Map<Long, ShortsContentDTO> uniqueShorts = new LinkedHashMap<>();
+        for (ShortsContentDTO dto : contents) {
+            uniqueShorts.putIfAbsent(dto.getShortsId(), dto);
         }
 
-        return new GetLikesContentsResponse<>(hasNext, contents);
+        List<ShortsContentDTO> finalContents = new ArrayList<>(uniqueShorts.values());
+
+        boolean hasNext = finalContents.size() > request.size();
+        if (hasNext) {
+            finalContents.remove(request.size());
+        }
+
+        return new GetLikesContentsResponse<>(hasNext, finalContents);
     }
 
     @Override

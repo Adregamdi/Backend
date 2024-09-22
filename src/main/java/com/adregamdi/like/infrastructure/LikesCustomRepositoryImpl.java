@@ -119,7 +119,7 @@ public class LikesCustomRepositoryImpl implements LikesCustomRepository {
                         )))
                 .from(like)
                 .join(shorts).on(like.contentId.eq(shorts.shortsId).and(like.contentType.eq(ContentType.SHORTS)))
-                .join(member).on(shorts.memberId.eq(String.valueOf(member.memberId)))
+                .leftJoin(member).on(shorts.memberId.eq(String.valueOf(member.memberId)))
                 .leftJoin(place).on(shorts.placeId.eq(place.placeId))
                 .leftJoin(travelogue).on(shorts.travelogueId.eq(travelogue.travelogueId))
                 .where(

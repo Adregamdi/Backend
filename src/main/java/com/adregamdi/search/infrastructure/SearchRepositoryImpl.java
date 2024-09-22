@@ -131,7 +131,7 @@ public class SearchRepositoryImpl implements SearchRepository {
                                 "isLiked"
                         )))
                 .from(shorts)
-                .join(member).on(shorts.memberId.eq(String.valueOf(member.memberId)))
+                .leftJoin(member).on(shorts.memberId.eq(String.valueOf(member.memberId)))
                 .leftJoin(place).on(shorts.placeId.eq(place.placeId))
                 .leftJoin(travelogue).on(shorts.travelogueId.eq(travelogue.travelogueId))
                 .where(shorts.title.startsWith(keyword),

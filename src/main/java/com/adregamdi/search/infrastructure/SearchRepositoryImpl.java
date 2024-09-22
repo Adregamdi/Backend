@@ -107,8 +107,10 @@ public class SearchRepositoryImpl implements SearchRepository {
                         member.profile,
                         shorts.placeId,
                         place.title,
+                        place.thumbnailPath,
                         shorts.travelogueId,
                         travelogue.title,
+                        travelogueImage.url,
                         shorts.shortsVideoUrl,
                         shorts.thumbnailUrl,
                         shorts.viewCount,
@@ -134,16 +136,24 @@ public class SearchRepositoryImpl implements SearchRepository {
                 .leftJoin(member).on(shorts.memberId.eq(member.memberId))
                 .leftJoin(place).on(shorts.placeId.eq(place.placeId))
                 .leftJoin(travelogue).on(shorts.travelogueId.eq(travelogue.travelogueId))
+                .leftJoin(travelogueImage).on(travelogue.travelogueId.eq(travelogueImage.travelogueId))
                 .where(shorts.title.startsWith(keyword),
                         shorts.assignedStatus.eq(true))
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize() + 1)
                 .fetch();
 
-        boolean hasNext = results.size() > pageable.getPageSize();
-        List<ShortsSearchDTO> content = hasNext ? results.subList(0, pageable.getPageSize()) : results;
+        Map<Long, ShortsSearchDTO> uniqueShorts = new LinkedHashMap<>();
+        for (ShortsSearchDTO dto : results) {
+            uniqueShorts.putIfAbsent(dto.shortsId(), dto);
+        }
 
-        return new SliceImpl<>(content, pageable, hasNext);
+        List<ShortsSearchDTO> contents = new ArrayList<>(uniqueShorts.values());
+
+        boolean hasNext = results.size() > pageable.getPageSize();
+        List<ShortsSearchDTO> finalContents = hasNext ? contents.subList(0, pageable.getPageSize()) : contents;
+
+        return new SliceImpl<>(finalContents, pageable, hasNext);
     }
 
     @Override

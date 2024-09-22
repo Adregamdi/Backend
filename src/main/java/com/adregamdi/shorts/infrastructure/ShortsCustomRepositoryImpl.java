@@ -6,10 +6,10 @@ import com.adregamdi.shorts.dto.request.GetShortsByPlaceIdRequest;
 import com.adregamdi.shorts.dto.response.GetShortsByPlaceIdResponse;
 import com.adregamdi.shorts.dto.response.GetShortsResponse;
 import com.querydsl.core.types.ExpressionUtils;
-import com.querydsl.core.types.Order;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.core.types.dsl.NumberExpression;
 import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
@@ -60,12 +60,12 @@ public class ShortsCustomRepositoryImpl implements ShortsCustomRepository {
     }
 
     @Override
-    public GetShortsResponse getHotShorts(String memberId, long lastShortsId, int size) {
+    public GetShortsResponse getHotShorts(String memberId, int lastLikeCount, int size) {
 
         LocalDateTime oneMonthAgo = LocalDateTime.now().minusMonths(1);
 
-        BooleanExpression condition = shorts.shortsId.lt(lastShortsId)
-                .and(shorts.assignedStatus.eq(true));
+        NumberExpression<Integer> likeCountExpression = like.likeId.countDistinct().intValue();
+        BooleanExpression havingCondition = lastLikeCount == -1 ? null : likeCountExpression.loe(lastLikeCount);
 
         List<ShortsDTO> contents = jpaQueryFactory
                 .select(Projections.constructor(ShortsDTO.class,
@@ -82,14 +82,7 @@ public class ShortsCustomRepositoryImpl implements ShortsCustomRepository {
                         shorts.shortsVideoUrl,
                         shorts.thumbnailUrl,
                         shorts.viewCount,
-                        ExpressionUtils.as(
-                                JPAExpressions
-                                        .select(like.count().intValue())
-                                        .from(like)
-                                        .where(like.contentId.eq(shorts.shortsId)
-                                                .and(like.contentType.eq(ContentType.SHORTS))),
-                                "likeCount"
-                        ),
+                        likeCountExpression.as("likeCount"),
                         ExpressionUtils.as(
                                 JPAExpressions
                                         .selectOne()
@@ -104,18 +97,15 @@ public class ShortsCustomRepositoryImpl implements ShortsCustomRepository {
                 .leftJoin(member).on(shorts.memberId.eq(String.valueOf(member.memberId)))
                 .leftJoin(place).on(shorts.placeId.eq(place.placeId))
                 .leftJoin(travelogue).on(shorts.travelogueId.eq(travelogue.travelogueId))
-                .where(condition)
-                .orderBy(
-                        new OrderSpecifier<>(Order.DESC,
-                                JPAExpressions
-                                        .select(like.count())
-                                        .from(like)
-                                        .where(like.contentId.eq(shorts.shortsId)
-                                                .and(like.contentType.eq(ContentType.SHORTS))
-                                                .and(like.createdAt.after(oneMonthAgo))
-                                        )
-                        ),
-                        shorts.shortsId.desc())
+                .leftJoin(like).on(like.contentId.eq(shorts.shortsId)
+                        .and(like.contentType.eq(ContentType.SHORTS))
+                        .and(like.createdAt.after(oneMonthAgo)))
+                .where(shorts.assignedStatus.eq(true))
+                .groupBy(shorts.shortsId, shorts.title, shorts.memberId, member.name, member.handle, member.profile,
+                        shorts.placeId, place.title, shorts.travelogueId, travelogue.title, shorts.shortsVideoUrl,
+                        shorts.thumbnailUrl, shorts.viewCount)
+                .having(havingCondition)
+                .orderBy(likeCountExpression.desc(), shorts.shortsId.desc())
                 .limit(size + 1)
                 .fetch();
 

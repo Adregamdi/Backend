@@ -42,8 +42,8 @@ public class ShortsServiceImpl implements ShortsService {
     }
 
     @Override
-    public GetShortsResponse getHotShorts(String memberId, long lastShortsId, int size) {
-        return shortsRepository.getHotShorts(memberId, lastShortsId, size);
+    public GetShortsResponse getHotShorts(String memberId, int lastLikeCount, int size) {
+        return shortsRepository.getHotShorts(memberId, lastLikeCount, size);
     }
 
     @Override

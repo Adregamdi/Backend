@@ -89,10 +89,10 @@ public class ShortsController {
     @MemberAuthorize
     public ResponseEntity<ApiResponse<GetShortsResponse>> getHotShorts(
             @AuthenticationPrincipal final UserDetails userDetails,
-            @RequestParam(value = "shorts_id", required = false) @PositiveOrZero final Long lastShortsId,
+            @RequestParam(value = "like_count", required = false) @PositiveOrZero final Integer lastLikeCount,
             @RequestParam(value = "size", defaultValue = "10") @Positive final int size
     ) {
-        GetShortsResponse response = shortsService.getHotShorts(userDetails.getUsername(), lastShortsId != null ? lastShortsId : Long.MAX_VALUE, size);
+        GetShortsResponse response = shortsService.getHotShorts(userDetails.getUsername(), lastLikeCount != null ? lastLikeCount : Integer.MAX_VALUE, size);
         return ResponseEntity.ok()
                 .body(ApiResponse.<GetShortsResponse>builder()
                         .statusCode(HttpStatus.OK.value())

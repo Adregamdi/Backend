@@ -19,5 +19,5 @@ public interface ShortsService {
 
     GetShortsByPlaceIdResponse getShortsByPlaceId(String memberId, GetShortsByPlaceIdRequest request);
 
-    GetShortsResponse getHotShorts(String memberId, long lastShortsId, int size);
+    GetShortsResponse getHotShorts(String memberId, int lastLikeCount, int size);
 }

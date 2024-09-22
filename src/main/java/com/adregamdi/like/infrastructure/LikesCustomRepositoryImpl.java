@@ -39,31 +39,25 @@ public class LikesCustomRepositoryImpl implements LikesCustomRepository {
     @Override
     public GetLikesContentsResponse<List<AllContentDTO>> getLikesContentsOfAll(GetLikesContentsRequest request) {
 
-        List<AllContentDTO> contents = jpaQueryFactory
-                .select(Projections.constructor(AllContentDTO.class,
+        List<Tuple> results = jpaQueryFactory
+                .select(
+                        like.contentType,
+                        like.contentId,
                         Expressions.cases()
                                 .when(like.contentType.eq(ContentType.SHORTS)).then(shorts.title)
                                 .when(like.contentType.eq(ContentType.PLACE)).then(place.title)
                                 .when(like.contentType.eq(ContentType.TRAVELOGUE)).then(travelogue.title)
                                 .otherwise((String) null),
-                        like.contentType,
-                        like.contentId,
                         Expressions.cases()
                                 .when(like.contentType.eq(ContentType.SHORTS)).then(shorts.thumbnailUrl)
                                 .when(like.contentType.eq(ContentType.PLACE)).then(place.thumbnailPath)
-                                .when(like.contentType.eq(ContentType.TRAVELOGUE))
-                                .then(
-                                        JPAExpressions.select(travelogueImage.url)
-                                                .from(travelogueImage)
-                                                .where(travelogueImage.travelogueId.eq(travelogue.travelogueId))
-                                                .orderBy(travelogueImage.travelogueImageId.desc())
-                                                .limit(1)
-                                )
-                                .otherwise((String) null)))
+                                .when(like.contentType.eq(ContentType.TRAVELOGUE)).then(travelogueImage.url)
+                                .otherwise((String) null))
                 .from(like)
                 .leftJoin(shorts).on(like.contentId.eq(shorts.shortsId).and(like.contentType.eq(ContentType.SHORTS)))
                 .leftJoin(place).on(like.contentId.eq(place.placeId).and(like.contentType.eq(ContentType.PLACE)))
                 .leftJoin(travelogue).on(like.contentId.eq(travelogue.travelogueId).and(like.contentType.eq(ContentType.TRAVELOGUE)))
+                .leftJoin(travelogueImage).on(travelogue.travelogueId.eq(travelogueImage.travelogueId))
                 .where(
                         like.memberId.eq(request.memberId()),
                         like.likeId.lt(request.lastLikeId()))
@@ -71,9 +65,29 @@ public class LikesCustomRepositoryImpl implements LikesCustomRepository {
                 .limit(request.size() + 1)
                 .fetch();
 
+
+        List<AllContentDTO> contents = new ArrayList<>();
+        Map<Long, AllContentDTO> travelogueMap = new HashMap<>();
+
+        for (Tuple tuple : results) {
+            ContentType contentType = tuple.get(0, ContentType.class);
+            Long contentId = tuple.get(1, Long.class);
+            String title = tuple.get(2, String.class);
+            String imageUrl = tuple.get(3, String.class);
+
+            if (contentType == ContentType.TRAVELOGUE) {
+                travelogueMap.computeIfAbsent(contentId, k -> new AllContentDTO(title, contentType, contentId, imageUrl));
+            } else {
+                contents.add(new AllContentDTO(title, contentType, contentId, imageUrl));
+            }
+        }
+
+        contents.addAll(travelogueMap.values());
+        contents.sort((a, b) -> Long.compare(b.getContentId(), a.getContentId()));
+
         boolean hasNext = contents.size() > request.size();
         if (hasNext) {
-            contents.remove(request.size());
+            contents = contents.subList(0, request.size());
         }
 
         return new GetLikesContentsResponse<>(hasNext, contents);

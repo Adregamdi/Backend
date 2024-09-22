@@ -36,7 +36,7 @@ public class TravelogueCustomRepositoryImpl implements TravelogueCustomRepositor
                         member.handle,
                         travelogueImage.url)
                 .from(travelogue)
-                .join(member).on(travelogue.memberId.eq(String.valueOf(member.memberId)))
+                .join(member).on(travelogue.memberId.eq(member.memberId))
                 .leftJoin(travelogueImage).on(travelogue.travelogueId.eq(travelogueImage.travelogueId))
                 .where(travelogue.memberId.eq(memberId))
                 .orderBy(makeOrderSpecifiers(travelogue, pageable))
@@ -79,7 +79,7 @@ public class TravelogueCustomRepositoryImpl implements TravelogueCustomRepositor
                         member.handle,
                         travelogueImage.url)
                 .from(travelogue)
-                .join(member).on(travelogue.memberId.eq(String.valueOf(member.memberId)))
+                .join(member).on(travelogue.memberId.eq(member.memberId))
                 .leftJoin(travelogueImage).on(travelogue.travelogueId.eq(travelogueImage.travelogueId))
                 .orderBy(makeOrderSpecifiers(travelogue, pageable))
                 .offset(pageable.getOffset())

@@ -39,7 +39,7 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
         Member findMember = memberRepository.findById(oAuth2User.getMemberId())
                 .orElseThrow(MemberException.MemberNotFoundException::new);
 
-        String accessToken = jwtService.createAccessToken(String.valueOf(findMember.getMemberId()), findMember.getRole());
+        String accessToken = jwtService.createAccessToken(findMember.getMemberId(), findMember.getRole());
         String refreshToken = jwtService.createRefreshToken();
 
         findMember.updateRefreshToken(refreshToken);

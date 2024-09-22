@@ -47,7 +47,7 @@ public class SearchRepositoryImpl implements SearchRepository {
                         member.handle,
                         Expressions.constant(new ArrayList<String>())))
                 .from(travelogue)
-                .leftJoin(member).on(travelogue.memberId.eq(String.valueOf(member.memberId)))
+                .leftJoin(member).on(travelogue.memberId.eq(member.memberId))
                 .where(travelogue.title.startsWith(keyword))
                 .orderBy(makeOrderSpecifiers(travelogue, pageable))
                 .offset(pageable.getOffset())
@@ -131,7 +131,7 @@ public class SearchRepositoryImpl implements SearchRepository {
                                 "isLiked"
                         )))
                 .from(shorts)
-                .leftJoin(member).on(shorts.memberId.eq(String.valueOf(member.memberId)))
+                .leftJoin(member).on(shorts.memberId.eq(member.memberId))
                 .leftJoin(place).on(shorts.placeId.eq(place.placeId))
                 .leftJoin(travelogue).on(shorts.travelogueId.eq(travelogue.travelogueId))
                 .where(shorts.title.startsWith(keyword),

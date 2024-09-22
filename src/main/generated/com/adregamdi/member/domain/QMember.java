@@ -32,7 +32,7 @@ public class QMember extends EntityPathBase<Member> {
 
     public final StringPath handle = createString("handle");
 
-    public final ComparablePath<java.util.UUID> memberId = createComparable("memberId", java.util.UUID.class);
+    public final StringPath memberId = createString("memberId");
 
     public final BooleanPath memberStatus = createBoolean("memberStatus");
 

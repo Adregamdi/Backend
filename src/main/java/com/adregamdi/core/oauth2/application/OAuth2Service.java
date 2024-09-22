@@ -82,7 +82,7 @@ public class OAuth2Service {
             findMember.updateSocialAccessToken(request.authorizationCode());
         }
 
-        String accessToken = jwtService.createAccessToken(String.valueOf(findMember.getMemberId()), findMember.getRole());
+        String accessToken = jwtService.createAccessToken(findMember.getMemberId(), findMember.getRole());
         String refreshToken = jwtService.createRefreshToken();
         findMember.updateRefreshToken(refreshToken);
         findMember.updateRefreshTokenStatus(true);

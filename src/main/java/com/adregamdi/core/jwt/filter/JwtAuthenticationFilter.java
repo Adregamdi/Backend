@@ -72,7 +72,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     if (Objects.equals(user.getRefreshTokenStatus(), true)) {
                         jwtService.sendAccessAndRefreshToken(
                                 response,
-                                jwtService.createAccessToken(String.valueOf(user.getMemberId()), user.getRole()),
+                                jwtService.createAccessToken(user.getMemberId(), user.getRole()),
                                 reIssueRefreshToken(user)
                         );
                     }
@@ -123,7 +123,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
 
         UserDetails userDetailsUser = org.springframework.security.core.userdetails.User.builder()
-                .username(String.valueOf(myMember.getMemberId()))
+                .username(myMember.getMemberId())
                 .password(password)
                 .roles(myMember.getRole().name())
                 .build();

@@ -156,7 +156,7 @@ public class ShortsCustomRepositoryImpl implements ShortsCustomRepository {
                                 "isLiked"
                         )))
                 .from(shorts)
-                .leftJoin(member).on(shorts.memberId.eq(String.valueOf(member.memberId)))
+                .leftJoin(member).on(shorts.memberId.eq(member.memberId))
                 .leftJoin(place).on(shorts.placeId.eq(place.placeId))
                 .leftJoin(travelogue).on(shorts.travelogueId.eq(travelogue.travelogueId))
                 .leftJoin(travelogueImage).on(travelogue.travelogueId.eq(travelogueImage.travelogueId))

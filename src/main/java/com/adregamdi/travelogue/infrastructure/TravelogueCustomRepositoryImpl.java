@@ -1,7 +1,12 @@
 package com.adregamdi.travelogue.infrastructure;
 
+import com.adregamdi.like.domain.enumtype.ContentType;
+import com.adregamdi.travelogue.dto.HotTravelogueDTO;
 import com.adregamdi.travelogue.dto.TravelogueDTO;
+import com.adregamdi.travelogue.dto.response.GetHotTraveloguesResponse;
 import com.querydsl.core.Tuple;
+import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.core.types.dsl.NumberExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
@@ -9,12 +14,11 @@ import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.SliceImpl;
 import org.springframework.stereotype.Repository;
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import static com.adregamdi.core.utils.RepositoryUtil.makeOrderSpecifiers;
+import static com.adregamdi.like.domain.QLike.like;
 import static com.adregamdi.member.domain.QMember.member;
 import static com.adregamdi.travelogue.domain.QTravelogue.travelogue;
 import static com.adregamdi.travelogue.domain.QTravelogueImage.travelogueImage;
@@ -107,5 +111,67 @@ public class TravelogueCustomRepositoryImpl implements TravelogueCustomRepositor
         }
 
         return new SliceImpl<>(content, pageable, hasNext);
+    }
+
+    @Override
+    public GetHotTraveloguesResponse findOrderByLikeCount(int lastLikeCount, int size) {
+
+        NumberExpression<Integer> likeCountExpression = like.likeId.countDistinct().intValue();
+        BooleanExpression havingCondition = lastLikeCount == -1 ? null : likeCountExpression.loe(lastLikeCount);
+
+        List<Tuple> results = jpaQueryFactory
+                .select(
+                        travelogue.travelogueId,
+                        travelogue.title,
+                        travelogue.memberId,
+                        member.handle,
+                        member.profile,
+                        likeCountExpression.as("likeCount")
+                )
+                .from(travelogue)
+                .leftJoin(member).on(travelogue.memberId.eq(String.valueOf(member.memberId)))
+                .leftJoin(like).on(like.contentId.eq(travelogue.travelogueId)
+                        .and(like.contentType.eq(ContentType.TRAVELOGUE)))
+                .groupBy(travelogue.travelogueId, travelogue.title, travelogue.memberId, member.handle, member.profile)
+                .having(havingCondition)
+                .orderBy(likeCountExpression.desc(), travelogue.travelogueId.desc())
+                .limit(size + 1)
+                .fetch();
+
+        List<Long> travelogueIds = results.stream()
+                .map(tuple -> tuple.get(travelogue.travelogueId))
+                .collect(Collectors.toList());
+
+        results.stream().forEach(tuple -> System.out.println(tuple));
+
+        Map<Long, List<String>> imageMap = jpaQueryFactory
+                .select(travelogueImage.travelogueId, travelogueImage.url)
+                .from(travelogueImage)
+                .where(travelogueImage.travelogueId.in(travelogueIds))
+                .fetch()
+                .stream()
+                .collect(Collectors.groupingBy(
+                        tuple -> tuple.get(travelogueImage.travelogueId),
+                        Collectors.mapping(tuple -> tuple.get(travelogueImage.url), Collectors.toList())
+                ));
+
+        List<HotTravelogueDTO> contents = results.stream()
+                .map(tuple -> new HotTravelogueDTO(
+                        tuple.get(travelogue.travelogueId),
+                        tuple.get(travelogue.title),
+                        tuple.get(travelogue.memberId),
+                        tuple.get(member.handle),
+                        tuple.get(member.profile),
+                        tuple.get(5, Integer.class),
+                        imageMap.getOrDefault(tuple.get(travelogue.travelogueId), Collections.emptyList())
+                ))
+                .collect(Collectors.toList());
+
+        boolean hasNext = contents.size() > size;
+        if (hasNext) {
+            contents = contents.subList(0, size);
+        }
+
+        return new GetHotTraveloguesResponse(hasNext, contents);
     }
 }

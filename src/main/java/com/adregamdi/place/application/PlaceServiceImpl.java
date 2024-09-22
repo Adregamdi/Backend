@@ -42,10 +42,7 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Locale;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.StreamSupport;
@@ -115,8 +112,11 @@ public class PlaceServiceImpl implements PlaceService {
                             JsonNode jsonNode = objectMapper.readTree(response);
                             JsonNode items = jsonNode.path("items");
 
-                            StreamSupport.stream(items.spliterator(), false)
+                            List<Place> places = StreamSupport.stream(items.spliterator(), false)
                                     .map(item -> {
+                                        if (item.path("latitude").asDouble() == 0 || item.path("longitude").asDouble() == 0) {
+                                            return null;
+                                        }
                                         String title = item.path("title").asText();
                                         String contentsId = item.path("contentsid").asText();
                                         String contentsLabel = item.path("contentscd").path("label").asText();
@@ -151,7 +151,10 @@ public class PlaceServiceImpl implements PlaceService {
                                                 .thumbnailPath(thumbnailPath)
                                                 .build();
                                     })
-                                    .forEach(placeRepository::save);
+                                    .filter(Objects::nonNull)
+                                    .toList();
+                            
+                            placeRepository.saveAll(places);
 
                             return "Data saved successfully";
                         } catch (Exception e) {

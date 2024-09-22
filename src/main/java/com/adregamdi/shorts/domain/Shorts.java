@@ -23,8 +23,8 @@ public class Shorts extends BaseTime {
     @Column(name = "title")
     @Comment(value = "쇼츠 제목")
     private String title;
-    @Comment(value = "작성자")
 
+    @Comment(value = "작성자")
     @Column(name = "member_id", updatable = false, nullable = false, columnDefinition = "VARCHAR(36)")
     private String memberId;
 

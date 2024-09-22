@@ -11,4 +11,6 @@ public interface ShortsCustomRepository {
     GetShortsResponse getUserShorts(String memberId, long lastShortsId, int size);
 
     GetShortsByPlaceIdResponse getShortsByPlaceId(String memberId, GetShortsByPlaceIdRequest request);
+
+    GetShortsResponse getHotShorts(String memberId, int lastLikeCount, int size);
 }

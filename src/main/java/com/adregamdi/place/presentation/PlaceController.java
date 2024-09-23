@@ -107,7 +107,7 @@ public class PlaceController {
                 );
     }
 
-    @GetMapping("/sort")
+    @PostMapping("/sort")
     @MemberAuthorize
     public ResponseEntity<ApiResponse<List<GetSortingPlacesResponse>>> getSortingPlaces(@RequestBody @Valid final List<GetSortingPlacesRequest> requests) {
         return ResponseEntity.ok()

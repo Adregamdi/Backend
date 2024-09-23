@@ -1,5 +1,6 @@
 package com.adregamdi.travelogue.dto.response;
 
+import com.adregamdi.member.domain.Member;
 import com.adregamdi.travelogue.domain.Travelogue;
 import com.adregamdi.travelogue.domain.TravelogueDay;
 import com.adregamdi.travelogue.domain.TravelogueImage;
@@ -14,6 +15,10 @@ import java.util.stream.Collectors;
 @Builder
 public record GetTravelogueResponse(
         boolean isLiked,
+        String memberId,
+        String memberName,
+        String memberProfile,
+        String memberHandle,
         Long travelogueId,
         Long travelId,
         String title,
@@ -23,6 +28,7 @@ public record GetTravelogueResponse(
 ) {
     public static GetTravelogueResponse of(
             final boolean isLiked,
+            final Member member,
             final Travelogue travelogue,
             final List<TravelogueImage> travelogueImages,
             final List<TravelogueDay> travelogueDays,
@@ -43,6 +49,10 @@ public record GetTravelogueResponse(
 
         return GetTravelogueResponse.builder()
                 .isLiked(isLiked)
+                .memberId(member.getMemberId())
+                .memberName(member.getName())
+                .memberProfile(member.getProfile())
+                .memberHandle(member.getHandle())
                 .travelogueId(travelogue.getTravelogueId())
                 .travelId(travelogue.getTravelId())
                 .title(travelogue.getTitle())

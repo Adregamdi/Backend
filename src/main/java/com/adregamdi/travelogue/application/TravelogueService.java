@@ -3,6 +3,9 @@ package com.adregamdi.travelogue.application;
 import com.adregamdi.like.application.LikesService;
 import com.adregamdi.like.domain.enumtype.ContentType;
 import com.adregamdi.media.application.ImageService;
+import com.adregamdi.member.domain.Member;
+import com.adregamdi.member.exception.MemberException;
+import com.adregamdi.member.infrastructure.MemberRepository;
 import com.adregamdi.place.domain.Place;
 import com.adregamdi.place.domain.PlaceReview;
 import com.adregamdi.place.domain.PlaceReviewImage;
@@ -55,6 +58,7 @@ public class TravelogueService {
     private final PlaceRepository placeRepository;
     private final PlaceReviewRepository placeReviewRepository;
     private final PlaceReviewImageRepository placeReviewImageRepository;
+    private final MemberRepository memberRepository;
 
     /*
      * 여행기 등록
@@ -190,12 +194,15 @@ public class TravelogueService {
     }
 
     /*
-     * 여행기 조회
+     * 특정 여행기 조회
      */
     @Transactional(readOnly = true)
     public GetTravelogueResponse get(final String memberId, final Long travelogueId) {
         Travelogue travelogue = travelogueRepository.findById(travelogueId)
                 .orElseThrow(() -> new TravelogueNotFoundException(travelogueId));
+
+        Member member = memberRepository.findById(travelogue.getMemberId())
+                .orElseThrow(() -> new MemberException.MemberNotFoundException(travelogue.getMemberId()));
 
         List<TravelogueImage> travelogueImages = travelogueImageRepository.findByTravelogueId(travelogueId)
                 .orElse(Collections.emptyList());
@@ -231,7 +238,7 @@ public class TravelogueService {
             placeReviewsMap.put(travelogueDay.getTravelogueDayId(), placeReviewInfos);
         }
         boolean isLiked = likesService.checkIsLiked(memberId, ContentType.TRAVELOGUE, travelogueId);
-        return GetTravelogueResponse.of(isLiked, travelogue, travelogueImages, travelogueDays, placeReviewsMap);
+        return GetTravelogueResponse.of(isLiked, member, travelogue, travelogueImages, travelogueDays, placeReviewsMap);
     }
 
     /*

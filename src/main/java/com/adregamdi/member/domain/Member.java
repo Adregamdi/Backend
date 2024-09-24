@@ -7,6 +7,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Getter
@@ -39,6 +40,8 @@ public class Member extends BaseTime {
     private String refreshToken; // 리프레쉬 토큰
     @Column
     private Boolean refreshTokenStatus; // 리프레쉬 토큰 상태 (T: 로그인/F: 로그아웃)
+    @Column
+    private LocalDateTime connectedAt; // 마지막 접속 시간
     @Column
     private Boolean memberStatus; // 회원 상태 (T: 등록/F: 탈퇴)
 
@@ -88,5 +91,9 @@ public class Member extends BaseTime {
 
     public void updateMemberStatus(Boolean status) {
         this.memberStatus = status;
+    }
+
+    public void updateConnectedAt() {
+        this.connectedAt = LocalDateTime.now();
     }
 }

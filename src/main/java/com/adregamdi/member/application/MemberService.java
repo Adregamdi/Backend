@@ -34,12 +34,20 @@ public class MemberService {
     private final MemberRepository memberRepository;
 
     /*
+     * [마지막 접속 시간 체크]
+     */
+    @Transactional
+    public void connectedAt(final Member member) {
+        member.updateConnectedAt();
+    }
+
+    /*
      * [내 정보 조회]
      */
     @Transactional
-    public GetMyMemberResponse getMyMember(final String username) {
-        Member member = memberRepository.findById(username)
-                .orElseThrow(() -> new MemberNotFoundException(username));
+    public GetMyMemberResponse getMyMember(final String memberId) {
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new MemberNotFoundException(memberId));
 
         return GetMyMemberResponse.from(member);
     }

@@ -4,6 +4,7 @@ import com.adregamdi.core.jwt.service.JwtService;
 import com.adregamdi.core.oauth2.dto.LoginRequest;
 import com.adregamdi.core.oauth2.dto.LoginResponse;
 import com.adregamdi.core.oauth2.dto.OAuth2Attributes;
+import com.adregamdi.member.application.MemberService;
 import com.adregamdi.member.domain.Member;
 import com.adregamdi.member.domain.SocialType;
 import com.adregamdi.member.infrastructure.MemberRepository;
@@ -42,6 +43,7 @@ public class OAuth2Service {
     private static final String APPLE = "apple";
     private static final String KAKAO = "kakao";
     private final JwtService jwtService;
+    private final MemberService memberService;
     private final MemberRepository memberRepository;
     private final WebClient webClient;
 
@@ -86,6 +88,7 @@ public class OAuth2Service {
         String refreshToken = jwtService.createRefreshToken();
         findMember.updateRefreshToken(refreshToken);
         findMember.updateRefreshTokenStatus(true);
+        memberService.connectedAt(findMember);
 
         return new LoginResponse(accessToken, refreshToken);
     }

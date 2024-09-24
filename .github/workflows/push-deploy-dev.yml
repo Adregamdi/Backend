@@ -76,7 +76,7 @@ jobs:
             sudo nohup java -jar -Dspring.profiles.active=dev ./*.jar > /home/ubuntu/logs/adregamdi-dev.out 2>&1 &
             
             # 프로세스가 실행 중인지 확인
-            sleep 20
+            sleep 30
             if ! pgrep -f "java -jar" > /dev/null; then
             echo "Application failed to start"
             exit 1

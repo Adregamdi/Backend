@@ -215,7 +215,6 @@ public class LikesCustomRepositoryImpl implements LikesCustomRepository {
 
     @Override
     public GetLikesContentsResponse<List<PlaceContentDTO>> getLikesContentsOfPlace(GetLikesContentsRequest request) {
-
         List<Tuple> results = jpaQueryFactory
                 .select(place.placeId, place.title, place.regionLabel, place.region1Cd,
                         place.region2Cd, place.imgPath, place.thumbnailPath, like.likeId)
@@ -249,32 +248,47 @@ public class LikesCustomRepositoryImpl implements LikesCustomRepository {
                                         list -> list.stream().limit(5).toList()))
                 ));
 
-        Long imageReviewCount = jpaQueryFactory
-                .select(placeReviewImage.count())
+        Map<Long, Long> imageReviewCountMap = jpaQueryFactory
+                .select(placeReview.placeId, placeReviewImage.count())
                 .from(placeReviewImage)
                 .join(placeReview).on(placeReviewImage.placeReviewId.eq(placeReview.placeReviewId))
                 .where(placeReview.placeId.in(placeIds))
-                .fetchOne();
+                .groupBy(placeReview.placeId)
+                .fetch()
+                .stream()
+                .collect(Collectors.toMap(
+                        tuple -> tuple.get(placeReview.placeId),
+                        tuple -> tuple.get(placeReviewImage.count())
+                ));
 
-        Long shortsReviewCount = jpaQueryFactory
-                .select(shorts.count())
+        Map<Long, Long> shortsReviewCountMap = jpaQueryFactory
+                .select(shorts.placeId, shorts.count())
                 .from(shorts)
                 .where(shorts.placeId.in(placeIds))
-                .fetchOne();
+                .groupBy(shorts.placeId)
+                .fetch()
+                .stream()
+                .collect(Collectors.toMap(
+                        tuple -> tuple.get(shorts.placeId),
+                        tuple -> tuple.get(shorts.count())
+                ));
 
         List<PlaceContentDTO> contents = results.stream()
-                .map(tuple -> new PlaceContentDTO(
-                        tuple.get(place.placeId),
-                        tuple.get(place.title),
-                        tuple.get(place.regionLabel),
-                        tuple.get(place.region1Cd),
-                        tuple.get(place.region2Cd),
-                        tuple.get(place.imgPath),
-                        tuple.get(place.thumbnailPath),
-                        imageMap.getOrDefault(tuple.get(place.placeId), Collections.emptyList()),
-                        imageReviewCount != null ? imageReviewCount.intValue() : 0,
-                        shortsReviewCount != null ? shortsReviewCount.intValue() : 0
-                )).collect(Collectors.toList());
+                .map(tuple -> {
+                    Long placeId = tuple.get(place.placeId);
+                    return new PlaceContentDTO(
+                            placeId,
+                            tuple.get(place.title),
+                            tuple.get(place.regionLabel),
+                            tuple.get(place.region1Cd),
+                            tuple.get(place.region2Cd),
+                            tuple.get(place.imgPath),
+                            tuple.get(place.thumbnailPath),
+                            imageMap.getOrDefault(placeId, Collections.emptyList()),
+                            imageReviewCountMap.getOrDefault(placeId, 0L).intValue(),
+                            shortsReviewCountMap.getOrDefault(placeId, 0L).intValue()
+                    );
+                }).collect(Collectors.toList());
 
         boolean hasNext = contents.size() > request.size();
         if (hasNext) {

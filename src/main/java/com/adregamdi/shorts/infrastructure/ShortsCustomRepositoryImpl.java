@@ -65,7 +65,6 @@ public class ShortsCustomRepositoryImpl implements ShortsCustomRepository {
 
     @Override
     public GetShortsResponse getHotShorts(String memberId, int lastLikeCount, int size) {
-
         LocalDateTime oneMonthAgo = LocalDateTime.now().minusMonths(1);
 
         NumberExpression<Integer> likeCountExpression = like.likeId.countDistinct().intValue();
@@ -81,8 +80,10 @@ public class ShortsCustomRepositoryImpl implements ShortsCustomRepository {
                         member.profile,
                         shorts.placeId,
                         place.title,
+                        place.thumbnailPath,
                         shorts.travelogueId,
                         travelogue.title,
+                        travelogueImage.url,
                         shorts.shortsVideoUrl,
                         shorts.thumbnailUrl,
                         shorts.viewCount,
@@ -101,22 +102,28 @@ public class ShortsCustomRepositoryImpl implements ShortsCustomRepository {
                 .leftJoin(member).on(shorts.memberId.eq(member.memberId))
                 .leftJoin(place).on(shorts.placeId.eq(place.placeId))
                 .leftJoin(travelogue).on(shorts.travelogueId.eq(travelogue.travelogueId))
+                .leftJoin(travelogueImage).on(travelogue.travelogueId.eq(travelogueImage.travelogueId))
                 .leftJoin(like).on(like.contentId.eq(shorts.shortsId)
                         .and(like.contentType.eq(ContentType.SHORTS))
                         .and(like.createdAt.after(oneMonthAgo)))
                 .where(shorts.assignedStatus.eq(true))
                 .groupBy(shorts.shortsId, shorts.title, shorts.memberId, member.name, member.handle, member.profile,
                         shorts.placeId, place.title, shorts.travelogueId, travelogue.title, shorts.shortsVideoUrl,
-                        shorts.thumbnailUrl, shorts.viewCount)
+                        shorts.thumbnailUrl, shorts.viewCount, travelogueImage.url)
                 .having(havingCondition)
                 .orderBy(likeCountExpression.desc(), shorts.shortsId.desc())
                 .limit(size + 1)
                 .fetch();
 
-        return processResult(contents, size);
+        Map<Long, ShortsDTO> uniqueShorts = new LinkedHashMap<>();
+        for (ShortsDTO dto : contents) {
+            uniqueShorts.putIfAbsent(dto.getShortsId(), dto);
+        }
+
+        List<ShortsDTO> finalContents = new ArrayList<>(uniqueShorts.values());
+
+        return processResult(finalContents, size);
     }
-
-
 
     private GetShortsResponse getShorts(String memberId, BooleanExpression condition, OrderSpecifier<?> orderBy, int size) {
 

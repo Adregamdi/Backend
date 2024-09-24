@@ -1,4 +1,4 @@
-name: Deploy Develop Server On Merge
+name: Deploy Prod Server On Merge
 
 on:
   push:
@@ -25,7 +25,7 @@ jobs:
         uses: samin/mysql-action@v1
         with:
           character set server: 'utf8'
-          mysql database: 'adregamdi'
+          mysql database: ${{ secrets.MYSQL_DATABASE }}
           mysql user: ${{ secrets.MYSQL_USERNAME }}
           mysql password: ${{ secrets.MYSQL_PASSWORD }}
 
@@ -36,7 +36,7 @@ jobs:
           echo "${{ secrets.APPLICATION_YML }}" > ./src/main/resources/application.yml
 
       - name: Setup application-prod.yml
-        run: echo "${{ secrets.PROD_APPLICATION_YML }}" > ./src/main/resources/application-dev.yml
+        run: echo "${{ secrets.PROD_APPLICATION_YML }}" > ./src/main/resources/application-prod.yml
 
       - name: Add permission to make gradlew executable
         run: chmod +x gradlew
@@ -73,4 +73,21 @@ jobs:
             # 서버 원격으로 명령어를 실행합니다. 서버 포트를 확인하고 실행중이면 종료합니다. 빌드된 jar파일을 실행합니다.
             sudo fuser -k ${{ secrets.SERVER_PORT }}/tcp || true; 
             sudo mkdir -p /home/ubuntu/logs
-            sudo nohup java -jar ./*.jar > /home/ubuntu/logs/nohup.out 2>&1 &
+            sudo nohup java -jar -Dspring.profiles.active=prod ./*.jar > /home/ubuntu/logs/adregamdi-prod.out 2>&1 &
+
+            # 프로세스가 실행 중인지 확인
+            sleep 50
+            if ! pgrep -f "java -jar" > /dev/null; then
+            echo "Application failed to start"
+            exit 1
+            fi
+            
+            # 로그에서 오류 확인
+            if grep -i "error" /home/ubuntu/logs/adregamdi-prod.out; then
+            echo "Errors found in application log"
+            cat /home/ubuntu/logs/adregamdi-prod.out
+            exit 1
+            fi
+            
+            echo "Application started successfully"
+            exit 0

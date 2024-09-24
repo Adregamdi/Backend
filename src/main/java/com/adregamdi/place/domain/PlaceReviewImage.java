@@ -2,12 +2,13 @@ package com.adregamdi.place.domain;
 
 import com.adregamdi.core.entity.BaseTime;
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.AccessLevel;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@AllArgsConstructor
-@Builder
 @Entity
 @Table(name = "tbl_place_review_image")
 public class PlaceReviewImage extends BaseTime {
@@ -19,6 +20,7 @@ public class PlaceReviewImage extends BaseTime {
     @Column
     private String url; // 이미지 url
 
+    @Builder
     public PlaceReviewImage(Long placeReviewId, String url) {
         this.placeReviewId = placeReviewId;
         this.url = url;

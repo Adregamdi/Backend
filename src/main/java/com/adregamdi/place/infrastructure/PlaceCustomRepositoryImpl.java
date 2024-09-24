@@ -4,6 +4,7 @@ import com.adregamdi.place.domain.Place;
 import com.adregamdi.place.dto.PopularPlaceDTO;
 import com.querydsl.core.Tuple;
 import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
@@ -43,13 +44,16 @@ public class PlaceCustomRepositoryImpl implements PlaceCustomRepository {
 
         List<Tuple> results = jpaQueryFactory
                 .select(place,
-                        placeReview.count().as("reviewCount"),
+                        JPAExpressions.selectDistinct(placeReview.count())
+                                .from(placeReview)
+                                .leftJoin(placeReviewImage).on(placeReviewImage.placeReviewId.eq(placeReview.placeReviewId))
+                                .where(placeReview.placeId.eq(place.placeId).and(placeReviewImage.url.isNotNull())),
                         shorts.count().as("shortsCount"),
                         placeReviewImage.url,
                         placeReviewImage.placeReviewImageId)
                 .from(place)
-                .leftJoin(placeReview).on(placeReview.placeId.eq(place.placeId))
                 .leftJoin(shorts).on(shorts.placeId.eq(place.placeId))
+                .leftJoin(placeReview).on(placeReview.placeId.eq(place.placeId))
                 .leftJoin(placeReviewImage).on(placeReviewImage.placeReviewId.eq(placeReview.placeReviewId))
                 .where(whereCondition)
                 .groupBy(place.placeId, placeReviewImage.url, placeReviewImage.placeReviewImageId)
@@ -73,7 +77,7 @@ public class PlaceCustomRepositoryImpl implements PlaceCustomRepository {
                 dto.imageUrls().add(imageUrl);
             }
         }
-
+        
         for (PopularPlaceDTO dto : dtoMap.values()) {
             if (dto.imageUrls().size() < 5 && dto.place().getImgPath() != null && !dto.place().getImgPath().isEmpty()) {
                 dto.imageUrls().add(dto.place().getImgPath());

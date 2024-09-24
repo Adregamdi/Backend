@@ -65,6 +65,17 @@ public class PlaceController {
                 );
     }
 
+    @PostMapping("/sort")
+    @MemberAuthorize
+    public ResponseEntity<ApiResponse<List<GetSortingPlacesResponse>>> getSortingPlaces(@RequestBody @Valid final List<GetSortingPlacesRequest> requests) {
+        return ResponseEntity.ok()
+                .body(ApiResponse.<List<GetSortingPlacesResponse>>builder()
+                        .statusCode(HttpStatus.OK.value())
+                        .data(placeService.getSortingPlaces(requests))
+                        .build()
+                );
+    }
+
     @GetMapping
     @MemberAuthorize
     public ResponseEntity<ApiResponse<GetPlaceResponse>> get(
@@ -103,17 +114,6 @@ public class PlaceController {
                 .body(ApiResponse.<List<GetSelectionBasedRecommendationPlacesResponse>>builder()
                         .statusCode(HttpStatus.OK.value())
                         .data(placeService.getSelectionBasedRecommendationPlaces(latitude, longitude))
-                        .build()
-                );
-    }
-
-    @PostMapping("/sort")
-    @MemberAuthorize
-    public ResponseEntity<ApiResponse<List<GetSortingPlacesResponse>>> getSortingPlaces(@RequestBody @Valid final List<GetSortingPlacesRequest> requests) {
-        return ResponseEntity.ok()
-                .body(ApiResponse.<List<GetSortingPlacesResponse>>builder()
-                        .statusCode(HttpStatus.OK.value())
-                        .data(placeService.getSortingPlaces(requests))
                         .build()
                 );
     }

@@ -4,7 +4,6 @@ import com.adregamdi.place.domain.Place;
 import com.adregamdi.place.dto.PopularPlaceDTO;
 import com.querydsl.core.Tuple;
 import com.querydsl.core.types.dsl.BooleanExpression;
-import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
@@ -12,11 +11,7 @@ import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.SliceImpl;
 import org.springframework.stereotype.Repository;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
+import java.util.*;
 
 import static com.adregamdi.core.utils.RepositoryUtil.makeOrderSpecifiers;
 import static com.adregamdi.place.domain.QPlace.place;
@@ -48,36 +43,44 @@ public class PlaceCustomRepositoryImpl implements PlaceCustomRepository {
 
         List<Tuple> results = jpaQueryFactory
                 .select(place,
-                        placeReview.count(),
-                        shorts.count(),
-                        Expressions.stringTemplate(
-                                "group_concat({0})",
-                                placeReviewImage.url).as("imageUrls"))
+                        placeReview.count().as("reviewCount"),
+                        shorts.count().as("shortsCount"),
+                        placeReviewImage.url,
+                        placeReviewImage.placeReviewImageId)
                 .from(place)
                 .leftJoin(placeReview).on(placeReview.placeId.eq(place.placeId))
                 .leftJoin(shorts).on(shorts.placeId.eq(place.placeId))
                 .leftJoin(placeReviewImage).on(placeReviewImage.placeReviewId.eq(placeReview.placeReviewId))
                 .where(whereCondition)
-                .groupBy(place.placeId)
-                .orderBy(place.addCount.desc(), place.placeId.asc())
+                .groupBy(place.placeId, placeReviewImage.url, placeReviewImage.placeReviewImageId)
+                .orderBy(place.addCount.desc(), place.placeId.asc(), placeReviewImage.placeReviewImageId.desc())
                 .limit(11)
                 .fetch();
 
-        return results.stream()
-                .map(tuple -> new PopularPlaceDTO(
-                        tuple.get(place),
-                        tuple.get(placeReview.count()),
-                        tuple.get(shorts.count()),
-                        parseImageUrls(tuple.get(3, String.class))
-                ))
-                .collect(Collectors.toList());
-    }
+        Map<Long, PopularPlaceDTO> dtoMap = new LinkedHashMap<>();
 
-    private List<String> parseImageUrls(String imageUrlString) {
-        if (imageUrlString == null || imageUrlString.isEmpty()) {
-            return Collections.emptyList();
+        for (Tuple tuple : results) {
+            Place placeEntity = tuple.get(place);
+            Long placeId = placeEntity.getPlaceId();
+            Long photoReviewCount = tuple.get(1, Long.class);
+            Long shortsCount = tuple.get(2, Long.class);
+            String imageUrl = tuple.get(placeReviewImage.url);
+
+            PopularPlaceDTO dto = dtoMap.computeIfAbsent(placeId, k ->
+                    new PopularPlaceDTO(placeEntity, photoReviewCount, shortsCount, new ArrayList<>()));
+
+            if (imageUrl != null && dto.imageUrls().size() < 5) {
+                dto.imageUrls().add(imageUrl);
+            }
         }
-        return Arrays.asList(imageUrlString.split(","));
+
+        for (PopularPlaceDTO dto : dtoMap.values()) {
+            if (dto.imageUrls().size() < 5 && dto.place().getImgPath() != null && !dto.place().getImgPath().isEmpty()) {
+                dto.imageUrls().add(dto.place().getImgPath());
+            }
+        }
+
+        return new ArrayList<>(dtoMap.values());
     }
 
     private BooleanExpression ltAddCountAndGtPlaceId(Integer lastAddCount, Long lastId) {

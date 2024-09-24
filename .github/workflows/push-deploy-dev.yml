@@ -60,7 +60,7 @@ jobs:
         run: |
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > /tmp/private_key
           chmod 400 /tmp/private_key
-          scp -i /tmp/private_key ./build/libs/*.jar ${{ secrets.SERVER_USERNAME }}@${{ secrets.SERVER_HOST }}:/home/ubuntu
+          scp -i /tmp/private_key ./build/libs/*.jar ${{ secrets.SERVER_USERNAME }}@${{ secrets.SERVER_HOST }}:/home/ubuntu/develop/
 
       # 서버에 통신하기 위한 SSH를 설정합니다.
       - name: Setup SSH and Deploy
@@ -72,22 +72,23 @@ jobs:
           script: |
             # 서버 원격으로 명령어를 실행합니다. 서버 포트를 확인하고 실행중이면 종료합니다. 빌드된 jar파일을 실행합니다.
             sudo fuser -k ${{ secrets.SERVER_PORT }}/tcp || true;
-            sudo mkdir -p /home/ubuntu/logs
-            sudo nohup java -jar -Dspring.profiles.active=dev ./*.jar > /home/ubuntu/logs/adregamdi-dev.out 2>&1 &
-            
+            sudo mkdir -p /home/ubuntu/develop/logs
+            cd /home/ubuntu/develop
+            sudo nohup java -jar -Dspring.profiles.active=dev ./*.jar > /home/ubuntu/develop/logs/adregamdi-develop.out 2>&1 &
+
             # 프로세스가 실행 중인지 확인
             sleep 30
             if ! pgrep -f "java -jar" > /dev/null; then
-            echo "Application failed to start"
-            exit 1
+              echo "Application failed to start"
+              exit 1
             fi
-            
+
             # 로그에서 오류 확인
-            if grep -i "error" /home/ubuntu/logs/adregamdi-dev.out; then
-            echo "Errors found in application log"
-            cat /home/ubuntu/logs/adregamdi-dev.out
-            exit 1
+            if grep -i "error" /home/ubuntu/develop/logs/adregamdi-develop.out; then
+              echo "Errors found in application log"
+              cat /home/ubuntu/develop/logs/adregamdi-develop.out
+              exit 1
             fi
-            
+
             echo "Application started successfully"
             exit 0

@@ -330,6 +330,7 @@ public class PlaceServiceImpl implements PlaceService {
 
             myPlaceReviews.add(MyPlaceReviewDTO.of(
                             place.getPlaceId(),
+                            placeReview.getPlaceReviewId(),
                             place.getTitle(),
                             place.getContentsLabel(),
                             place.getRegionLabel(),

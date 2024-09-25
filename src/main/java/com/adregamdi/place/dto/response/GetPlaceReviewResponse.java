@@ -8,6 +8,7 @@ import java.util.List;
 
 @Builder
 public record GetPlaceReviewResponse(
+        Long placeId,
         Long placeReviewId,
         String title,
         String contentsLabel,
@@ -21,6 +22,7 @@ public record GetPlaceReviewResponse(
         String handle
 ) {
     public static GetPlaceReviewResponse of(
+            final Long placeId,
             final Long placeReviewId,
             final String title,
             final String contentsLabel,
@@ -34,6 +36,7 @@ public record GetPlaceReviewResponse(
             final String handle
     ) {
         return GetPlaceReviewResponse.builder()
+                .placeId(placeId)
                 .placeReviewId(placeReviewId)
                 .title(title)
                 .contentsLabel(contentsLabel)

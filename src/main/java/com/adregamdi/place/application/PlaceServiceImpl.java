@@ -153,7 +153,7 @@ public class PlaceServiceImpl implements PlaceService {
                                     })
                                     .filter(Objects::nonNull)
                                     .toList();
-                            
+
                             placeRepository.saveAll(places);
 
                             return "Data saved successfully";
@@ -361,6 +361,7 @@ public class PlaceServiceImpl implements PlaceService {
 
         return PlaceReviewDTO.of(
                 place.getPlaceId(),
+                placeReview.getPlaceReviewId(),
                 place.getTitle(),
                 place.getContentsLabel(),
                 place.getRegionLabel(),
@@ -389,6 +390,7 @@ public class PlaceServiceImpl implements PlaceService {
 
             placeReviewDTOS.add(PlaceReviewDTO.of(
                             place.getPlaceId(),
+                            placeReview.getPlaceReviewId(),
                             place.getTitle(),
                             place.getContentsLabel(),
                             place.getRegionLabel(),

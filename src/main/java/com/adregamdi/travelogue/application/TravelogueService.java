@@ -177,19 +177,28 @@ public class TravelogueService {
         List<CreateMyTravelogueRequest.DayInfo> days = (dayList != null) ? dayList : Collections.emptyList();
 
         for (CreateMyTravelogueRequest.DayInfo dayInfo : days) {
-            TravelogueDay travelogueDay = travelogueDayRepository.save(new TravelogueDay(travelogueId, dayInfo.date(), dayInfo.day(), dayInfo.content()));
+            TravelogueDay travelogueDay = travelogueDayRepository.save(TravelogueDay.builder()
+                    .travelogueId(travelogueId)
+                    .date(dayInfo.date())
+                    .day(dayInfo.day())
+                    .content(dayInfo.content())
+                    .build());
             saveTravelogueDayPlaceReview(dayInfo.placeList(), travelogueDay.getTravelogueDayId());
         }
     }
 
     private void saveTravelogueDayPlaceReview(
-            final List<CreateMyTravelogueRequest.PlaceInfo> placeReviews,
+            final List<CreateMyTravelogueRequest.PlaceInfo> places,
             final Long travelogueDayId
     ) {
-        List<CreateMyTravelogueRequest.PlaceInfo> reviews = (placeReviews != null) ? placeReviews : Collections.emptyList();
+        List<CreateMyTravelogueRequest.PlaceInfo> placeInfos = (places != null) ? places : Collections.emptyList();
 
-        for (CreateMyTravelogueRequest.PlaceInfo reviewInfo : reviews) {
-            travelogueDayPlaceReviewRepository.save(new TravelogueDayPlaceReview(travelogueDayId, reviewInfo.placeReviewId()));
+        for (CreateMyTravelogueRequest.PlaceInfo placeInfo : placeInfos) {
+            travelogueDayPlaceReviewRepository.save(TravelogueDayPlaceReview.builder()
+                    .travelogueDayId(travelogueDayId)
+                    .placeId(placeInfo.placeId())
+                    .placeReviewId(placeInfo.placeReviewId())
+                    .build());
         }
     }
 
@@ -216,10 +225,10 @@ public class TravelogueService {
 
             List<GetTravelogueResponse.PlaceInfo> placeReviewInfos = travelogueDayPlaceReviews.stream()
                     .map(tdpr -> {
+                        Place place = placeRepository.findById(tdpr.getPlaceId())
+                                .orElseThrow(() -> new PlaceException.PlaceNotFoundException(tdpr.getPlaceId()));
                         PlaceReview placeReview = placeReviewRepository.findById(tdpr.getPlaceReviewId())
-                                .orElseThrow(() -> new PlaceException.PlaceReviewNotFoundException(tdpr.getPlaceReviewId()));
-                        Place place = placeRepository.findById(placeReview.getPlaceId())
-                                .orElseThrow(() -> new PlaceException.PlaceNotFoundException(placeReview.getPlaceId()));
+                                .orElse(PlaceReview.builder().build());
                         List<PlaceReviewImage> images = placeReviewImageRepository.findByPlaceReviewIdOrderByPlaceReviewImageIdDesc(placeReview.getPlaceReviewId());
 
                         return GetTravelogueResponse.PlaceInfo.builder()

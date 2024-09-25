@@ -152,6 +152,7 @@ public class PlaceController {
                 .body(ApiResponse.<GetPlaceReviewResponse>builder()
                         .statusCode(HttpStatus.OK.value())
                         .data(GetPlaceReviewResponse.of(
+                                placeReview.placeId(),
                                 placeReview.placeReviewId(),
                                 placeReview.title(),
                                 placeReview.contentsLabel(),

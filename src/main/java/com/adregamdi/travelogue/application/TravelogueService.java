@@ -178,17 +178,17 @@ public class TravelogueService {
 
         for (CreateMyTravelogueRequest.DayInfo dayInfo : days) {
             TravelogueDay travelogueDay = travelogueDayRepository.save(new TravelogueDay(travelogueId, dayInfo.date(), dayInfo.day(), dayInfo.content()));
-            saveTravelogueDayPlaceReview(dayInfo.placeReviewList(), travelogueDay.getTravelogueDayId());
+            saveTravelogueDayPlaceReview(dayInfo.placeList(), travelogueDay.getTravelogueDayId());
         }
     }
 
     private void saveTravelogueDayPlaceReview(
-            final List<CreateMyTravelogueRequest.PlaceReviewInfo> placeReviews,
+            final List<CreateMyTravelogueRequest.PlaceInfo> placeReviews,
             final Long travelogueDayId
     ) {
-        List<CreateMyTravelogueRequest.PlaceReviewInfo> reviews = (placeReviews != null) ? placeReviews : Collections.emptyList();
+        List<CreateMyTravelogueRequest.PlaceInfo> reviews = (placeReviews != null) ? placeReviews : Collections.emptyList();
 
-        for (CreateMyTravelogueRequest.PlaceReviewInfo reviewInfo : reviews) {
+        for (CreateMyTravelogueRequest.PlaceInfo reviewInfo : reviews) {
             travelogueDayPlaceReviewRepository.save(new TravelogueDayPlaceReview(travelogueDayId, reviewInfo.placeReviewId()));
         }
     }

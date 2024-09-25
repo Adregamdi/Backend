@@ -200,7 +200,7 @@ public class LikesCustomRepositoryImpl implements LikesCustomRepository {
                         tuple.get(travelogue.travelogueId),
                         tuple.get(travelogue.title),
                         imageMap.getOrDefault(tuple.get(travelogue.travelogueId), Collections.emptyList()).stream().limit(5).toList(),
-                        tuple.get(member.name),
+                        tuple.get(member.handle),
                         tuple.get(member.profile)
                 ))
                 .collect(Collectors.toList());

@@ -18,6 +18,7 @@ public record GetMyTravelResponse(
         TravelInfo travel
 ) {
     public static GetMyTravelResponse of(
+            final boolean existTravelogue,
             final Travel travel,
             final List<TravelDay> travelDays,
             final List<List<TravelPlaceDTO>> travelPlaces
@@ -55,6 +56,7 @@ public record GetMyTravelResponse(
                 .collect(Collectors.toList());
 
         TravelInfo travelData = TravelInfo.builder()
+                .existTravelogue(existTravelogue)
                 .travelId(travel.getTravelId())
                 .startDate(travel.getStartDate())
                 .endDate(travel.getEndDate())
@@ -69,6 +71,7 @@ public record GetMyTravelResponse(
 
     @Builder
     public record TravelInfo(
+            boolean existTravelogue,
             Long travelId,
             LocalDate startDate,
             LocalDate endDate,

@@ -135,6 +135,22 @@ public class TravelogueService {
                 travelogueImageRepository.saveAll(travelogueImages);
                 saveOrUpdateImages(request.travelogueId(), requestImages);
             }
+
+            List<TravelogueDay> travelogueDays = travelogueDayRepository.findByTravelogueIdOrderByDay(travelogue.getTravelogueId())
+                    .orElse(Collections.emptyList());
+            List<CreateMyTravelogueRequest.DayInfo> days = (request.dayList() != null) ? request.dayList() : Collections.emptyList();
+            for (int i = 0; i < travelogueDays.size(); i++) {
+                List<TravelogueDayPlaceReview> travelogueDayPlaceReviews = travelogueDayPlaceReviewRepository.findByTravelogueDayId(request.travelogueId());
+
+                for (int j = 0; j < travelogueDayPlaceReviews.size(); j++) {
+                    if (travelogueDayPlaceReviews.get(j).getPlaceReviewId() == null) {
+                        travelogueDayPlaceReviews.get(j).update(
+                                travelogueDayPlaceReviews.get(j).getTravelogueDayId(),
+                                travelogueDayPlaceReviews.get(j).getPlaceId(),
+                                days.get(i).placeList().get(j).placeReviewId());
+                    }
+                }
+            }
         }
         return CreateMyTravelogueResponse.from(travelogue.getTravelogueId());
     }

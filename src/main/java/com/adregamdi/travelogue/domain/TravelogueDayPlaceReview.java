@@ -28,4 +28,10 @@ public class TravelogueDayPlaceReview {
         this.placeId = placeId;
         this.placeReviewId = placeReviewId;
     }
+
+    public void update(Long travelogueDayId, Long placeId, Long placeReviewId) {
+        this.travelogueDayId = travelogueDayId;
+        this.placeId = placeId;
+        this.placeReviewId = placeReviewId;
+    }
 }

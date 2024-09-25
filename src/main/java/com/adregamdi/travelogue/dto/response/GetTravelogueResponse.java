@@ -80,9 +80,12 @@ public record GetTravelogueResponse(
     @Builder
     public record PlaceReviewInfo(
             Long placeId,
+            Long placeReviewId,
             String title,
             String contentsLabel,
             String regionLabel,
+            Double latitude,
+            Double longitude,
             String content,
             List<PlaceReviewImageInfo> placeReviewImageList
     ) {

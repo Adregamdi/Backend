@@ -224,9 +224,12 @@ public class TravelogueService {
 
                         return GetTravelogueResponse.PlaceReviewInfo.builder()
                                 .placeId(place.getPlaceId())
+                                .placeReviewId(placeReview.getPlaceReviewId())
                                 .title(place.getTitle())
                                 .contentsLabel(place.getContentsLabel())
                                 .regionLabel(place.getRegionLabel())
+                                .latitude(place.getLatitude())
+                                .longitude(place.getLongitude())
                                 .content(placeReview.getContent())
                                 .placeReviewImageList(images.stream()
                                         .map(img -> new GetTravelogueResponse.PlaceReviewImageInfo(img.getUrl()))

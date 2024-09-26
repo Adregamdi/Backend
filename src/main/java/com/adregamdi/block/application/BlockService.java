@@ -3,6 +3,7 @@ package com.adregamdi.block.application;
 import com.adregamdi.block.domain.Block;
 import com.adregamdi.block.dto.request.CreateBlockRequest;
 import com.adregamdi.block.dto.request.DeleteBlockRequest;
+import com.adregamdi.block.dto.response.GetMyBlockingMembers;
 import com.adregamdi.block.exception.BlockException;
 import com.adregamdi.block.infrastructure.BlockRepository;
 import com.adregamdi.member.exception.MemberException;
@@ -11,6 +12,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -34,6 +37,16 @@ public class BlockService {
                 .blockedMemberId(request.blockedMemberId())
                 .blockingMemberId(memberId)
                 .build());
+    }
+
+    @Transactional(readOnly = true)
+    public GetMyBlockingMembers getMyBlockingMembers(final String memberId) {
+        memberRepository.findById(memberId)
+                .orElseThrow(() -> new MemberException.MemberNotFoundException(memberId));
+
+        List<Block> blocks = blockRepository.findByBlockingMemberId(memberId);
+        
+        return GetMyBlockingMembers.from(blocks);
     }
 
     @Transactional

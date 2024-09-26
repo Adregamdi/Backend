@@ -2,14 +2,15 @@ package com.adregamdi.travelogue.domain;
 
 import com.adregamdi.core.entity.BaseTime;
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.AccessLevel;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@AllArgsConstructor
-@Builder
 @Entity
 @Table(name = "tbl_travelogue_day")
 public class TravelogueDay extends BaseTime {
@@ -25,6 +26,7 @@ public class TravelogueDay extends BaseTime {
     @Column
     private String content; // 내용
 
+    @Builder
     public TravelogueDay(Long travelogueId, LocalDate date, Integer day, String content) {
         this.travelogueId = travelogueId;
         this.date = date;

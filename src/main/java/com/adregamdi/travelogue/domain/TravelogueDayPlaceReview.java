@@ -1,12 +1,13 @@
 package com.adregamdi.travelogue.domain;
 
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.AccessLevel;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@AllArgsConstructor
-@Builder
 @Entity
 @Table(name = "tbl_travelogue_day_place_review")
 public class TravelogueDayPlaceReview {
@@ -16,12 +17,21 @@ public class TravelogueDayPlaceReview {
 
     @Column(nullable = false)
     private Long travelogueDayId;
-
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false)
+    private Long placeId;
+    @Column
     private Long placeReviewId;
 
-    public TravelogueDayPlaceReview(Long travelogueDayId, Long placeReviewId) {
+    @Builder
+    public TravelogueDayPlaceReview(Long travelogueDayId, Long placeId, Long placeReviewId) {
         this.travelogueDayId = travelogueDayId;
+        this.placeId = placeId;
+        this.placeReviewId = placeReviewId;
+    }
+
+    public void update(Long travelogueDayId, Long placeId, Long placeReviewId) {
+        this.travelogueDayId = travelogueDayId;
+        this.placeId = placeId;
         this.placeReviewId = placeReviewId;
     }
 }

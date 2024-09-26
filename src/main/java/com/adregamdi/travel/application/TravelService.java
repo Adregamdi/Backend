@@ -84,6 +84,7 @@ public class TravelService {
                     if (request.dayList().get(day - 1).placeList() != null && !request.dayList().get(day - 1).placeList().isEmpty()) {
                         for (int i = 0; i < request.dayList().get(day - 1).placeList().size(); i++) {
                             travelPlaceRepository.save(new TravelPlace(travelDay.getTravelDayId(), request.dayList().get(day - 1).placeList().get(i).placeId(), request.dayList().get(day - 1).placeList().get(i).placeOrder()));
+                            placeService.addCount(request.dayList().get(day - 1).placeList().get(i).placeId(), true);
                         }
                     }
                 } else {

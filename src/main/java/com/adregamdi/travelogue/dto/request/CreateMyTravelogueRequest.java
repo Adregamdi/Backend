@@ -30,12 +30,14 @@ public record CreateMyTravelogueRequest(
             @Positive
             Integer day,
             String content,
-            List<PlaceReviewInfo> placeReviewList
+            List<PlaceInfo> placeList
     ) {
     }
 
-    public record PlaceReviewInfo(
+    public record PlaceInfo(
             @NotNull
+            @Positive
+            Long placeId,
             @Positive
             Long placeReviewId
     ) {

@@ -1,5 +1,6 @@
 package com.adregamdi.core.handler;
 
+import com.adregamdi.block.exception.BlockException;
 import com.adregamdi.like.exception.LikesException;
 import com.adregamdi.media.exception.ImageException;
 import com.adregamdi.member.exception.MemberException;
@@ -115,7 +116,8 @@ public class GlobalExceptionHandler {
             PlaceException.PlaceExistException.class,
             PlaceException.PlaceReviewExistException.class,
             ShortsException.ShortsExistException.class,
-            TravelogueException.TravelogueExistException.class
+            TravelogueException.TravelogueExistException.class,
+            BlockException.BlockExistException.class
     })
     public ResponseEntity<ErrorResponse> handleExistException(final RuntimeException exception) {
         log.warn(exception.getMessage());

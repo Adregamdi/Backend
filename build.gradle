@@ -72,6 +72,9 @@ dependencies {
 
     // 썸네일 제작을 위한 라이브러리
     implementation 'org.bytedeco:javacv-platform:1.5.9'
+
+    // 이미지 메타데이터 추출 라이브러리
+    implementation 'com.drewnoakes:metadata-extractor:2.18.0'
 }
 
 tasks.named('test') {

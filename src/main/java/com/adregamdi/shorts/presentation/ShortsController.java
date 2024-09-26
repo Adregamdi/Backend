@@ -119,6 +119,23 @@ public class ShortsController {
                         .build());
     }
 
+    @PostMapping("/upload-video")
+    @MemberAuthorize
+    public ResponseEntity<ApiResponse<SaveVideoResponse>> uploadVideo(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @RequestPart("shorts") MultipartFile videoFile
+    ) throws EncoderException {
+
+        UploadVideoDTO videoUrlDTO = videoService.uploadVideo(videoFile, userDetails.getUsername());
+        SaveVideoResponse response = shortsService.saveVideo(videoUrlDTO, userDetails.getUsername());
+
+        return ResponseEntity.ok()
+                .body(ApiResponse.<SaveVideoResponse>builder()
+                        .statusCode(HttpStatus.OK.value())
+                        .data(response)
+                        .build());
+    }
+
     @GetMapping("/stream/{shorts_id}")
     @MemberAuthorize
     public ResponseEntity<StreamingResponseBody> streamShort(@PathVariable(value = "shorts_id") Long shortsId) {
@@ -174,23 +191,6 @@ public class ShortsController {
         return ResponseEntity.ok()
                 .headers(responseHeaders)
                 .body(responseBody);
-    }
-
-    @PostMapping("/upload-video")
-    @MemberAuthorize
-    public ResponseEntity<ApiResponse<SaveVideoResponse>> uploadVideo(
-            @AuthenticationPrincipal UserDetails userDetails,
-            @RequestPart("shorts") MultipartFile videoFile
-    ) throws EncoderException {
-
-        UploadVideoDTO videoUrlDTO = videoService.uploadVideo(videoFile, userDetails.getUsername());
-        SaveVideoResponse response = shortsService.saveVideo(videoUrlDTO, userDetails.getUsername());
-
-        return ResponseEntity.ok()
-                .body(ApiResponse.<SaveVideoResponse>builder()
-                        .statusCode(HttpStatus.OK.value())
-                        .data(response)
-                        .build());
     }
 
     @PostMapping("")

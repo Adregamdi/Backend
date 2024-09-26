@@ -100,7 +100,8 @@ public class GlobalExceptionHandler {
             TravelogueException.TravelogueDayNotFoundException.class,
             ShortsException.ShortsNotFoundException.class,
             ImageException.ImageNotFoundException.class,
-            LikesException.LikesNotFoundException.class
+            LikesException.LikesNotFoundException.class,
+            BlockException.BlockNotFoundException.class
     })
     public ResponseEntity<ErrorResponse> handleNotFoundException(final RuntimeException exception) {
         log.warn(exception.getMessage());

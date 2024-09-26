@@ -5,6 +5,17 @@ public class BlockException extends RuntimeException {
         super(message);
     }
 
+    public static class BlockNotFoundException extends BlockException {
+
+        public BlockNotFoundException() {
+            super("차단이 존재하지 않습니다.");
+        }
+
+        public BlockNotFoundException(final Object data) {
+            super(String.format("차단이 존재하지 않습니다. - request info => %s", data));
+        }
+    }
+
     public static class BlockExistException extends BlockException {
 
         public BlockExistException() {

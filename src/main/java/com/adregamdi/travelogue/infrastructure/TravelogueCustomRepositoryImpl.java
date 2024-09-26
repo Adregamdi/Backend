@@ -33,6 +33,7 @@ public class TravelogueCustomRepositoryImpl implements TravelogueCustomRepositor
         List<Tuple> results = jpaQueryFactory
                 .select(travelogue.travelogueId,
                         travelogue.title,
+                        member.profile,
                         member.handle,
                         travelogueImage.url)
                 .from(travelogue)
@@ -77,6 +78,7 @@ public class TravelogueCustomRepositoryImpl implements TravelogueCustomRepositor
         List<Tuple> results = jpaQueryFactory
                 .select(travelogue.travelogueId,
                         travelogue.title,
+                        member.profile,
                         member.handle,
                         travelogueImage.url)
                 .from(travelogue)

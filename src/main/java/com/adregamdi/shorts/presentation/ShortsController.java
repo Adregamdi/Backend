@@ -222,7 +222,7 @@ public class ShortsController {
                         .build());
     }
 
-    @DeleteMapping("/{shorts_id}")
+    @DeleteMapping("/delete/{shorts_id}")
     @MemberAuthorize
     public ResponseEntity<ApiResponse<Void>> deleteShort(
             @AuthenticationPrincipal UserDetails userDetails,

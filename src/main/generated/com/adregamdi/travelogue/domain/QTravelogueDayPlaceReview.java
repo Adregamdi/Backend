@@ -21,6 +21,8 @@ public class QTravelogueDayPlaceReview extends EntityPathBase<TravelogueDayPlace
 
     public final NumberPath<Long> id = createNumber("id", Long.class);
 
+    public final NumberPath<Long> placeId = createNumber("placeId", Long.class);
+
     public final NumberPath<Long> placeReviewId = createNumber("placeReviewId", Long.class);
 
     public final NumberPath<Long> travelogueDayId = createNumber("travelogueDayId", Long.class);

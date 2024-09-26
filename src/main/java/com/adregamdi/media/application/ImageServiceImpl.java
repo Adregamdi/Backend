@@ -4,6 +4,11 @@ import com.adregamdi.media.domain.Image;
 import com.adregamdi.media.domain.ImageTarget;
 import com.adregamdi.media.exception.ImageException;
 import com.adregamdi.media.infrastructure.ImageRepository;
+import com.drew.imaging.ImageMetadataReader;
+import com.drew.imaging.ImageProcessingException;
+import com.drew.metadata.Directory;
+import com.drew.metadata.Metadata;
+import com.drew.metadata.exif.ExifIFD0Directory;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.imgscalr.Scalr;
@@ -218,15 +223,12 @@ public class ImageServiceImpl implements ImageService {
         String fileExtension = imageValidService.getFileExtension(Objects.requireNonNull(multipartFile.getOriginalFilename()));
         log.info("fileExtension: {}", fileExtension);
 
-        // HEIC/HEIF 파일은 리사이징하지 않고 그대로 반환
-        if (imageValidService.isHeifOrHeic(fileExtension)) {
-            return multipartFile.getBytes();
-        }
-
         BufferedImage originalImage = ImageIO.read(multipartFile.getInputStream());
         if (originalImage == null) {
             throw new IOException("이미지 리사이징 중 오류가 발생하였습니다.");
         }
+
+        originalImage = rotateImageIfRequired(originalImage, multipartFile);
 
         BufferedImage resizedImage = Scalr.resize(
                 originalImage,
@@ -245,6 +247,28 @@ public class ImageServiceImpl implements ImageService {
 
         log.info("성공적으로 이미지가 리사이징되었습니다.");
         return outputStream.toByteArray();
+    }
+
+
+    private BufferedImage rotateImageIfRequired(BufferedImage image, MultipartFile multipartFile) throws IOException {
+        try {
+            Metadata metadata = ImageMetadataReader.readMetadata(multipartFile.getInputStream());
+            Directory directory = metadata.getFirstDirectoryOfType(ExifIFD0Directory.class);
+            if (directory != null && directory.containsTag(ExifIFD0Directory.TAG_ORIENTATION)) {
+                int orientation = directory.getInt(ExifIFD0Directory.TAG_ORIENTATION);
+                switch (orientation) {
+                    case 3:
+                        return Scalr.rotate(image, Scalr.Rotation.CW_180);
+                    case 6:
+                        return Scalr.rotate(image, Scalr.Rotation.CW_90);
+                    case 8:
+                        return Scalr.rotate(image, Scalr.Rotation.CW_270);
+                }
+            }
+        } catch (ImageProcessingException | com.drew.metadata.MetadataException e) {
+            log.warn("이미지 방향 정보 읽기 실패", e);
+        }
+        return image;
     }
 
     @Override

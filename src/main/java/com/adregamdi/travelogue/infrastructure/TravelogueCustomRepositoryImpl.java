@@ -51,6 +51,7 @@ public class TravelogueCustomRepositoryImpl implements TravelogueCustomRepositor
                     id -> new TravelogueDTO(
                             id,
                             row.get(travelogue.title),
+                            row.get(member.profile),
                             row.get(member.handle),
                             new ArrayList<>()
                     )
@@ -93,6 +94,7 @@ public class TravelogueCustomRepositoryImpl implements TravelogueCustomRepositor
                     id -> new TravelogueDTO(
                             id,
                             row.get(travelogue.title),
+                            row.get(member.profile),
                             row.get(member.handle),
                             new ArrayList<>()
                     )

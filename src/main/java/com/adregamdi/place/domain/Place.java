@@ -51,10 +51,10 @@ public class Place extends BaseTime {
     private Integer addCount; // 장소 카운트
 
     @Builder
-    private Place(String title, String contentsId, String contentsLabel, String regionLabel,
-                  String region1Cd, String region2Cd, String address, String roadAddress,
-                  String tag, String introduction, String information, Double latitude,
-                  Double longitude, String phoneNo, String imgPath, String thumbnailPath
+    public Place(String title, String contentsId, String contentsLabel, String regionLabel,
+                 String region1Cd, String region2Cd, String address, String roadAddress,
+                 String tag, String introduction, String information, Double latitude,
+                 Double longitude, String phoneNo, String imgPath, String thumbnailPath
     ) {
         this.title = title;
         this.contentsId = contentsId;

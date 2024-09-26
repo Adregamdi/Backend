@@ -8,6 +8,7 @@ import java.util.List;
 
 @Builder
 public record MyPlaceReviewDTO(
+        Long placeId,
         Long placeReviewId,
         String title,
         String contentsLabel,
@@ -23,6 +24,7 @@ public record MyPlaceReviewDTO(
         String handle
 ) {
     public static MyPlaceReviewDTO of(
+            final Long placeId,
             final Long placeReviewId,
             final String title,
             final String contentsLabel,
@@ -38,6 +40,7 @@ public record MyPlaceReviewDTO(
             final String handle
     ) {
         return MyPlaceReviewDTO.builder()
+                .placeId(placeId)
                 .placeReviewId(placeReviewId)
                 .title(title)
                 .contentsLabel(contentsLabel)

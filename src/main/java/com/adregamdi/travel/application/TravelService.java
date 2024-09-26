@@ -20,6 +20,8 @@ import com.adregamdi.travel.exception.TravelException.TravelPlaceNotFoundExcepti
 import com.adregamdi.travel.infrastructure.TravelDayRepository;
 import com.adregamdi.travel.infrastructure.TravelPlaceRepository;
 import com.adregamdi.travel.infrastructure.TravelRepository;
+import com.adregamdi.travelogue.domain.Travelogue;
+import com.adregamdi.travelogue.infrastructure.TravelogueRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Slice;
@@ -43,6 +45,7 @@ public class TravelService {
     private final TravelRepository travelRepository;
     private final TravelDayRepository travelDayRepository;
     private final TravelPlaceRepository travelPlaceRepository;
+    private final TravelogueRepository travelogueRepository;
 
     /*
      * 일정 등록/수정
@@ -203,7 +206,9 @@ public class TravelService {
             }
             travelPlaceDTOList.add(travelPlaceDTOS);
         }
-        return GetMyTravelResponse.of(travel, travelDays, travelPlaceDTOList);
+
+        Travelogue travelogue = travelogueRepository.findByTravelId(travelId);
+        return GetMyTravelResponse.of(travelogue != null, travel, travelDays, travelPlaceDTOList);
     }
 
     /*

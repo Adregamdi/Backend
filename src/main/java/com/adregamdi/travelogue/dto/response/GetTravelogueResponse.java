@@ -32,7 +32,7 @@ public record GetTravelogueResponse(
             final Travelogue travelogue,
             final List<TravelogueImage> travelogueImages,
             final List<TravelogueDay> travelogueDays,
-            final Map<Long, List<PlaceReviewInfo>> placeReviewsMap
+            final Map<Long, List<PlaceInfo>> placeReviewsMap
     ) {
         List<TravelogueImageInfo> travelogueImageInfos = travelogueImages.stream()
                 .map(image -> new TravelogueImageInfo(image.getUrl()))
@@ -73,16 +73,19 @@ public record GetTravelogueResponse(
             LocalDate date,
             Integer day,
             String content,
-            List<PlaceReviewInfo> placeReviewList
+            List<PlaceInfo> placeList
     ) {
     }
 
     @Builder
-    public record PlaceReviewInfo(
+    public record PlaceInfo(
             Long placeId,
+            Long placeReviewId,
             String title,
             String contentsLabel,
             String regionLabel,
+            Double latitude,
+            Double longitude,
             String content,
             List<PlaceReviewImageInfo> placeReviewImageList
     ) {

@@ -210,11 +210,11 @@ public class TravelogueService {
         List<TravelogueDay> travelogueDays = travelogueDayRepository.findByTravelogueIdOrderByDay(travelogueId)
                 .orElse(Collections.emptyList());
 
-        Map<Long, List<GetTravelogueResponse.PlaceReviewInfo>> placeReviewsMap = new LinkedHashMap<>();
+        Map<Long, List<GetTravelogueResponse.PlaceInfo>> placeReviewsMap = new LinkedHashMap<>();
         for (TravelogueDay travelogueDay : travelogueDays) {
             List<TravelogueDayPlaceReview> travelogueDayPlaceReviews = travelogueDayPlaceReviewRepository.findByTravelogueDayId(travelogueDay.getTravelogueDayId());
 
-            List<GetTravelogueResponse.PlaceReviewInfo> placeReviewInfos = travelogueDayPlaceReviews.stream()
+            List<GetTravelogueResponse.PlaceInfo> placeReviewInfos = travelogueDayPlaceReviews.stream()
                     .map(tdpr -> {
                         PlaceReview placeReview = placeReviewRepository.findById(tdpr.getPlaceReviewId())
                                 .orElseThrow(() -> new PlaceException.PlaceReviewNotFoundException(tdpr.getPlaceReviewId()));
@@ -222,11 +222,14 @@ public class TravelogueService {
                                 .orElseThrow(() -> new PlaceException.PlaceNotFoundException(placeReview.getPlaceId()));
                         List<PlaceReviewImage> images = placeReviewImageRepository.findByPlaceReviewIdOrderByPlaceReviewImageIdDesc(placeReview.getPlaceReviewId());
 
-                        return GetTravelogueResponse.PlaceReviewInfo.builder()
+                        return GetTravelogueResponse.PlaceInfo.builder()
                                 .placeId(place.getPlaceId())
+                                .placeReviewId(placeReview.getPlaceReviewId())
                                 .title(place.getTitle())
                                 .contentsLabel(place.getContentsLabel())
                                 .regionLabel(place.getRegionLabel())
+                                .latitude(place.getLatitude())
+                                .longitude(place.getLongitude())
                                 .content(placeReview.getContent())
                                 .placeReviewImageList(images.stream()
                                         .map(img -> new GetTravelogueResponse.PlaceReviewImageInfo(img.getUrl()))

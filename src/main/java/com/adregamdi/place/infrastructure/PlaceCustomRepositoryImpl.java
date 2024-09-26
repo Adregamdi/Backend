@@ -47,15 +47,15 @@ public class PlaceCustomRepositoryImpl implements PlaceCustomRepository {
         BooleanExpression whereCondition = ltAddCountAndGtPlaceId(lastAddCount, lastId);
 
         // 사진 리뷰 카운트를 위한 서브쿼리
-        JPQLQuery<Long> imageReviewCountSubQuery = JPAExpressions
-                .selectDistinct(placeReview.count())
+        JPQLQuery<Long> photoReviewCountSubQuery = JPAExpressions
+                .select(placeReview.countDistinct())
                 .from(placeReview)
                 .leftJoin(placeReviewImage).on(placeReviewImage.placeReviewId.eq(placeReview.placeReviewId))
                 .where(placeReview.placeId.eq(place.placeId).and(placeReviewImage.url.isNotNull()));
 
         List<Tuple> results = jpaQueryFactory
                 .select(place,
-                        Expressions.as(imageReviewCountSubQuery, "photoReviewCount"),
+                        Expressions.as(photoReviewCountSubQuery, "photoReviewCount"),
                         shorts.count(),
                         placeReviewImage.url,
                         placeReviewImage.placeReviewImageId)
@@ -66,7 +66,7 @@ public class PlaceCustomRepositoryImpl implements PlaceCustomRepository {
                 .where(whereCondition)
                 .groupBy(place.placeId, placeReviewImage.url, placeReviewImage.placeReviewImageId)
                 .orderBy(place.addCount.desc(),
-                        new OrderSpecifier<>(Order.DESC, Expressions.asNumber(imageReviewCountSubQuery)),
+                        new OrderSpecifier<>(Order.DESC, Expressions.asNumber(photoReviewCountSubQuery)),
                         place.placeId.asc(),
                         placeReviewImage.placeReviewImageId.desc())
                 .limit(11)
@@ -103,22 +103,22 @@ public class PlaceCustomRepositoryImpl implements PlaceCustomRepository {
             return null;
         }
 
-        JPQLQuery<Long> imageReviewCountSubQuery = JPAExpressions
+        JPQLQuery<Long> photoReviewCountSubQuery = JPAExpressions
                 .selectDistinct(placeReview.count())
                 .from(placeReview)
                 .leftJoin(placeReviewImage).on(placeReviewImage.placeReviewId.eq(placeReview.placeReviewId))
                 .where(placeReview.placeId.eq(place.placeId).and(placeReviewImage.url.isNotNull()));
 
-        JPQLQuery<Long> lastImageReviewCountSubQuery = JPAExpressions
+        JPQLQuery<Long> lastPhotoReviewCountSubQuery = JPAExpressions
                 .selectDistinct(placeReview.count())
                 .from(placeReview)
                 .leftJoin(placeReviewImage).on(placeReviewImage.placeReviewId.eq(placeReview.placeReviewId))
                 .where(placeReview.placeId.eq(lastId).and(placeReviewImage.url.isNotNull()));
 
         return place.addCount.lt(lastAddCount)
-                .or(place.addCount.eq(lastAddCount).and(Expressions.asNumber(imageReviewCountSubQuery).gt(Expressions.asNumber(lastImageReviewCountSubQuery))))
+                .or(place.addCount.eq(lastAddCount).and(Expressions.asNumber(photoReviewCountSubQuery).gt(Expressions.asNumber(lastPhotoReviewCountSubQuery))))
                 .or(place.addCount.eq(lastAddCount)
-                        .and(Expressions.asNumber(imageReviewCountSubQuery).eq(Expressions.asNumber(imageReviewCountSubQuery)))
+                        .and(Expressions.asNumber(photoReviewCountSubQuery).eq(Expressions.asNumber(photoReviewCountSubQuery)))
                         .and(place.placeId.gt(lastId)));
     }
 }

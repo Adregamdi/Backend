@@ -243,8 +243,13 @@ public class TravelogueService {
                     .map(tdpr -> {
                         Place place = placeRepository.findById(tdpr.getPlaceId())
                                 .orElseThrow(() -> new PlaceException.PlaceNotFoundException(tdpr.getPlaceId()));
-                        PlaceReview placeReview = placeReviewRepository.findById(tdpr.getPlaceReviewId())
-                                .orElse(PlaceReview.builder().build());
+
+                        PlaceReview placeReview = PlaceReview.builder().build();
+                        if (tdpr.getPlaceReviewId() != null) {
+                            placeReview = placeReviewRepository.findById(tdpr.getPlaceReviewId())
+                                    .orElseThrow(() -> new PlaceException.PlaceReviewNotFoundException(tdpr.getPlaceReviewId()));
+                        }
+                        
                         List<PlaceReviewImage> images = placeReviewImageRepository.findByPlaceReviewIdOrderByPlaceReviewImageIdDesc(placeReview.getPlaceReviewId());
 
                         return GetTravelogueResponse.PlaceInfo.builder()

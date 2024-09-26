@@ -2,6 +2,7 @@ package com.adregamdi.block.presentation;
 
 import com.adregamdi.block.application.BlockService;
 import com.adregamdi.block.dto.request.CreateBlockRequest;
+import com.adregamdi.block.dto.request.DeleteBlockRequest;
 import com.adregamdi.core.annotation.MemberAuthorize;
 import com.adregamdi.core.handler.ApiResponse;
 import lombok.RequiredArgsConstructor;
@@ -10,10 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @Validated
 @RequiredArgsConstructor
@@ -32,6 +30,20 @@ public class BlockController {
         return ResponseEntity.ok()
                 .body(ApiResponse.<Void>builder()
                         .statusCode(HttpStatus.CREATED.value())
+                        .build()
+                );
+    }
+
+    @DeleteMapping
+    @MemberAuthorize
+    public ResponseEntity<ApiResponse<Void>> delete(
+            @AuthenticationPrincipal final UserDetails userDetails,
+            @RequestBody final DeleteBlockRequest request
+    ) {
+        blockService.delete(userDetails.getUsername(), request);
+        return ResponseEntity.ok()
+                .body(ApiResponse.<Void>builder()
+                        .statusCode(HttpStatus.OK.value())
                         .build()
                 );
     }

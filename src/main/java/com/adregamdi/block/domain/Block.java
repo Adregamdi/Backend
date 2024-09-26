@@ -21,7 +21,7 @@ public class Block extends BaseTime {
     private String blockingMemberId;
 
     @Builder
-    public Block(String blockedMemberId, String blockingMemberId) {
+    private Block(String blockedMemberId, String blockingMemberId) {
         this.blockedMemberId = blockedMemberId;
         this.blockingMemberId = blockingMemberId;
     }

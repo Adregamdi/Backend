@@ -34,7 +34,7 @@ public class BlockService {
                 .orElseThrow(() -> new MemberException.MemberNotFoundException(request.blockedMemberId()));
 
         blockRepository.findByBlockedMemberIdAndBlockingMemberId(request.blockedMemberId(), memberId)
-                .orElseThrow(BlockException.BlockExistException::new);
+                .ifPresent(BlockException.BlockExistException::new);
 
         blockRepository.save(Block.builder()
                 .blockedMemberId(request.blockedMemberId())

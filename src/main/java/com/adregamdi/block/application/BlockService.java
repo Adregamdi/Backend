@@ -22,6 +22,9 @@ public class BlockService {
     private final BlockRepository blockRepository;
     private final MemberRepository memberRepository;
 
+    /*
+     * 차단하기
+     * */
     @Transactional
     public void create(final String memberId, final CreateBlockRequest request) {
         memberRepository.findById(memberId)
@@ -39,16 +42,22 @@ public class BlockService {
                 .build());
     }
 
+    /*
+     * 내 차단 목록 조회
+     * */
     @Transactional(readOnly = true)
     public GetMyBlockingMembers getMyBlockingMembers(final String memberId) {
         memberRepository.findById(memberId)
                 .orElseThrow(() -> new MemberException.MemberNotFoundException(memberId));
 
         List<Block> blocks = blockRepository.findByBlockingMemberId(memberId);
-        
+
         return GetMyBlockingMembers.from(blocks);
     }
 
+    /*
+     * 차단해제
+     * */
     @Transactional
     public void delete(final String memberId, final DeleteBlockRequest request) {
         memberRepository.findById(memberId)

@@ -1,5 +1,7 @@
 package com.adregamdi.travelogue.application;
 
+import com.adregamdi.block.exception.BlockException;
+import com.adregamdi.block.infrastructure.BlockRepository;
 import com.adregamdi.like.application.LikesService;
 import com.adregamdi.like.domain.enumtype.ContentType;
 import com.adregamdi.media.application.ImageService;
@@ -59,6 +61,7 @@ public class TravelogueService {
     private final PlaceReviewRepository placeReviewRepository;
     private final PlaceReviewImageRepository placeReviewImageRepository;
     private final MemberRepository memberRepository;
+    private final BlockRepository blockRepository;
 
     /*
      * 여행기 등록
@@ -229,6 +232,9 @@ public class TravelogueService {
         Member member = memberRepository.findById(travelogue.getMemberId())
                 .orElseThrow(() -> new MemberException.MemberNotFoundException(travelogue.getMemberId()));
 
+        blockRepository.findByBlockedMemberIdAndBlockingMemberId(travelogue.getMemberId(), memberId)
+                .ifPresent(BlockException.BlockExistException::new);
+
         List<TravelogueImage> travelogueImages = travelogueImageRepository.findByTravelogueId(travelogueId)
                 .orElse(Collections.emptyList());
 
@@ -249,7 +255,7 @@ public class TravelogueService {
                             placeReview = placeReviewRepository.findById(tdpr.getPlaceReviewId())
                                     .orElseThrow(() -> new PlaceException.PlaceReviewNotFoundException(tdpr.getPlaceReviewId()));
                         }
-                        
+
                         List<PlaceReviewImage> images = placeReviewImageRepository.findByPlaceReviewIdOrderByPlaceReviewImageIdDesc(placeReview.getPlaceReviewId());
 
                         return GetTravelogueResponse.PlaceInfo.builder()
@@ -290,8 +296,11 @@ public class TravelogueService {
         );
     }
 
-    public GetRecentTraveloguesResponse getRecentTravelogues(final int page) {
-        Slice<TravelogueDTO> travelogues = travelogueRepository.findOrderByCreatedAt(generatePageDesc(page, LARGE_PAGE_SIZE, "createdAt"));
+    /*
+     * 최근 등록된 여행기 조회
+     * */
+    public GetRecentTraveloguesResponse getRecentTravelogues(final String memberId, final int page) {
+        Slice<TravelogueDTO> travelogues = travelogueRepository.findOrderByCreatedAt(memberId, generatePageDesc(page, LARGE_PAGE_SIZE, "createdAt"));
 
         return GetRecentTraveloguesResponse.of(
                 LARGE_PAGE_SIZE,
@@ -302,7 +311,10 @@ public class TravelogueService {
         );
     }
 
-    public GetHotTraveloguesResponse getHotTravelogue(int lastLikeCount, int size) {
-        return travelogueRepository.findOrderByLikeCount(lastLikeCount, size);
+    /*
+     * 인기있는 여행기 조회
+     * */
+    public GetHotTraveloguesResponse getHotTravelogue(String memberId, int lastLikeCount, int size) {
+        return travelogueRepository.findOrderByLikeCount(memberId, lastLikeCount, size);
     }
 }

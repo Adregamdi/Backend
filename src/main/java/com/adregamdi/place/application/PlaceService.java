@@ -64,12 +64,12 @@ public interface PlaceService {
     /*
      * [특정 리뷰 조회]
      * */
-    PlaceReviewDTO getReview(final Long placeReviewId);
+    PlaceReviewDTO getReview(String username, final Long placeReviewId);
 
     /*
      * [특정 장소의 전체 리뷰 조회]
      * */
-    GetPlaceReviewsResponse getReviews(final Long placeId);
+    GetPlaceReviewsResponse getReviews(String username, final Long placeId);
 
     /*
      * [특정 장소의 전체 사진 조회]

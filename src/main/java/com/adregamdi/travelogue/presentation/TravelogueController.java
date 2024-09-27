@@ -26,8 +26,8 @@ public class TravelogueController {
     @PostMapping
     @MemberAuthorize
     public ResponseEntity<ApiResponse<CreateMyTravelogueResponse>> createMyTravelogue(
-            @RequestBody @Valid final CreateMyTravelogueRequest request,
-            @AuthenticationPrincipal final UserDetails userDetails
+            @AuthenticationPrincipal final UserDetails userDetails,
+            @RequestBody @Valid final CreateMyTravelogueRequest request
     ) {
         return ResponseEntity.ok()
                 .body(ApiResponse.<CreateMyTravelogueResponse>builder()
@@ -54,8 +54,8 @@ public class TravelogueController {
     @GetMapping("/list/me")
     @MemberAuthorize
     public ResponseEntity<ApiResponse<GetMyTraveloguesResponse>> getMyTravelogues(
-            @RequestParam(defaultValue = "0") final int page,
-            @AuthenticationPrincipal final UserDetails userDetails
+            @AuthenticationPrincipal final UserDetails userDetails,
+            @RequestParam(defaultValue = "0") final int page
     ) {
         return ResponseEntity.ok()
                 .body(ApiResponse.<GetMyTraveloguesResponse>builder()
@@ -67,11 +67,14 @@ public class TravelogueController {
 
     @GetMapping("/list/recent")
     @MemberAuthorize
-    public ResponseEntity<ApiResponse<GetRecentTraveloguesResponse>> getRecentTravelogues(@RequestParam(defaultValue = "0") final int page) {
+    public ResponseEntity<ApiResponse<GetRecentTraveloguesResponse>> getRecentTravelogues(
+            @AuthenticationPrincipal final UserDetails userDetails,
+            @RequestParam(defaultValue = "0") final int page
+    ) {
         return ResponseEntity.ok()
                 .body(ApiResponse.<GetRecentTraveloguesResponse>builder()
                         .statusCode(HttpStatus.OK.value())
-                        .data(travelogueService.getRecentTravelogues(page))
+                        .data(travelogueService.getRecentTravelogues(userDetails.getUsername(), page))
                         .build()
                 );
     }
@@ -79,13 +82,14 @@ public class TravelogueController {
     @GetMapping("/list/hot")
     @MemberAuthorize
     public ResponseEntity<ApiResponse<GetHotTraveloguesResponse>> getHotTravelogues(
+            @AuthenticationPrincipal final UserDetails userDetails,
             @RequestParam(value = "like_count", required = false) @PositiveOrZero Integer lastLikeCount,
             @RequestParam(value = "size", defaultValue = "10") @Positive final int size
-            ) {
+    ) {
         return ResponseEntity.ok()
                 .body(ApiResponse.<GetHotTraveloguesResponse>builder()
                         .statusCode(HttpStatus.OK.value())
-                        .data(travelogueService.getHotTravelogue(lastLikeCount != null ? lastLikeCount : Integer.MAX_VALUE, size))
+                        .data(travelogueService.getHotTravelogue(userDetails.getUsername(), lastLikeCount != null ? lastLikeCount : Integer.MAX_VALUE, size))
                         .build());
     }
 }

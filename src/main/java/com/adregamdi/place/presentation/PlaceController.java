@@ -145,9 +145,10 @@ public class PlaceController {
     @GetMapping("/review")
     @MemberAuthorize
     public ResponseEntity<ApiResponse<GetPlaceReviewResponse>> getReview(
+            @AuthenticationPrincipal final UserDetails userDetails,
             @RequestParam("place_review_id") final Long placeReviewId
     ) {
-        PlaceReviewDTO placeReview = placeService.getReview(placeReviewId);
+        PlaceReviewDTO placeReview = placeService.getReview(userDetails.getUsername(), placeReviewId);
         return ResponseEntity.ok()
                 .body(ApiResponse.<GetPlaceReviewResponse>builder()
                         .statusCode(HttpStatus.OK.value())
@@ -172,12 +173,13 @@ public class PlaceController {
     @GetMapping("/reviews")
     @MemberAuthorize
     public ResponseEntity<ApiResponse<GetPlaceReviewsResponse>> getReviews(
+            @AuthenticationPrincipal final UserDetails userDetails,
             @RequestParam("place_id") final Long placeId
     ) {
         return ResponseEntity.ok()
                 .body(ApiResponse.<GetPlaceReviewsResponse>builder()
                         .statusCode(HttpStatus.OK.value())
-                        .data(placeService.getReviews(placeId))
+                        .data(placeService.getReviews(userDetails.getUsername(), placeId))
                         .build()
                 );
     }

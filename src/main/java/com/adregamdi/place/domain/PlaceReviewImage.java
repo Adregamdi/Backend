@@ -21,7 +21,7 @@ public class PlaceReviewImage extends BaseTime {
     private String url; // 이미지 url
 
     @Builder
-    public PlaceReviewImage(Long placeReviewId, String url) {
+    private PlaceReviewImage(Long placeReviewId, String url) {
         this.placeReviewId = placeReviewId;
         this.url = url;
     }

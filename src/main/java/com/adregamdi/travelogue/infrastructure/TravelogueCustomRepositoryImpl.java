@@ -17,6 +17,7 @@ import org.springframework.stereotype.Repository;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static com.adregamdi.block.domain.QBlock.block;
 import static com.adregamdi.core.utils.RepositoryUtil.makeOrderSpecifiers;
 import static com.adregamdi.like.domain.QLike.like;
 import static com.adregamdi.member.domain.QMember.member;
@@ -74,7 +75,7 @@ public class TravelogueCustomRepositoryImpl implements TravelogueCustomRepositor
     }
 
     @Override
-    public Slice<TravelogueDTO> findOrderByCreatedAt(final Pageable pageable) {
+    public Slice<TravelogueDTO> findOrderByCreatedAt(final String memberId, final Pageable pageable) {
         List<Tuple> results = jpaQueryFactory
                 .select(travelogue.travelogueId,
                         travelogue.title,
@@ -84,6 +85,9 @@ public class TravelogueCustomRepositoryImpl implements TravelogueCustomRepositor
                 .from(travelogue)
                 .join(member).on(travelogue.memberId.eq(member.memberId))
                 .leftJoin(travelogueImage).on(travelogue.travelogueId.eq(travelogueImage.travelogueId))
+                .leftJoin(block).on(block.blockingMemberId.eq(memberId)
+                        .and(block.blockedMemberId.eq(member.memberId)))
+                .where(block.blockId.isNull())
                 .orderBy(makeOrderSpecifiers(travelogue, pageable))
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize() + 1)
@@ -118,7 +122,7 @@ public class TravelogueCustomRepositoryImpl implements TravelogueCustomRepositor
     }
 
     @Override
-    public GetHotTraveloguesResponse findOrderByLikeCount(int lastLikeCount, int size) {
+    public GetHotTraveloguesResponse findOrderByLikeCount(String memberId, int lastLikeCount, int size) {
 
         NumberExpression<Integer> likeCountExpression = like.likeId.countDistinct().intValue();
         BooleanExpression havingCondition = lastLikeCount == -1 ? null : likeCountExpression.loe(lastLikeCount);
@@ -136,6 +140,9 @@ public class TravelogueCustomRepositoryImpl implements TravelogueCustomRepositor
                 .leftJoin(member).on(travelogue.memberId.eq(member.memberId))
                 .leftJoin(like).on(like.contentId.eq(travelogue.travelogueId)
                         .and(like.contentType.eq(ContentType.TRAVELOGUE)))
+                .leftJoin(block).on(block.blockingMemberId.eq(memberId)
+                        .and(block.blockedMemberId.eq(member.memberId)))
+                .where(block.blockId.isNull())
                 .groupBy(travelogue.travelogueId, travelogue.title, travelogue.memberId, member.handle, member.profile)
                 .having(havingCondition)
                 .orderBy(likeCountExpression.desc(), travelogue.travelogueId.desc())

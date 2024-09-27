@@ -27,7 +27,7 @@ public class PlaceReview extends BaseTime {
     private String content; // 내용
 
     @Builder
-    public PlaceReview(String memberId, Long placeId, LocalDate visitDate, String content) {
+    private PlaceReview(String memberId, Long placeId, LocalDate visitDate, String content) {
         this.memberId = memberId;
         this.placeId = placeId;
         this.visitDate = visitDate;

@@ -166,7 +166,7 @@ public class LikesCustomRepositoryImpl implements LikesCustomRepository {
     public GetLikesContentsResponse<List<TravelogueContentDTO>> getLikesContentsOfTravelogue(GetLikesContentsRequest request) {
 
         List<Tuple> results = jpaQueryFactory
-                .select(travelogue.travelogueId, travelogue.title, member.name, member.profile)
+                .select(travelogue.travelogueId, travelogue.title, member.name, member.profile, member.handle)
                 .from(like)
                 .leftJoin(travelogue).on(like.contentId.eq(travelogue.travelogueId).and(like.contentType.eq(ContentType.TRAVELOGUE)))
                 .leftJoin(member).on(travelogue.memberId.eq(member.memberId))

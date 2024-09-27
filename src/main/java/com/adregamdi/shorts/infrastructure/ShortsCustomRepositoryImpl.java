@@ -22,6 +22,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import static com.adregamdi.block.domain.QBlock.block;
 import static com.adregamdi.like.domain.QLike.like;
 import static com.adregamdi.member.domain.QMember.member;
 import static com.adregamdi.place.domain.QPlace.place;
@@ -106,6 +107,9 @@ public class ShortsCustomRepositoryImpl implements ShortsCustomRepository {
                 .leftJoin(like).on(like.contentId.eq(shorts.shortsId)
                         .and(like.contentType.eq(ContentType.SHORTS))
                         .and(like.createdAt.after(oneMonthAgo)))
+                .leftJoin(block).on(block.blockingMemberId.eq(memberId)
+                        .and(block.blockedMemberId.eq(member.memberId)))
+                .where(block.blockId.isNull())
                 .where(shorts.assignedStatus.eq(true))
                 .groupBy(shorts.shortsId, shorts.title, shorts.memberId, member.name, member.handle, member.profile,
                         shorts.placeId, place.title, shorts.travelogueId, travelogue.title, shorts.shortsVideoUrl,
@@ -167,6 +171,9 @@ public class ShortsCustomRepositoryImpl implements ShortsCustomRepository {
                 .leftJoin(place).on(shorts.placeId.eq(place.placeId))
                 .leftJoin(travelogue).on(shorts.travelogueId.eq(travelogue.travelogueId))
                 .leftJoin(travelogueImage).on(travelogue.travelogueId.eq(travelogueImage.travelogueId))
+                .leftJoin(block).on(block.blockingMemberId.eq(memberId)
+                        .and(block.blockedMemberId.eq(member.memberId)))
+                .where(block.blockId.isNull())
                 .where(condition)
                 .orderBy(orderBy)
                 .limit(size + 1)

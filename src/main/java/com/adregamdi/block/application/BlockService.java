@@ -57,14 +57,14 @@ public class BlockService {
 
         List<BlockDTO> blockInfos = new ArrayList<>();
         if (!blocks.isEmpty()) {
-            for (int i = 0; i < blocks.size(); i++) {
-                Optional<Member> blockedMember = memberRepository.findById(blocks.get(i).getBlockedMemberId());
+            for (Block block : blocks) {
+                Optional<Member> blockedMember = memberRepository.findById(block.getBlockedMemberId());
                 if (blockedMember.isEmpty()) {
                     continue;
                 }
 
                 blockInfos.add(BlockDTO.builder()
-                        .blockId(blocks.get(i).getBlockId())
+                        .blockId(block.getBlockId())
                         .blockedMemberId(blockedMember.get().getMemberId())
                         .blockedMemberName(blockedMember.get().getName())
                         .blockedMemberProfile(blockedMember.get().getProfile())
@@ -87,12 +87,9 @@ public class BlockService {
         memberRepository.findById(blockedMemberId)
                 .orElseThrow(() -> new MemberException.MemberNotFoundException(blockedMemberId));
 
-        blockRepository.findByBlockedMemberIdAndBlockingMemberId(blockedMemberId, memberId)
+        Block block = blockRepository.findByBlockedMemberIdAndBlockingMemberId(blockedMemberId, memberId)
                 .orElseThrow(BlockException.BlockNotFoundException::new);
 
-        blockRepository.delete(Block.builder()
-                .blockedMemberId(blockedMemberId)
-                .blockingMemberId(memberId)
-                .build());
+        blockRepository.deleteById(block.getBlockId());
     }
 }

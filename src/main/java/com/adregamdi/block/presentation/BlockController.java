@@ -1,8 +1,6 @@
 package com.adregamdi.block.presentation;
 
 import com.adregamdi.block.application.BlockService;
-import com.adregamdi.block.dto.request.CreateBlockRequest;
-import com.adregamdi.block.dto.request.DeleteBlockRequest;
 import com.adregamdi.block.dto.response.CreateBlockResponse;
 import com.adregamdi.block.dto.response.GetMyBlockingMembers;
 import com.adregamdi.core.annotation.MemberAuthorize;
@@ -26,12 +24,12 @@ public class BlockController {
     @MemberAuthorize
     public ResponseEntity<ApiResponse<CreateBlockResponse>> create(
             @AuthenticationPrincipal final UserDetails userDetails,
-            @RequestBody final CreateBlockRequest request
+            @RequestParam(name = "blocked_member_id") final String blockedMemberId
     ) {
         return ResponseEntity.ok()
                 .body(ApiResponse.<CreateBlockResponse>builder()
                         .statusCode(HttpStatus.CREATED.value())
-                        .data(blockService.create(userDetails.getUsername(), request))
+                        .data(blockService.create(userDetails.getUsername(), blockedMemberId))
                         .build()
                 );
     }
@@ -51,9 +49,9 @@ public class BlockController {
     @MemberAuthorize
     public ResponseEntity<ApiResponse<Void>> delete(
             @AuthenticationPrincipal final UserDetails userDetails,
-            @RequestBody final DeleteBlockRequest request
+            @RequestParam(name = "blocked_member_id") final String blockedMemberId
     ) {
-        blockService.delete(userDetails.getUsername(), request);
+        blockService.delete(userDetails.getUsername(), blockedMemberId);
         return ResponseEntity.ok()
                 .body(ApiResponse.<Void>builder()
                         .statusCode(HttpStatus.OK.value())

@@ -1,8 +1,6 @@
 package com.adregamdi.block.application;
 
 import com.adregamdi.block.domain.Block;
-import com.adregamdi.block.dto.request.CreateBlockRequest;
-import com.adregamdi.block.dto.request.DeleteBlockRequest;
 import com.adregamdi.block.dto.response.CreateBlockResponse;
 import com.adregamdi.block.dto.response.GetMyBlockingMembers;
 import com.adregamdi.block.exception.BlockException;
@@ -27,19 +25,19 @@ public class BlockService {
      * 차단하기
      * */
     @Transactional
-    public CreateBlockResponse create(final String memberId, final CreateBlockRequest request) {
+    public CreateBlockResponse create(final String memberId, final String blockedMemberId) {
         memberRepository.findById(memberId)
                 .orElseThrow(() -> new MemberException.MemberNotFoundException(memberId));
 
-        memberRepository.findById(request.blockedMemberId())
-                .orElseThrow(() -> new MemberException.MemberNotFoundException(request.blockedMemberId()));
+        memberRepository.findById(blockedMemberId)
+                .orElseThrow(() -> new MemberException.MemberNotFoundException(blockedMemberId));
 
-        Block block = blockRepository.findByBlockedMemberIdAndBlockingMemberId(request.blockedMemberId(), memberId)
+        Block block = blockRepository.findByBlockedMemberIdAndBlockingMemberId(blockedMemberId, memberId)
                 .orElse(blockRepository.save(Block.builder()
-                        .blockedMemberId(request.blockedMemberId())
+                        .blockedMemberId(blockedMemberId)
                         .blockingMemberId(memberId)
                         .build()));
-        
+
         return new CreateBlockResponse(block);
     }
 
@@ -60,18 +58,18 @@ public class BlockService {
      * 차단해제
      * */
     @Transactional
-    public void delete(final String memberId, final DeleteBlockRequest request) {
+    public void delete(final String memberId, final String blockedMemberId) {
         memberRepository.findById(memberId)
                 .orElseThrow(() -> new MemberException.MemberNotFoundException(memberId));
 
-        memberRepository.findById(request.blockedMemberId())
-                .orElseThrow(() -> new MemberException.MemberNotFoundException(request.blockedMemberId()));
+        memberRepository.findById(blockedMemberId)
+                .orElseThrow(() -> new MemberException.MemberNotFoundException(blockedMemberId));
 
-        blockRepository.findByBlockedMemberIdAndBlockingMemberId(request.blockedMemberId(), memberId)
+        blockRepository.findByBlockedMemberIdAndBlockingMemberId(blockedMemberId, memberId)
                 .orElseThrow(BlockException.BlockNotFoundException::new);
 
         blockRepository.delete(Block.builder()
-                .blockedMemberId(request.blockedMemberId())
+                .blockedMemberId(blockedMemberId)
                 .blockingMemberId(memberId)
                 .build());
     }

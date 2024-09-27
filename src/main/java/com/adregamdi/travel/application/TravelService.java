@@ -201,7 +201,7 @@ public class TravelService {
                         .orElse(PlaceReview.builder().build());
                 PlaceReviewDTO placeReview = null;
                 if (placeReviewInfo.getPlaceReviewId() != null && placeReviewInfo.getPlaceReviewId() != 0) {
-                    placeReview = placeService.getReview(placeReviewInfo.getPlaceReviewId());
+                    placeReview = placeService.getReview(memberId, placeReviewInfo.getPlaceReviewId());
                 }
                 travelPlaceDTOS.add(TravelPlaceDTO.of(placeReview, travelPlace, placeService.get(memberId, travelPlace.getPlaceId()).place()));
             }

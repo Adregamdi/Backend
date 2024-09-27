@@ -45,20 +45,28 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             final HttpServletResponse response,
             final FilterChain filterChain
     ) throws ServletException, IOException {
-        log.info("요청 URL: {}", request.getRequestURI() + "?" + request.getQueryString());
-        log.info("요청 Method: {}", request.getMethod());
+        String requestUri = request.getRequestURI();
+        String queryString = request.getQueryString();
+        log.info("Incoming request - URL: {}, Query: {}, Method: {}",
+                requestUri,
+                queryString != null ? queryString : "No query string",
+                request.getMethod());
 
-        if (isAllowedUrl(request.getRequestURI())) {
+        if (isAllowedUrl(requestUri)) {
+            log.info("URL {} is in allowed list. Skipping token validation.", requestUri);
             filterChain.doFilter(request, response);
             return;
         }
 
-        String refreshToken = jwtService.extractRefreshToken(request)
-                .filter(jwtService::isTokenValid)
-                .orElse(null);
+        String accessToken = jwtService.extractAccessToken(request).orElse(null);
+        String refreshToken = jwtService.extractRefreshToken(request).orElse(null);
 
-        if (refreshToken != null && Objects.equals("/api/auth/reissue", request.getRequestURI())) {
-            log.info("리프레쉬 토큰 존재");
+        log.info("Extracted tokens - Access: {}, Refresh: {}",
+                accessToken != null ? "Present" : "Absent",
+                refreshToken != null ? "Present" : "Absent");
+
+        if (refreshToken != null && jwtService.isTokenValid(refreshToken) && Objects.equals("/api/auth/reissue", requestUri)) {
+            log.info("Valid refresh token present. Reissuing access token.");
             checkRefreshTokenAndReIssueAccessToken(response, refreshToken);
             return;
         }
@@ -67,7 +75,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     }
 
     private boolean isAllowedUrl(String requestUri) {
-        return allowedUrls.stream().anyMatch(requestUri::startsWith);
+        boolean allowed = allowedUrls.stream().anyMatch(requestUri::startsWith);
+        log.info("URL {} is {}allowed", requestUri, allowed ? "" : "not ");
+        return allowed;
     }
 
     public void checkRefreshTokenAndReIssueAccessToken(

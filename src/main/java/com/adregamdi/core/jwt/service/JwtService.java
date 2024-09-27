@@ -43,17 +43,18 @@ public class JwtService {
     @Value("${jwt.refresh.header}")
     private String refreshHeader;
 
-    public String createAccessToken(
-            final String memberId,
-            final Role role
-    ) {
+    public String createAccessToken(final String memberId, final Role role) {
         Date now = new Date();
-        return JWT.create()
+        Date expiresAt = new Date(now.getTime() + accessTokenExpirationPeriod);
+        String token = JWT.create()
                 .withSubject(ACCESS_TOKEN_SUBJECT)
-                .withExpiresAt(new Date(now.getTime() + accessTokenExpirationPeriod))
+                .withExpiresAt(expiresAt)
                 .withClaim(MEMBER_ID_CLAIM, memberId)
                 .withClaim(ROLE, role.toString())
                 .sign(Algorithm.HMAC512(secretKey));
+
+        log.info("Created Access Token for memberId: {}. Expires at: {}", memberId, expiresAt);
+        return token;
     }
 
     public String createNoExpiresAtAccessToken(
@@ -70,10 +71,14 @@ public class JwtService {
 
     public String createRefreshToken() {
         Date now = new Date();
-        return JWT.create()
+        Date expiresAt = new Date(now.getTime() + refreshTokenExpirationPeriod);
+        String token = JWT.create()
                 .withSubject(REFRESH_TOKEN_SUBJECT)
-                .withExpiresAt(new Date(now.getTime() + refreshTokenExpirationPeriod))
+                .withExpiresAt(expiresAt)
                 .sign(Algorithm.HMAC512(secretKey));
+
+        log.info("Created Refresh Token. Expires at: {}", expiresAt);
+        return token;
     }
 
     public void sendAccessToken(
@@ -97,31 +102,45 @@ public class JwtService {
     }
 
     public Optional<String> extractAccessToken(final HttpServletRequest request) {
-        return Optional.ofNullable(request.getHeader(accessHeader))
+        Optional<String> token = Optional.ofNullable(request.getHeader(accessHeader))
                 .filter(accessToken -> accessToken.startsWith(BEARER))
                 .map(accessToken -> accessToken.replace(BEARER, ""));
+
+        log.info("Extracted Access Token: {}", token.isPresent() ? "Present" : "Absent");
+        return token;
     }
 
     public Optional<String> extractRefreshToken(final HttpServletRequest request) {
-        return Optional.ofNullable(request.getHeader(refreshHeader))
+        Optional<String> token = Optional.ofNullable(request.getHeader(refreshHeader))
                 .filter(refreshToken -> refreshToken.startsWith(BEARER))
                 .map(refreshToken -> refreshToken.replace(BEARER, ""));
+
+        log.info("Extracted Refresh Token: {}", token.isPresent() ? "Present" : "Absent");
+        return token;
     }
 
     public Optional<String> extractMemberId(final String accessToken) {
-        String memberId = JWT.require(Algorithm.HMAC512(secretKey))
-                .build()
-                .verify(accessToken)
-                .getClaim(MEMBER_ID_CLAIM)
-                .as(String.class);
-        Member member = memberRepository.findById(memberId)
-                .orElseThrow(MemberNotFoundException::new);
+        try {
+            String memberId = JWT.require(Algorithm.HMAC512(secretKey))
+                    .build()
+                    .verify(accessToken)
+                    .getClaim(MEMBER_ID_CLAIM)
+                    .as(String.class);
 
-        if ((member.getRefreshTokenStatus()).equals(false)) {
-            throw new LogoutMemberException();
+            Member member = memberRepository.findById(memberId)
+                    .orElseThrow(MemberNotFoundException::new);
+
+            if (Boolean.FALSE.equals(member.getRefreshTokenStatus())) {
+                log.info("Member {} has logged out. Token is invalid.", memberId);
+                throw new LogoutMemberException();
+            }
+
+            log.info("Extracted memberId from Access Token: {}", memberId);
+            return Optional.of(memberId);
+        } catch (JWTVerificationException e) {
+            log.info("Failed to extract memberId from Access Token. Error: {}", e.getMessage());
+            return Optional.empty();
         }
-
-        return Optional.of(memberId);
     }
 
     public void setAccessTokenHeader(
@@ -141,8 +160,10 @@ public class JwtService {
     public boolean isTokenValid(final String token) {
         try {
             JWT.require(Algorithm.HMAC512(secretKey)).build().verify(token);
+            log.info("Token is valid");
             return true;
         } catch (JWTVerificationException e) {
+            log.info("Token is invalid. Error: {}", e.getMessage());
             throw new TokenValidationException();
         }
     }

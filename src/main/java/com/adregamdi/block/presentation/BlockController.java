@@ -3,6 +3,7 @@ package com.adregamdi.block.presentation;
 import com.adregamdi.block.application.BlockService;
 import com.adregamdi.block.dto.request.CreateBlockRequest;
 import com.adregamdi.block.dto.request.DeleteBlockRequest;
+import com.adregamdi.block.dto.response.CreateBlockResponse;
 import com.adregamdi.block.dto.response.GetMyBlockingMembers;
 import com.adregamdi.core.annotation.MemberAuthorize;
 import com.adregamdi.core.handler.ApiResponse;
@@ -23,14 +24,14 @@ public class BlockController {
 
     @PostMapping
     @MemberAuthorize
-    public ResponseEntity<ApiResponse<Void>> create(
+    public ResponseEntity<ApiResponse<CreateBlockResponse>> create(
             @AuthenticationPrincipal final UserDetails userDetails,
             @RequestBody final CreateBlockRequest request
     ) {
-        blockService.create(userDetails.getUsername(), request);
         return ResponseEntity.ok()
-                .body(ApiResponse.<Void>builder()
+                .body(ApiResponse.<CreateBlockResponse>builder()
                         .statusCode(HttpStatus.CREATED.value())
+                        .data(blockService.create(userDetails.getUsername(), request))
                         .build()
                 );
     }

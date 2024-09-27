@@ -3,6 +3,7 @@ package com.adregamdi.block.application;
 import com.adregamdi.block.domain.Block;
 import com.adregamdi.block.dto.request.CreateBlockRequest;
 import com.adregamdi.block.dto.request.DeleteBlockRequest;
+import com.adregamdi.block.dto.response.CreateBlockResponse;
 import com.adregamdi.block.dto.response.GetMyBlockingMembers;
 import com.adregamdi.block.exception.BlockException;
 import com.adregamdi.block.infrastructure.BlockRepository;
@@ -26,20 +27,20 @@ public class BlockService {
      * 차단하기
      * */
     @Transactional
-    public void create(final String memberId, final CreateBlockRequest request) {
+    public CreateBlockResponse create(final String memberId, final CreateBlockRequest request) {
         memberRepository.findById(memberId)
                 .orElseThrow(() -> new MemberException.MemberNotFoundException(memberId));
 
         memberRepository.findById(request.blockedMemberId())
                 .orElseThrow(() -> new MemberException.MemberNotFoundException(request.blockedMemberId()));
 
-        blockRepository.findByBlockedMemberIdAndBlockingMemberId(request.blockedMemberId(), memberId)
-                .ifPresent(BlockException.BlockExistException::new);
-
-        blockRepository.save(Block.builder()
-                .blockedMemberId(request.blockedMemberId())
-                .blockingMemberId(memberId)
-                .build());
+        Block block = blockRepository.findByBlockedMemberIdAndBlockingMemberId(request.blockedMemberId(), memberId)
+                .orElse(blockRepository.save(Block.builder()
+                        .blockedMemberId(request.blockedMemberId())
+                        .blockingMemberId(memberId)
+                        .build()));
+        
+        return new CreateBlockResponse(block);
     }
 
     /*

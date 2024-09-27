@@ -10,7 +10,8 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
-@Table(name = "tbl_block")
+@Table(name = "tbl_block",
+        uniqueConstraints = @UniqueConstraint(columnNames = {"blocked_member_id", "blocking_member_id"}))
 public class Block extends BaseTime {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

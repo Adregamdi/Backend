@@ -182,7 +182,10 @@ public class PlaceServiceImpl implements PlaceService {
         List<CreatePlaceReviewRequest.PlaceReviewImageInfo> imageList = (request.placeReviewImageList() != null) ? request.placeReviewImageList() : Collections.emptyList();
 
         List<PlaceReviewImage> placeReviewImages = imageList.stream()
-                .map(img -> new PlaceReviewImage(savePlaceReview.getPlaceReviewId(), img.url()))
+                .map(img -> PlaceReviewImage.builder()
+                        .placeReviewId(savePlaceReview.getPlaceReviewId())
+                        .url(img.url())
+                        .build())
                 .collect(Collectors.toList());
         placeReviewImageRepository.saveAll(placeReviewImages);
 

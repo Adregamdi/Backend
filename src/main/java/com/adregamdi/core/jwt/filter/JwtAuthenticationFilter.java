@@ -20,6 +20,7 @@ import org.springframework.security.core.authority.mapping.GrantedAuthoritiesMap
 import org.springframework.security.core.authority.mapping.NullAuthoritiesMapper;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.util.AntPathMatcher;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
@@ -37,6 +38,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final GrantedAuthoritiesMapper authoritiesMapper = new NullAuthoritiesMapper();
     private final JwtService jwtService;
     private final MemberRepository memberRepository;
+    private final AntPathMatcher pathMatcher = new AntPathMatcher();
     private final List<String> allowedUrls;
 
     @Override
@@ -47,13 +49,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     ) throws ServletException, IOException {
         String requestUri = request.getRequestURI();
         String queryString = request.getQueryString();
-        log.info("Incoming request - URL: {}, Query: {}, Method: {}",
+        log.info("들어온 요청 - URL: {}, Query: {}, Method: {}",
                 requestUri,
-                queryString != null ? queryString : "No query string",
+                queryString != null ? queryString : "쿼리 스트링 없음",
                 request.getMethod());
 
         if (isAllowedUrl(requestUri)) {
-            log.info("URL {} is in allowed list. Skipping token validation.", requestUri);
+            log.info("URL {} is in allowed list. 토큰 유효성 검사 스킵.", requestUri);
             filterChain.doFilter(request, response);
             return;
         }
@@ -61,12 +63,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         String accessToken = jwtService.extractAccessToken(request).orElse(null);
         String refreshToken = jwtService.extractRefreshToken(request).orElse(null);
 
-        log.info("Extracted tokens - Access: {}, Refresh: {}",
+        log.info("토큰 추출 - Access: {}, Refresh: {}",
                 accessToken != null ? "Present" : "Absent",
                 refreshToken != null ? "Present" : "Absent");
 
         if (refreshToken != null && jwtService.isTokenValid(refreshToken) && Objects.equals("/api/auth/reissue", requestUri)) {
-            log.info("Valid refresh token present. Reissuing access token.");
+            log.info("유효한 리프레쉬 토큰 존재. 액세스 토큰을 재발급합니다.");
             checkRefreshTokenAndReIssueAccessToken(response, refreshToken);
             return;
         }
@@ -75,7 +77,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     }
 
     private boolean isAllowedUrl(String requestUri) {
-        boolean allowed = allowedUrls.stream().anyMatch(requestUri::startsWith);
+        boolean allowed = false;
+        for (String pattern : allowedUrls) {
+            if (pathMatcher.match(pattern, requestUri)) {
+                allowed = true;
+                break;
+            }
+        }
         log.info("URL {} is {}allowed", requestUri, allowed ? "" : "not ");
         return allowed;
     }

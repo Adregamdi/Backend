@@ -33,6 +33,7 @@ public class SecurityConfig {
     private final OAuth2LoginFailureHandler oAuth2LoginFailureHandler;
     private final String[] ALLOWED_URLS = {
             "/",
+            "/login",
             "/index.html",
             "/api/oauth2/**",
             "/api/shorts/stream/**",

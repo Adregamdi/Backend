@@ -233,7 +233,7 @@ public class TravelogueService {
                 .orElseThrow(() -> new MemberException.MemberNotFoundException(travelogue.getMemberId()));
 
         blockRepository.findByBlockedMemberIdAndBlockingMemberId(travelogue.getMemberId(), memberId)
-                .orElseThrow(BlockException.BlockExistException::new);
+                .ifPresent(BlockException.BlockExistException::new);
 
         List<TravelogueImage> travelogueImages = travelogueImageRepository.findByTravelogueId(travelogueId)
                 .orElse(Collections.emptyList());

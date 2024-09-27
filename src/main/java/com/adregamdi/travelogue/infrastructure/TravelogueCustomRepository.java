@@ -8,7 +8,7 @@ import org.springframework.data.domain.Slice;
 public interface TravelogueCustomRepository {
     Slice<TravelogueDTO> findByMemberId(String memberId, Pageable pageable);
 
-    Slice<TravelogueDTO> findOrderByCreatedAt(Pageable pageable);
+    Slice<TravelogueDTO> findOrderByCreatedAt(String memberId, Pageable pageable);
 
-    GetHotTraveloguesResponse findOrderByLikeCount(int likeCount, int size);
+    GetHotTraveloguesResponse findOrderByLikeCount(String memberId, int likeCount, int size);
 }

@@ -90,6 +90,6 @@ public class BlockService {
         Block block = blockRepository.findByBlockedMemberIdAndBlockingMemberId(blockedMemberId, memberId)
                 .orElseThrow(BlockException.BlockNotFoundException::new);
 
-        blockRepository.deleteById(block.getBlockId());
+        blockRepository.delete(block);
     }
 }

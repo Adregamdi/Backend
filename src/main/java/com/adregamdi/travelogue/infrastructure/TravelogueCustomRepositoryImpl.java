@@ -34,6 +34,7 @@ public class TravelogueCustomRepositoryImpl implements TravelogueCustomRepositor
         List<Tuple> results = jpaQueryFactory
                 .select(travelogue.travelogueId,
                         travelogue.title,
+                        member.memberId,
                         member.profile,
                         member.handle,
                         travelogueImage.url)
@@ -53,6 +54,7 @@ public class TravelogueCustomRepositoryImpl implements TravelogueCustomRepositor
                     id -> new TravelogueDTO(
                             id,
                             row.get(travelogue.title),
+                            row.get(member.memberId),
                             row.get(member.profile),
                             row.get(member.handle),
                             new ArrayList<>()
@@ -79,6 +81,7 @@ public class TravelogueCustomRepositoryImpl implements TravelogueCustomRepositor
         List<Tuple> results = jpaQueryFactory
                 .select(travelogue.travelogueId,
                         travelogue.title,
+                        member.memberId,
                         member.profile,
                         member.handle,
                         travelogueImage.url)
@@ -100,6 +103,7 @@ public class TravelogueCustomRepositoryImpl implements TravelogueCustomRepositor
                     id -> new TravelogueDTO(
                             id,
                             row.get(travelogue.title),
+                            row.get(member.memberId),
                             row.get(member.profile),
                             row.get(member.handle),
                             new ArrayList<>()

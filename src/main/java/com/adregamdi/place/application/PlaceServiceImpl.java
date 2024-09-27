@@ -381,6 +381,7 @@ public class PlaceServiceImpl implements PlaceService {
                 placeReview.getContent(),
                 placeReviewImages,
                 LocalDate.from(placeReview.getCreatedAt()),
+                member.getMemberId(),
                 member.getName(),
                 member.getProfile(),
                 member.getHandle()
@@ -418,6 +419,7 @@ public class PlaceServiceImpl implements PlaceService {
                             placeReview.getContent(),
                             placeReviewImages,
                             LocalDate.from(placeReview.getCreatedAt()),
+                            member.get().getMemberId(),
                             member.get().getName(),
                             member.get().getProfile(),
                             member.get().getHandle()

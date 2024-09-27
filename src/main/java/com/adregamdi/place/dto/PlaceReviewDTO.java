@@ -17,6 +17,7 @@ public record PlaceReviewDTO(
         String content,
         List<PlaceReviewImage> placeReviewImageList,
         LocalDate createdAt,
+        String memberId,
         String name,
         String profile,
         String handle
@@ -31,6 +32,7 @@ public record PlaceReviewDTO(
             final String content,
             final List<PlaceReviewImage> placeReviewImageList,
             final LocalDate createdAt,
+            final String memberId,
             final String name,
             final String profile,
             final String handle
@@ -45,6 +47,7 @@ public record PlaceReviewDTO(
                 .content(content)
                 .placeReviewImageList(placeReviewImageList)
                 .createdAt(createdAt)
+                .memberId(memberId)
                 .name(name)
                 .profile(profile)
                 .handle(handle)

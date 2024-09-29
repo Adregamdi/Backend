@@ -2,6 +2,7 @@ package com.adregamdi.place.dto.request;
 
 public record CreatePlaceRequest(
         String title,
+        String contentsId,
         String contentsLabel,
         String regionLabel,
         String region1Cd,

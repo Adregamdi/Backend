@@ -81,6 +81,7 @@ public class PlaceServiceImpl implements PlaceService {
         }
         placeRepository.save(Place.builder()
                 .title(request.title())
+                .contentsId(request.contentsId())
                 .contentsLabel(request.contentsLabel())
                 .regionLabel(request.regionLabel())
                 .region1Cd(request.region1Cd())

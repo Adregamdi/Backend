@@ -1,11 +1,13 @@
 package com.adregamdi.core.jwt.service;
 
+import com.adregamdi.core.exception.GlobalException;
 import com.adregamdi.member.domain.Member;
 import com.adregamdi.member.domain.Role;
 import com.adregamdi.member.infrastructure.MemberRepository;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTVerificationException;
+import com.auth0.jwt.exceptions.SignatureVerificationException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.Getter;
@@ -18,7 +20,6 @@ import java.util.Date;
 import java.util.Optional;
 
 import static com.adregamdi.core.exception.GlobalException.LogoutMemberException;
-import static com.adregamdi.core.exception.GlobalException.TokenValidationException;
 import static com.adregamdi.member.exception.MemberException.MemberNotFoundException;
 
 @Slf4j
@@ -61,7 +62,6 @@ public class JwtService {
             final String memberId,
             final Role role
     ) {
-        Date now = new Date();
         return JWT.create()
                 .withSubject(ACCESS_TOKEN_SUBJECT)
                 .withClaim(MEMBER_ID_CLAIM, memberId)
@@ -158,13 +158,24 @@ public class JwtService {
     }
 
     public boolean isTokenValid(final String token) {
+        if (token == null || token.trim().isEmpty()) {
+            log.info("토큰이 비어있습니다.");
+            throw new GlobalException.EmptyTokenException();
+        }
+        
         try {
             JWT.require(Algorithm.HMAC512(secretKey)).build().verify(token);
-            log.info("유효한 토큰");
+            log.info("유효한 토큰.");
             return true;
+        } catch (GlobalException.TokenExpiredException e) {
+            log.info("토큰이 만료되었습니다.");
+            throw new GlobalException.TokenExpiredException();
+        } catch (SignatureVerificationException e) {
+            log.info("토큰 서명이 유효하지 않습니다.");
+            throw new GlobalException.TokenValidationException("토큰 서명이 유효하지 않습니다.");
         } catch (JWTVerificationException e) {
             log.info("유효하지 않은 토큰. 에러: {}", e.getMessage());
-            throw new TokenValidationException();
+            throw new GlobalException.TokenValidationException("유효하지 않은 토큰입니다: " + e.getMessage());
         }
     }
 }

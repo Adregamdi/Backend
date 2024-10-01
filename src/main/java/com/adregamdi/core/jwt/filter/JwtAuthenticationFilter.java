@@ -1,5 +1,6 @@
 package com.adregamdi.core.jwt.filter;
 
+import com.adregamdi.core.exception.GlobalException;
 import com.adregamdi.core.handler.ErrorResponse;
 import com.adregamdi.core.jwt.service.JwtService;
 import com.adregamdi.core.utils.PasswordUtil;
@@ -26,9 +27,6 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
 import java.util.List;
 import java.util.Objects;
-
-import static com.adregamdi.core.exception.GlobalException.LogoutMemberException;
-import static com.adregamdi.core.exception.GlobalException.TokenValidationException;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -122,13 +120,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     .flatMap(jwtService::extractMemberId)
                     .flatMap(memberId -> memberRepository.findByMemberIdAndMemberStatus(memberId, true))
                     .ifPresent(this::saveAuthentication);
-        } catch (TokenValidationException e) {
+        } catch (GlobalException.EmptyTokenException |
+                 GlobalException.TokenExpiredException |
+                 GlobalException.TokenValidationException e) {
             response.setStatus(HttpStatus.UNAUTHORIZED.value());
             response.setContentType(MediaType.APPLICATION_JSON_VALUE);
             response.setCharacterEncoding("UTF-8");
             objectMapper.writeValue(response.getWriter(), new ErrorResponse(HttpStatus.UNAUTHORIZED.value(), e.getMessage()));
             return;
-        } catch (LogoutMemberException e) {
+        } catch (GlobalException.LogoutMemberException e) {
             response.setStatus(HttpStatus.FORBIDDEN.value());
             response.setContentType(MediaType.APPLICATION_JSON_VALUE);
             response.setCharacterEncoding("UTF-8");

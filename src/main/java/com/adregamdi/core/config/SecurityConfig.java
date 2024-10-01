@@ -31,7 +31,9 @@ public class SecurityConfig {
     private final CustomOAuth2UserService customOAuth2UserService;
     private final OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler;
     private final OAuth2LoginFailureHandler oAuth2LoginFailureHandler;
-    private final String[] ALLOWED_URLS = {
+
+    // 아래 URI로 들어오는 요청은 AuthenticationFilter 작동 X
+    private final String[] ALLOWED_URIS = {
             "/",
             "/login",
             "/index.html",
@@ -56,7 +58,7 @@ public class SecurityConfig {
                         sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
                 .authorizeHttpRequests(request ->
-                        request.requestMatchers(ALLOWED_URLS).permitAll()
+                        request.requestMatchers(ALLOWED_URIS).permitAll()
                                 .anyRequest().authenticated())
                 .oauth2Login(oauth2Login -> oauth2Login
                         .userInfoEndpoint(userInfo -> userInfo.userService(customOAuth2UserService))
@@ -71,6 +73,6 @@ public class SecurityConfig {
 
     @Bean
     public JwtAuthenticationFilter jwtAuthenticationFilter() {
-        return new JwtAuthenticationFilter(jwtService, memberRepository, Arrays.asList(ALLOWED_URLS));
+        return new JwtAuthenticationFilter(jwtService, memberRepository, Arrays.asList(ALLOWED_URIS));
     }
 }

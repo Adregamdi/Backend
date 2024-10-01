@@ -1,11 +1,13 @@
 package com.adregamdi.core.jwt.service;
 
+import com.adregamdi.core.exception.GlobalException;
 import com.adregamdi.member.domain.Member;
 import com.adregamdi.member.domain.Role;
 import com.adregamdi.member.infrastructure.MemberRepository;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
-import com.auth0.jwt.exceptions.JWTVerificationException;
+import com.auth0.jwt.exceptions.*;
+import com.auth0.jwt.interfaces.DecodedJWT;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.Getter;
@@ -18,7 +20,6 @@ import java.util.Date;
 import java.util.Optional;
 
 import static com.adregamdi.core.exception.GlobalException.LogoutMemberException;
-import static com.adregamdi.core.exception.GlobalException.TokenValidationException;
 import static com.adregamdi.member.exception.MemberException.MemberNotFoundException;
 
 @Slf4j
@@ -53,7 +54,7 @@ public class JwtService {
                 .withClaim(ROLE, role.toString())
                 .sign(Algorithm.HMAC512(secretKey));
 
-        log.info("Created Access Token for memberId: {}. Expires at: {}", memberId, expiresAt);
+        log.info("memberId로 액세스 토큰 생성: {}. 만료 기간: {}", memberId, expiresAt);
         return token;
     }
 
@@ -61,7 +62,6 @@ public class JwtService {
             final String memberId,
             final Role role
     ) {
-        Date now = new Date();
         return JWT.create()
                 .withSubject(ACCESS_TOKEN_SUBJECT)
                 .withClaim(MEMBER_ID_CLAIM, memberId)
@@ -77,7 +77,7 @@ public class JwtService {
                 .withExpiresAt(expiresAt)
                 .sign(Algorithm.HMAC512(secretKey));
 
-        log.info("Created Refresh Token. Expires at: {}", expiresAt);
+        log.info("리프레쉬 토큰 생성. 만료 기간: {}", expiresAt);
         return token;
     }
 
@@ -106,7 +106,7 @@ public class JwtService {
                 .filter(accessToken -> accessToken.startsWith(BEARER))
                 .map(accessToken -> accessToken.replace(BEARER, ""));
 
-        log.info("Extracted Access Token: {}", token.isPresent() ? "Present" : "Absent");
+        log.info("추출된 액세스 토큰: {}", token.isPresent() ? "존재" : "존재하지 않음");
         return token;
     }
 
@@ -115,7 +115,7 @@ public class JwtService {
                 .filter(refreshToken -> refreshToken.startsWith(BEARER))
                 .map(refreshToken -> refreshToken.replace(BEARER, ""));
 
-        log.info("Extracted Refresh Token: {}", token.isPresent() ? "Present" : "Absent");
+        log.info("추출된 리프레쉬 토큰: {}", token.isPresent() ? "존재" : "존재하지 않음");
         return token;
     }
 
@@ -131,14 +131,14 @@ public class JwtService {
                     .orElseThrow(MemberNotFoundException::new);
 
             if (Boolean.FALSE.equals(member.getRefreshTokenStatus())) {
-                log.info("Member {} has logged out. Token is invalid.", memberId);
+                log.info("{} 로그아웃 상태인 회원입니다. 유효하지 않은 토큰.", memberId);
                 throw new LogoutMemberException();
             }
 
-            log.info("Extracted memberId from Access Token: {}", memberId);
+            log.info("액세스 토큰으로부터 추출된 memberId: {}", memberId);
             return Optional.of(memberId);
         } catch (JWTVerificationException e) {
-            log.info("Failed to extract memberId from Access Token. Error: {}", e.getMessage());
+            log.info("액세스 토큰으로부터 memberId 추출 실패. 에러: {}", e.getMessage());
             return Optional.empty();
         }
     }
@@ -158,13 +158,54 @@ public class JwtService {
     }
 
     public boolean isTokenValid(final String token) {
+        if (token == null || token.trim().isEmpty()) {
+            log.info("토큰이 비어있습니다.");
+            throw new GlobalException.EmptyTokenException();
+        }
+
         try {
-            JWT.require(Algorithm.HMAC512(secretKey)).build().verify(token);
-            log.info("Token is valid");
+            DecodedJWT jwt = JWT.decode(token);
+
+            JWT.require(Algorithm.HMAC512(secretKey))
+                    .withClaimPresence(MEMBER_ID_CLAIM)  // memberId claim이 반드시 있어야 함
+                    .withClaimPresence(ROLE)  // role claim이 반드시 있어야 함
+                    .build()
+                    .verify(jwt);
+
+            Date issuedAt = jwt.getIssuedAt();
+            if (issuedAt != null && issuedAt.after(new Date())) {
+                throw new GlobalException.TokenIssuedAtFutureException();
+            }
+
+            log.info("유효한 토큰");
             return true;
+        } catch (JWTDecodeException e) {
+            log.info("토큰의 형식이 올바르지 않습니다.");
+            throw new GlobalException.MalformedTokenException();
+        } catch (TokenExpiredException e) {
+            log.info("토큰이 만료되었습니다.");
+            throw new GlobalException.TokenExpiredException();
+        } catch (SignatureVerificationException e) {
+            log.info("토큰 서명이 유효하지 않습니다.");
+            throw new GlobalException.TokenValidationException("토큰 서명이 유효하지 않습니다.");
+        } catch (IncorrectClaimException e) {
+            log.info("토큰의 클레임이 올바르지 않습니다: {}", e.getMessage());
+            throw new GlobalException.TokenClaimMissingException(e.getClaimName());
         } catch (JWTVerificationException e) {
-            log.info("Token is invalid. Error: {}", e.getMessage());
-            throw new TokenValidationException();
+            log.info("유효하지 않은 토큰. 에러: {}", e.getMessage());
+            throw new GlobalException.TokenValidationException("유효하지 않은 토큰입니다: " + e.getMessage());
+        }
+    }
+
+    public void validateRefreshToken(String refreshToken, Member member) {
+        if (!refreshToken.equals(member.getRefreshToken())) {
+            log.info("저장된 리프레시 토큰과 제공된 리프레시 토큰이 일치하지 않습니다. MemberId: {}", member.getMemberId());
+            throw new GlobalException.RefreshTokenMismatchException();
+        }
+
+        if (!isTokenValid(refreshToken)) {
+            log.info("리프레시 토큰이 유효하지 않습니다. MemberId: {}", member.getMemberId());
+            throw new GlobalException.TokenValidationException("리프레시 토큰이 유효하지 않습니다.");
         }
     }
 }

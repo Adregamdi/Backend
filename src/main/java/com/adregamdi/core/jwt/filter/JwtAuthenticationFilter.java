@@ -1,5 +1,6 @@
 package com.adregamdi.core.jwt.filter;
 
+import com.adregamdi.core.exception.GlobalException;
 import com.adregamdi.core.handler.ErrorResponse;
 import com.adregamdi.core.jwt.service.JwtService;
 import com.adregamdi.core.utils.PasswordUtil;
@@ -27,19 +28,14 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Objects;
 
-import static com.adregamdi.core.exception.GlobalException.LogoutMemberException;
-import static com.adregamdi.core.exception.GlobalException.TokenValidationException;
-
 @Slf4j
 @RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
-
-    private static final String NO_CHECK_URL = "/login"; // "/login"으로 들어오는 요청은 Filter 작동 X
     private final GrantedAuthoritiesMapper authoritiesMapper = new NullAuthoritiesMapper();
     private final JwtService jwtService;
     private final MemberRepository memberRepository;
     private final AntPathMatcher pathMatcher = new AntPathMatcher();
-    private final List<String> allowedUrls;
+    private final List<String> allowedUris;
 
     @Override
     protected void doFilterInternal(
@@ -49,13 +45,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     ) throws ServletException, IOException {
         String requestUri = request.getRequestURI();
         String queryString = request.getQueryString();
-        log.info("들어온 요청 - URL: {}, Query: {}, Method: {}",
+        log.info("들어온 요청 - URI: {}, Query: {}, Method: {}",
                 requestUri,
                 queryString != null ? queryString : "쿼리 스트링 없음",
                 request.getMethod());
 
-        if (isAllowedUrl(requestUri)) {
-            log.info("URL {} is in allowed list. 토큰 유효성 검사 스킵.", requestUri);
+        if (isAllowedUri(requestUri)) {
+            log.info("{} 허용 URI. 토큰 유효성 검사 스킵.", requestUri);
             filterChain.doFilter(request, response);
             return;
         }
@@ -64,8 +60,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         String refreshToken = jwtService.extractRefreshToken(request).orElse(null);
 
         log.info("토큰 추출 - Access: {}, Refresh: {}",
-                accessToken != null ? "Present" : "Absent",
-                refreshToken != null ? "Present" : "Absent");
+                accessToken != null ? "존재" : "존재하지 않음",
+                refreshToken != null ? "존재" : "존재하지 않음");
 
         if (refreshToken != null && jwtService.isTokenValid(refreshToken) && Objects.equals("/api/auth/reissue", requestUri)) {
             log.info("유효한 리프레쉬 토큰 존재. 액세스 토큰을 재발급합니다.");
@@ -76,15 +72,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         checkAccessTokenAndAuthentication(request, response, filterChain);
     }
 
-    private boolean isAllowedUrl(String requestUri) {
+    private boolean isAllowedUri(String requestUri) {
         boolean allowed = false;
-        for (String pattern : allowedUrls) {
+        for (String pattern : allowedUris) {
             if (pathMatcher.match(pattern, requestUri)) {
                 allowed = true;
                 break;
             }
         }
-        log.info("URL {} is {}allowed", requestUri, allowed ? "" : "not ");
+        log.info("URI {} is {}allowed", requestUri, allowed ? "" : "not ");
         return allowed;
     }
 
@@ -92,16 +88,26 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             final HttpServletResponse response,
             final String refreshToken
     ) {
-        memberRepository.findByRefreshToken(refreshToken)
-                .ifPresent(user -> {
-                    if (Objects.equals(user.getRefreshTokenStatus(), true)) {
-                        jwtService.sendAccessAndRefreshToken(
-                                response,
-                                jwtService.createAccessToken(user.getMemberId(), user.getRole()),
-                                reIssueRefreshToken(user)
-                        );
-                    }
-                });
+        try {
+            memberRepository.findByRefreshToken(refreshToken)
+                    .ifPresentOrElse(member -> {
+                        jwtService.validateRefreshToken(refreshToken, member);
+                        String newAccessToken = jwtService.createAccessToken(member.getMemberId(), member.getRole());
+                        String newRefreshToken = reIssueRefreshToken(member);
+                        jwtService.sendAccessAndRefreshToken(response, newAccessToken, newRefreshToken);
+                    }, () -> {
+                        throw new GlobalException.TokenValidationException("해당 리프레시 토큰을 가진 회원이 없습니다.");
+                    });
+        } catch (GlobalException.RefreshTokenMismatchException | GlobalException.TokenValidationException e) {
+            response.setStatus(HttpStatus.UNAUTHORIZED.value());
+            response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+            response.setCharacterEncoding("UTF-8");
+            try {
+                new ObjectMapper().writeValue(response.getWriter(), new ErrorResponse(HttpStatus.UNAUTHORIZED.value(), e.getMessage()));
+            } catch (IOException ioException) {
+                log.error("응답 쓰기 실패", ioException);
+            }
+        }
     }
 
     private String reIssueRefreshToken(final Member member) {
@@ -124,13 +130,19 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     .flatMap(jwtService::extractMemberId)
                     .flatMap(memberId -> memberRepository.findByMemberIdAndMemberStatus(memberId, true))
                     .ifPresent(this::saveAuthentication);
-        } catch (TokenValidationException e) {
+        } catch (GlobalException.EmptyTokenException |
+                 GlobalException.TokenExpiredException |
+                 GlobalException.TokenValidationException |
+                 GlobalException.MalformedTokenException |
+                 GlobalException.UnsupportedTokenException |
+                 GlobalException.TokenIssuedAtFutureException |
+                 GlobalException.TokenClaimMissingException e) {
             response.setStatus(HttpStatus.UNAUTHORIZED.value());
             response.setContentType(MediaType.APPLICATION_JSON_VALUE);
             response.setCharacterEncoding("UTF-8");
             objectMapper.writeValue(response.getWriter(), new ErrorResponse(HttpStatus.UNAUTHORIZED.value(), e.getMessage()));
             return;
-        } catch (LogoutMemberException e) {
+        } catch (GlobalException.LogoutMemberException e) {
             response.setStatus(HttpStatus.FORBIDDEN.value());
             response.setContentType(MediaType.APPLICATION_JSON_VALUE);
             response.setCharacterEncoding("UTF-8");

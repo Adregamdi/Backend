@@ -13,16 +13,51 @@ public class GlobalException extends RuntimeException {
         }
     }
 
-    public static class JWTNotFoundException extends GlobalException {
-
-        public JWTNotFoundException() {
+    public static class EmptyTokenException extends GlobalException {
+        public EmptyTokenException() {
             super("토큰이 비어있습니다.");
         }
     }
 
+    public static class TokenExpiredException extends GlobalException {
+        public TokenExpiredException() {
+            super("토큰이 만료되었습니다.");
+        }
+    }
+
     public static class TokenValidationException extends GlobalException {
-        public TokenValidationException() {
-            super("유효하지 않은 토큰입니다.");
+        public TokenValidationException(String message) {
+            super(message);
+        }
+    }
+
+    public static class MalformedTokenException extends GlobalException {
+        public MalformedTokenException() {
+            super("토큰의 형식이 올바르지 않습니다.");
+        }
+    }
+
+    public static class UnsupportedTokenException extends GlobalException {
+        public UnsupportedTokenException() {
+            super("지원하지 않는 형식의 토큰입니다.");
+        }
+    }
+
+    public static class TokenIssuedAtFutureException extends GlobalException {
+        public TokenIssuedAtFutureException() {
+            super("토큰의 발행 시간이 현재 시간보다 미래입니다.");
+        }
+    }
+
+    public static class TokenClaimMissingException extends GlobalException {
+        public TokenClaimMissingException(String claimName) {
+            super("토큰에 필수 클레임(" + claimName + ")이 누락되었습니다.");
+        }
+    }
+
+    public static class RefreshTokenMismatchException extends GlobalException {
+        public RefreshTokenMismatchException() {
+            super("제공된 리프레시 토큰이 저장된 토큰과 일치하지 않습니다.");
         }
     }
 

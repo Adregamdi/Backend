@@ -55,6 +55,12 @@ public class GlobalException extends RuntimeException {
         }
     }
 
+    public static class RefreshTokenMismatchException extends GlobalException {
+        public RefreshTokenMismatchException() {
+            super("제공된 리프레시 토큰이 저장된 토큰과 일치하지 않습니다.");
+        }
+    }
+
     public static class ExistBadwordException extends GlobalException {
 
         public ExistBadwordException() {

@@ -196,4 +196,16 @@ public class JwtService {
             throw new GlobalException.TokenValidationException("유효하지 않은 토큰입니다: " + e.getMessage());
         }
     }
+
+    public void validateRefreshToken(String refreshToken, Member member) {
+        if (!refreshToken.equals(member.getRefreshToken())) {
+            log.info("저장된 리프레시 토큰과 제공된 리프레시 토큰이 일치하지 않습니다. MemberId: {}", member.getMemberId());
+            throw new GlobalException.RefreshTokenMismatchException();
+        }
+
+        if (!isTokenValid(refreshToken)) {
+            log.info("리프레시 토큰이 유효하지 않습니다. MemberId: {}", member.getMemberId());
+            throw new GlobalException.TokenValidationException("리프레시 토큰이 유효하지 않습니다.");
+        }
+    }
 }

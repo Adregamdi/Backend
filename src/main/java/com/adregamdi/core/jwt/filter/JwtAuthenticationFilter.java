@@ -88,16 +88,26 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             final HttpServletResponse response,
             final String refreshToken
     ) {
-        memberRepository.findByRefreshToken(refreshToken)
-                .ifPresent(user -> {
-                    if (Objects.equals(user.getRefreshTokenStatus(), true)) {
-                        jwtService.sendAccessAndRefreshToken(
-                                response,
-                                jwtService.createAccessToken(user.getMemberId(), user.getRole()),
-                                reIssueRefreshToken(user)
-                        );
-                    }
-                });
+        try {
+            memberRepository.findByRefreshToken(refreshToken)
+                    .ifPresentOrElse(member -> {
+                        jwtService.validateRefreshToken(refreshToken, member);
+                        String newAccessToken = jwtService.createAccessToken(member.getMemberId(), member.getRole());
+                        String newRefreshToken = reIssueRefreshToken(member);
+                        jwtService.sendAccessAndRefreshToken(response, newAccessToken, newRefreshToken);
+                    }, () -> {
+                        throw new GlobalException.TokenValidationException("해당 리프레시 토큰을 가진 회원이 없습니다.");
+                    });
+        } catch (GlobalException.RefreshTokenMismatchException | GlobalException.TokenValidationException e) {
+            response.setStatus(HttpStatus.UNAUTHORIZED.value());
+            response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+            response.setCharacterEncoding("UTF-8");
+            try {
+                new ObjectMapper().writeValue(response.getWriter(), new ErrorResponse(HttpStatus.UNAUTHORIZED.value(), e.getMessage()));
+            } catch (IOException ioException) {
+                log.error("응답 쓰기 실패", ioException);
+            }
+        }
     }
 
     private String reIssueRefreshToken(final Member member) {

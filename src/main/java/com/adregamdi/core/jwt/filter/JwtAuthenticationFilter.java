@@ -122,7 +122,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     .ifPresent(this::saveAuthentication);
         } catch (GlobalException.EmptyTokenException |
                  GlobalException.TokenExpiredException |
-                 GlobalException.TokenValidationException e) {
+                 GlobalException.TokenValidationException |
+                 GlobalException.MalformedTokenException |
+                 GlobalException.UnsupportedTokenException |
+                 GlobalException.TokenIssuedAtFutureException |
+                 GlobalException.TokenClaimMissingException e) {
             response.setStatus(HttpStatus.UNAUTHORIZED.value());
             response.setContentType(MediaType.APPLICATION_JSON_VALUE);
             response.setCharacterEncoding("UTF-8");

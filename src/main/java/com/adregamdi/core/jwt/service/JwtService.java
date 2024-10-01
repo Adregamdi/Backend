@@ -6,8 +6,8 @@ import com.adregamdi.member.domain.Role;
 import com.adregamdi.member.infrastructure.MemberRepository;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
-import com.auth0.jwt.exceptions.JWTVerificationException;
-import com.auth0.jwt.exceptions.SignatureVerificationException;
+import com.auth0.jwt.exceptions.*;
+import com.auth0.jwt.interfaces.DecodedJWT;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.Getter;
@@ -162,17 +162,35 @@ public class JwtService {
             log.info("토큰이 비어있습니다.");
             throw new GlobalException.EmptyTokenException();
         }
-        
+
         try {
-            JWT.require(Algorithm.HMAC512(secretKey)).build().verify(token);
-            log.info("유효한 토큰.");
+            DecodedJWT jwt = JWT.decode(token);
+
+            JWT.require(Algorithm.HMAC512(secretKey))
+                    .withClaimPresence(MEMBER_ID_CLAIM)  // memberId claim이 반드시 있어야 함
+                    .withClaimPresence(ROLE)  // role claim이 반드시 있어야 함
+                    .build()
+                    .verify(jwt);
+
+            Date issuedAt = jwt.getIssuedAt();
+            if (issuedAt != null && issuedAt.after(new Date())) {
+                throw new GlobalException.TokenIssuedAtFutureException();
+            }
+
+            log.info("유효한 토큰");
             return true;
-        } catch (GlobalException.TokenExpiredException e) {
+        } catch (JWTDecodeException e) {
+            log.info("토큰의 형식이 올바르지 않습니다.");
+            throw new GlobalException.MalformedTokenException();
+        } catch (TokenExpiredException e) {
             log.info("토큰이 만료되었습니다.");
             throw new GlobalException.TokenExpiredException();
         } catch (SignatureVerificationException e) {
             log.info("토큰 서명이 유효하지 않습니다.");
             throw new GlobalException.TokenValidationException("토큰 서명이 유효하지 않습니다.");
+        } catch (IncorrectClaimException e) {
+            log.info("토큰의 클레임이 올바르지 않습니다: {}", e.getMessage());
+            throw new GlobalException.TokenClaimMissingException(e.getClaimName());
         } catch (JWTVerificationException e) {
             log.info("유효하지 않은 토큰. 에러: {}", e.getMessage());
             throw new GlobalException.TokenValidationException("유효하지 않은 토큰입니다: " + e.getMessage());

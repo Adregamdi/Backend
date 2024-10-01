@@ -31,6 +31,30 @@ public class GlobalException extends RuntimeException {
         }
     }
 
+    public static class MalformedTokenException extends GlobalException {
+        public MalformedTokenException() {
+            super("토큰의 형식이 올바르지 않습니다.");
+        }
+    }
+
+    public static class UnsupportedTokenException extends GlobalException {
+        public UnsupportedTokenException() {
+            super("지원하지 않는 형식의 토큰입니다.");
+        }
+    }
+
+    public static class TokenIssuedAtFutureException extends GlobalException {
+        public TokenIssuedAtFutureException() {
+            super("토큰의 발행 시간이 현재 시간보다 미래입니다.");
+        }
+    }
+
+    public static class TokenClaimMissingException extends GlobalException {
+        public TokenClaimMissingException(String claimName) {
+            super("토큰에 필수 클레임(" + claimName + ")이 누락되었습니다.");
+        }
+    }
+
     public static class ExistBadwordException extends GlobalException {
 
         public ExistBadwordException() {

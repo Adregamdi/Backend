@@ -53,7 +53,7 @@ public class JwtService {
                 .withClaim(ROLE, role.toString())
                 .sign(Algorithm.HMAC512(secretKey));
 
-        log.info("Created Access Token for memberId: {}. Expires at: {}", memberId, expiresAt);
+        log.info("memberId로 액세스 토큰 생성: {}. 만료 기간: {}", memberId, expiresAt);
         return token;
     }
 
@@ -77,7 +77,7 @@ public class JwtService {
                 .withExpiresAt(expiresAt)
                 .sign(Algorithm.HMAC512(secretKey));
 
-        log.info("Created Refresh Token. Expires at: {}", expiresAt);
+        log.info("리프레쉬 토큰 생성. 만료 기간: {}", expiresAt);
         return token;
     }
 
@@ -106,7 +106,7 @@ public class JwtService {
                 .filter(accessToken -> accessToken.startsWith(BEARER))
                 .map(accessToken -> accessToken.replace(BEARER, ""));
 
-        log.info("Extracted Access Token: {}", token.isPresent() ? "Present" : "Absent");
+        log.info("추출된 액세스 토큰: {}", token.isPresent() ? "존재" : "존재하지 않음");
         return token;
     }
 
@@ -115,7 +115,7 @@ public class JwtService {
                 .filter(refreshToken -> refreshToken.startsWith(BEARER))
                 .map(refreshToken -> refreshToken.replace(BEARER, ""));
 
-        log.info("Extracted Refresh Token: {}", token.isPresent() ? "Present" : "Absent");
+        log.info("추출된 리프레쉬 토큰: {}", token.isPresent() ? "존재" : "존재하지 않음");
         return token;
     }
 
@@ -131,14 +131,14 @@ public class JwtService {
                     .orElseThrow(MemberNotFoundException::new);
 
             if (Boolean.FALSE.equals(member.getRefreshTokenStatus())) {
-                log.info("Member {} has logged out. Token is invalid.", memberId);
+                log.info("{} 로그아웃 상태인 회원입니다. 유효하지 않은 토큰.", memberId);
                 throw new LogoutMemberException();
             }
 
-            log.info("Extracted memberId from Access Token: {}", memberId);
+            log.info("액세스 토큰으로부터 추출된 memberId: {}", memberId);
             return Optional.of(memberId);
         } catch (JWTVerificationException e) {
-            log.info("Failed to extract memberId from Access Token. Error: {}", e.getMessage());
+            log.info("액세스 토큰으로부터 memberId 추출 실패. 에러: {}", e.getMessage());
             return Optional.empty();
         }
     }
@@ -160,10 +160,10 @@ public class JwtService {
     public boolean isTokenValid(final String token) {
         try {
             JWT.require(Algorithm.HMAC512(secretKey)).build().verify(token);
-            log.info("Token is valid");
+            log.info("유효한 토큰");
             return true;
         } catch (JWTVerificationException e) {
-            log.info("Token is invalid. Error: {}", e.getMessage());
+            log.info("유효하지 않은 토큰. 에러: {}", e.getMessage());
             throw new TokenValidationException();
         }
     }

@@ -63,9 +63,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 accessToken != null ? "존재" : "존재하지 않음",
                 refreshToken != null ? "존재" : "존재하지 않음");
 
-        if (refreshToken != null && jwtService.isTokenValid(refreshToken) && Objects.equals("/api/auth/reissue", requestUri)) {
-            log.info("유효한 리프레쉬 토큰 존재. 액세스 토큰을 재발급합니다.");
+        if (refreshToken != null && Objects.equals("/api/auth/reissue", requestUri)) {
             checkRefreshTokenAndReIssueAccessToken(response, refreshToken);
+            log.info("유효한 리프레쉬 토큰 존재. 액세스 토큰을 재발급합니다.");
             return;
         }
 
@@ -126,7 +126,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         log.info("checkAccessTokenAndAuthentication() 호출");
         try {
             jwtService.extractAccessToken(request)
-                    .filter(jwtService::isTokenValid)
+                    .filter(jwtService::validateAccessToken)
                     .flatMap(jwtService::extractMemberId)
                     .flatMap(memberId -> memberRepository.findByMemberIdAndMemberStatus(memberId, true))
                     .ifPresent(this::saveAuthentication);

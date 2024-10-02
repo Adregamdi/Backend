@@ -157,14 +157,14 @@ public class JwtService {
         response.setHeader(refreshHeader, refreshToken);
     }
 
-    public boolean isTokenValid(final String token) {
-        if (token == null || token.trim().isEmpty()) {
-            log.info("토큰이 비어있습니다.");
+    public boolean validateAccessToken(final String accessToken) {
+        if (accessToken == null || accessToken.trim().isEmpty()) {
+            log.info("액세스 토큰이 비어있습니다.");
             throw new GlobalException.EmptyTokenException();
         }
 
         try {
-            DecodedJWT jwt = JWT.decode(token);
+            DecodedJWT jwt = JWT.decode(accessToken);
 
             JWT.require(Algorithm.HMAC512(secretKey))
                     .withClaimPresence(MEMBER_ID_CLAIM)  // memberId claim이 반드시 있어야 함
@@ -177,7 +177,7 @@ public class JwtService {
                 throw new GlobalException.TokenIssuedAtFutureException();
             }
 
-            log.info("유효한 토큰");
+            log.info("유효한 액세스 토큰");
             return true;
         } catch (JWTDecodeException e) {
             log.info("토큰의 형식이 올바르지 않습니다.");
@@ -197,13 +197,35 @@ public class JwtService {
         }
     }
 
-    public void validateRefreshToken(String refreshToken, Member member) {
+    public void validateRefreshToken(final String refreshToken, final Member member) {
         if (!refreshToken.equals(member.getRefreshToken())) {
             log.info("저장된 리프레시 토큰과 제공된 리프레시 토큰이 일치하지 않습니다. MemberId: {}", member.getMemberId());
             throw new GlobalException.RefreshTokenMismatchException();
         }
 
-        if (!isTokenValid(refreshToken)) {
+        try {
+            DecodedJWT jwt = JWT.decode(refreshToken);
+
+            JWT.require(Algorithm.HMAC512(secretKey))
+                    .build()
+                    .verify(jwt);
+
+            Date issuedAt = jwt.getIssuedAt();
+            if (issuedAt != null && issuedAt.after(new Date())) {
+                throw new GlobalException.TokenIssuedAtFutureException();
+            }
+
+            log.info("유효한 리프레쉬 토큰");
+        } catch (JWTDecodeException e) {
+            log.info("토큰의 형식이 올바르지 않습니다.");
+            throw new GlobalException.MalformedTokenException();
+        } catch (TokenExpiredException e) {
+            log.info("토큰이 만료되었습니다.");
+            throw new GlobalException.TokenExpiredException();
+        } catch (SignatureVerificationException e) {
+            log.info("토큰 서명이 유효하지 않습니다.");
+            throw new GlobalException.TokenValidationException("토큰 서명이 유효하지 않습니다.");
+        } catch (JWTVerificationException e) {
             log.info("리프레시 토큰이 유효하지 않습니다. MemberId: {}", member.getMemberId());
             throw new GlobalException.TokenValidationException("리프레시 토큰이 유효하지 않습니다.");
         }

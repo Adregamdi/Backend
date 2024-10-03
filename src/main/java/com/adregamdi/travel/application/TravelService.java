@@ -227,4 +227,15 @@ public class TravelService {
                 travels.getContent()
         );
     }
+
+    /*
+     * 내 특정 일정 삭제
+     * */
+    @Transactional
+    public void deleteMyTravel(final Long travelId, final String memberId) {
+        Travel travel = travelRepository.findByTravelIdAndMemberId(travelId, memberId)
+                .orElseThrow(() -> new TravelNotFoundException(travelId));
+
+        travelRepository.delete(travel);
+    }
 }

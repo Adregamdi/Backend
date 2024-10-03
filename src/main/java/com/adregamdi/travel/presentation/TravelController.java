@@ -27,8 +27,8 @@ public class TravelController {
     @PostMapping
     @MemberAuthorize
     public ResponseEntity<ApiResponse<CreateMyTravelResponse>> createMyTravel(
-            @RequestBody @Valid final CreateMyTravelRequest request,
-            @AuthenticationPrincipal final UserDetails userDetails
+            @AuthenticationPrincipal final UserDetails userDetails,
+            @RequestBody @Valid final CreateMyTravelRequest request
     ) {
         return ResponseEntity.ok()
                 .body(ApiResponse.<CreateMyTravelResponse>builder()
@@ -41,8 +41,8 @@ public class TravelController {
     @GetMapping
     @MemberAuthorize
     public ResponseEntity<ApiResponse<GetMyTravelResponse>> getMyTravel(
-            @RequestParam("travel_id") @Positive final Long travelId,
-            @AuthenticationPrincipal final UserDetails userDetails
+            @AuthenticationPrincipal final UserDetails userDetails,
+            @RequestParam("travel_id") @Positive final Long travelId
     ) {
         return ResponseEntity.ok()
                 .body(ApiResponse.<GetMyTravelResponse>builder()
@@ -55,13 +55,27 @@ public class TravelController {
     @GetMapping("/list")
     @MemberAuthorize
     public ResponseEntity<ApiResponse<GetMyTravelsResponse>> getMyTravels(
-            @RequestParam(defaultValue = "0") final int page,
-            @AuthenticationPrincipal final UserDetails userDetails
+            @AuthenticationPrincipal final UserDetails userDetails,
+            @RequestParam(defaultValue = "0") final int page
     ) {
         return ResponseEntity.ok()
                 .body(ApiResponse.<GetMyTravelsResponse>builder()
                         .statusCode(HttpStatus.OK.value())
                         .data(travelService.getMyTravels(page, userDetails.getUsername()))
+                        .build()
+                );
+    }
+
+    @DeleteMapping()
+    @MemberAuthorize
+    public ResponseEntity<ApiResponse<Void>> deleteMyTravel(
+            @AuthenticationPrincipal final UserDetails userDetails,
+            @RequestParam("travel_id") @Positive final Long travelId
+    ) {
+        travelService.deleteMyTravel(travelId, userDetails.getUsername());
+        return ResponseEntity.ok()
+                .body(ApiResponse.<Void>builder()
+                        .statusCode(HttpStatus.OK.value())
                         .build()
                 );
     }

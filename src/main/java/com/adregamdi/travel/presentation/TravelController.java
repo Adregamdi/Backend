@@ -33,7 +33,7 @@ public class TravelController {
         return ResponseEntity.ok()
                 .body(ApiResponse.<CreateMyTravelResponse>builder()
                         .statusCode(HttpStatus.CREATED.value())
-                        .data(travelService.createMyTravel(request, userDetails.getUsername()))
+                        .data(travelService.createMyTravel(userDetails.getUsername(), request))
                         .build()
                 );
     }
@@ -47,7 +47,7 @@ public class TravelController {
         return ResponseEntity.ok()
                 .body(ApiResponse.<GetMyTravelResponse>builder()
                         .statusCode(HttpStatus.OK.value())
-                        .data(travelService.getMyTravel(travelId, userDetails.getUsername()))
+                        .data(travelService.getMyTravel(userDetails.getUsername(), travelId))
                         .build()
                 );
     }
@@ -61,7 +61,7 @@ public class TravelController {
         return ResponseEntity.ok()
                 .body(ApiResponse.<GetMyTravelsResponse>builder()
                         .statusCode(HttpStatus.OK.value())
-                        .data(travelService.getMyTravels(page, userDetails.getUsername()))
+                        .data(travelService.getMyTravels(userDetails.getUsername(), page))
                         .build()
                 );
     }
@@ -72,7 +72,7 @@ public class TravelController {
             @AuthenticationPrincipal final UserDetails userDetails,
             @RequestParam("travel_id") @Positive final Long travelId
     ) {
-        travelService.deleteMyTravel(travelId, userDetails.getUsername());
+        travelService.deleteMyTravel(userDetails.getUsername(), travelId);
         return ResponseEntity.ok()
                 .body(ApiResponse.<Void>builder()
                         .statusCode(HttpStatus.OK.value())

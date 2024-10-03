@@ -51,7 +51,7 @@ public class TravelService {
      * 일정 등록/수정
      * */
     @Transactional
-    public CreateMyTravelResponse createMyTravel(final CreateMyTravelRequest request, final String memberId) {
+    public CreateMyTravelResponse createMyTravel(final String memberId, final CreateMyTravelRequest request) {
         int totalDays = (int) (ChronoUnit.DAYS.between(request.startDate(), request.endDate()) + 1);
 
         if (request.startDate().isAfter(request.endDate())) {
@@ -182,7 +182,7 @@ public class TravelService {
      * 내 특정 일정 조회
      * */
     @Transactional(readOnly = true)
-    public GetMyTravelResponse getMyTravel(final Long travelId, final String memberId) {
+    public GetMyTravelResponse getMyTravel(final String memberId, final Long travelId) {
         Travel travel = travelRepository.findByTravelIdAndMemberId(travelId, memberId)
                 .orElseThrow(() -> new TravelNotFoundException(memberId));
 
@@ -216,7 +216,7 @@ public class TravelService {
      * 내 전체 일정 조회
      * */
     @Transactional(readOnly = true)
-    public GetMyTravelsResponse getMyTravels(final int page, final String memberId) {
+    public GetMyTravelsResponse getMyTravels(final String memberId, final int page) {
         Slice<TravelDTO> travels = travelRepository.findByMemberId(memberId, generatePageDesc(page, LARGE_PAGE_SIZE, "travelId"));
 
         return GetMyTravelsResponse.of(
@@ -232,7 +232,7 @@ public class TravelService {
      * 내 특정 일정 삭제
      * */
     @Transactional
-    public void deleteMyTravel(final Long travelId, final String memberId) {
+    public void deleteMyTravel(final String memberId, final Long travelId) {
         Travel travel = travelRepository.findByTravelIdAndMemberId(travelId, memberId)
                 .orElseThrow(() -> new TravelNotFoundException(travelId));
 

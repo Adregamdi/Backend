@@ -68,8 +68,8 @@ public class TravelogueService {
      */
     @Transactional
     public CreateMyTravelogueResponse createMyTravelogue(
-            final CreateMyTravelogueRequest request,
-            final String memberId
+            final String memberId,
+            final CreateMyTravelogueRequest request
     ) {
         Travel travel = travelRepository.findById(request.travelId())
                 .orElseThrow(() -> new TravelException.TravelNotFoundException(request.travelId()));
@@ -284,7 +284,7 @@ public class TravelogueService {
      * 내 전체 여행기 조회
      * */
     @Transactional(readOnly = true)
-    public GetMyTraveloguesResponse getMyTravelogues(final int page, final String memberId) {
+    public GetMyTraveloguesResponse getMyTravelogues(final String memberId, final int page) {
         Slice<TravelogueDTO> travelogues = travelogueRepository.findByMemberId(memberId, generatePageDesc(page, LARGE_PAGE_SIZE, "travelogueId"));
 
         return GetMyTraveloguesResponse.of(

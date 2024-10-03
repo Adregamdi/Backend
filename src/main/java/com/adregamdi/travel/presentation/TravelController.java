@@ -66,7 +66,7 @@ public class TravelController {
                 );
     }
 
-    @DeleteMapping()
+    @DeleteMapping
     @MemberAuthorize
     public ResponseEntity<ApiResponse<Void>> deleteMyTravel(
             @AuthenticationPrincipal final UserDetails userDetails,

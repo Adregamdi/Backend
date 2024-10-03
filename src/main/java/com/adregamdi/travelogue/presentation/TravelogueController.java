@@ -32,7 +32,7 @@ public class TravelogueController {
         return ResponseEntity.ok()
                 .body(ApiResponse.<CreateMyTravelogueResponse>builder()
                         .statusCode(HttpStatus.CREATED.value())
-                        .data(travelogueService.createMyTravelogue(request, userDetails.getUsername()))
+                        .data(travelogueService.createMyTravelogue(userDetails.getUsername(), request))
                         .build()
                 );
     }
@@ -41,7 +41,7 @@ public class TravelogueController {
     @MemberAuthorize
     public ResponseEntity<ApiResponse<GetTravelogueResponse>> get(
             @AuthenticationPrincipal final UserDetails userDetails,
-            @RequestParam("travelogue_id") @Positive Long travelogueId
+            @RequestParam("travelogue_id") @Positive final Long travelogueId
     ) {
         return ResponseEntity.ok()
                 .body(ApiResponse.<GetTravelogueResponse>builder()
@@ -60,7 +60,7 @@ public class TravelogueController {
         return ResponseEntity.ok()
                 .body(ApiResponse.<GetMyTraveloguesResponse>builder()
                         .statusCode(HttpStatus.OK.value())
-                        .data(travelogueService.getMyTravelogues(page, userDetails.getUsername()))
+                        .data(travelogueService.getMyTravelogues(userDetails.getUsername(), page))
                         .build()
                 );
     }
@@ -83,7 +83,7 @@ public class TravelogueController {
     @MemberAuthorize
     public ResponseEntity<ApiResponse<GetHotTraveloguesResponse>> getHotTravelogues(
             @AuthenticationPrincipal final UserDetails userDetails,
-            @RequestParam(value = "like_count", required = false) @PositiveOrZero Integer lastLikeCount,
+            @RequestParam(value = "like_count", required = false) @PositiveOrZero final Integer lastLikeCount,
             @RequestParam(value = "size", defaultValue = "10") @Positive final int size
     ) {
         return ResponseEntity.ok()
@@ -91,5 +91,19 @@ public class TravelogueController {
                         .statusCode(HttpStatus.OK.value())
                         .data(travelogueService.getHotTravelogue(userDetails.getUsername(), lastLikeCount != null ? lastLikeCount : Integer.MAX_VALUE, size))
                         .build());
+    }
+
+    @DeleteMapping
+    @MemberAuthorize
+    public ResponseEntity<ApiResponse<Void>> deleteMyTravelogue(
+            @AuthenticationPrincipal final UserDetails userDetails,
+            @RequestParam("travelogue_id") @Positive final Long travelogueId
+    ) {
+        travelogueService.deleteMyTravelogue(userDetails.getUsername(), travelogueId);
+        return ResponseEntity.ok()
+                .body(ApiResponse.<Void>builder()
+                        .statusCode(HttpStatus.OK.value())
+                        .build()
+                );
     }
 }

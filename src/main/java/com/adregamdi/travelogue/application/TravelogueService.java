@@ -68,8 +68,8 @@ public class TravelogueService {
      */
     @Transactional
     public CreateMyTravelogueResponse createMyTravelogue(
-            final CreateMyTravelogueRequest request,
-            final String memberId
+            final String currentMemberId,
+            final CreateMyTravelogueRequest request
     ) {
         Travel travel = travelRepository.findById(request.travelId())
                 .orElseThrow(() -> new TravelException.TravelNotFoundException(request.travelId()));
@@ -90,7 +90,7 @@ public class TravelogueService {
             if (travelogue != null) {
                 throw new TravelogueExistException(request.travelId());
             }
-            travelogue = travelogueRepository.save(new Travelogue(memberId, request.travelId(), request.title(), request.introduction()));
+            travelogue = travelogueRepository.save(new Travelogue(currentMemberId, request.travelId(), request.title(), request.introduction()));
             saveTravelogueImages(requestImages, travelogue.getTravelogueId());
             saveTravelogueDaysAndReviews(request.dayList(), travelogue.getTravelogueId());
         }
@@ -225,14 +225,14 @@ public class TravelogueService {
      * 특정 여행기 조회
      */
     @Transactional(readOnly = true)
-    public GetTravelogueResponse get(final String memberId, final Long travelogueId) {
+    public GetTravelogueResponse get(final String currentMemberId, final Long travelogueId) {
         Travelogue travelogue = travelogueRepository.findById(travelogueId)
                 .orElseThrow(() -> new TravelogueNotFoundException(travelogueId));
 
         Member member = memberRepository.findById(travelogue.getMemberId())
                 .orElseThrow(() -> new MemberException.MemberNotFoundException(travelogue.getMemberId()));
 
-        blockRepository.findByBlockedMemberIdAndBlockingMemberId(travelogue.getMemberId(), memberId)
+        blockRepository.findByBlockedMemberIdAndBlockingMemberId(travelogue.getMemberId(), currentMemberId)
                 .ifPresent(BlockException.BlockExistException::new);
 
         List<TravelogueImage> travelogueImages = travelogueImageRepository.findByTravelogueId(travelogueId)
@@ -276,7 +276,7 @@ public class TravelogueService {
 
             placeReviewsMap.put(travelogueDay.getTravelogueDayId(), placeReviewInfos);
         }
-        boolean isLiked = likesService.checkIsLiked(memberId, ContentType.TRAVELOGUE, travelogueId);
+        boolean isLiked = likesService.checkIsLiked(currentMemberId, ContentType.TRAVELOGUE, travelogueId);
         return GetTravelogueResponse.of(isLiked, member, travelogue, travelogueImages, travelogueDays, placeReviewsMap);
     }
 
@@ -284,8 +284,8 @@ public class TravelogueService {
      * 내 전체 여행기 조회
      * */
     @Transactional(readOnly = true)
-    public GetMyTraveloguesResponse getMyTravelogues(final int page, final String memberId) {
-        Slice<TravelogueDTO> travelogues = travelogueRepository.findByMemberId(memberId, generatePageDesc(page, LARGE_PAGE_SIZE, "travelogueId"));
+    public GetMyTraveloguesResponse getMyTravelogues(final String currentMemberId, final int page) {
+        Slice<TravelogueDTO> travelogues = travelogueRepository.findByMemberId(currentMemberId, generatePageDesc(page, LARGE_PAGE_SIZE, "travelogueId"));
 
         return GetMyTraveloguesResponse.of(
                 LARGE_PAGE_SIZE,
@@ -299,8 +299,8 @@ public class TravelogueService {
     /*
      * 최근 등록된 여행기 조회
      * */
-    public GetRecentTraveloguesResponse getRecentTravelogues(final String memberId, final int page) {
-        Slice<TravelogueDTO> travelogues = travelogueRepository.findOrderByCreatedAt(memberId, generatePageDesc(page, LARGE_PAGE_SIZE, "createdAt"));
+    public GetRecentTraveloguesResponse getRecentTravelogues(final String currentMemberId, final int page) {
+        Slice<TravelogueDTO> travelogues = travelogueRepository.findOrderByCreatedAt(currentMemberId, generatePageDesc(page, LARGE_PAGE_SIZE, "createdAt"));
 
         return GetRecentTraveloguesResponse.of(
                 LARGE_PAGE_SIZE,
@@ -314,7 +314,18 @@ public class TravelogueService {
     /*
      * 인기있는 여행기 조회
      * */
-    public GetHotTraveloguesResponse getHotTravelogue(String memberId, int lastLikeCount, int size) {
-        return travelogueRepository.findOrderByLikeCount(memberId, lastLikeCount, size);
+    public GetHotTraveloguesResponse getHotTravelogue(String currentMemberId, int lastLikeCount, int size) {
+        return travelogueRepository.findOrderByLikeCount(currentMemberId, lastLikeCount, size);
+    }
+
+    /*
+     * 내 특정 여행기 삭제
+     * */
+    @Transactional
+    public void deleteMyTravelogue(final String currentMemberId, final Long travelogueId) {
+        Travelogue travelogue = travelogueRepository.findByTravelogueIdAndMemberId(travelogueId, currentMemberId)
+                .orElseThrow(() -> new TravelogueNotFoundException(travelogueId));
+
+        travelogueRepository.delete(travelogue);
     }
 }

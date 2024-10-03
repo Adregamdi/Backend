@@ -51,7 +51,7 @@ public class TravelService {
      * 일정 등록/수정
      * */
     @Transactional
-    public CreateMyTravelResponse createMyTravel(final CreateMyTravelRequest request, final String memberId) {
+    public CreateMyTravelResponse createMyTravel(final String currentMemberId, final CreateMyTravelRequest request) {
         int totalDays = (int) (ChronoUnit.DAYS.between(request.startDate(), request.endDate()) + 1);
 
         if (request.startDate().isAfter(request.endDate())) {
@@ -61,7 +61,7 @@ public class TravelService {
         Travel travel;
         if (request.travelId() == null) {
             travel = travelRepository.save(Travel.builder()
-                    .memberId(memberId)
+                    .memberId(currentMemberId)
                     .startDate(request.startDate())
                     .endDate(request.endDate())
                     .title(request.title())
@@ -69,7 +69,7 @@ public class TravelService {
         } else {
             travel = travelRepository.findById(request.travelId())
                     .orElseThrow(() -> new TravelNotFoundException(request.travelId()));
-            travel.update(memberId, request.startDate(), request.endDate(), request.title());
+            travel.update(currentMemberId, request.startDate(), request.endDate(), request.title());
         }
 
         List<TravelDay> existingDays = travelDayRepository.findAllByTravelId(travel.getTravelId());
@@ -182,9 +182,9 @@ public class TravelService {
      * 내 특정 일정 조회
      * */
     @Transactional(readOnly = true)
-    public GetMyTravelResponse getMyTravel(final Long travelId, final String memberId) {
-        Travel travel = travelRepository.findByTravelIdAndMemberId(travelId, memberId)
-                .orElseThrow(() -> new TravelNotFoundException(memberId));
+    public GetMyTravelResponse getMyTravel(final String currentMemberId, final Long travelId) {
+        Travel travel = travelRepository.findByTravelIdAndMemberId(travelId, currentMemberId)
+                .orElseThrow(() -> new TravelNotFoundException(currentMemberId));
 
         List<TravelDay> travelDays = travelDayRepository.findByTravelId(travelId)
                 .orElseThrow(() -> new TravelDayNotFoundException(travelId));
@@ -197,13 +197,13 @@ public class TravelService {
                 throw new TravelPlaceNotFoundException(travel.getTravelId());
             }
             for (TravelPlace travelPlace : travelPlaceList) {
-                PlaceReview placeReviewInfo = placeReviewRepository.findByMemberIdAndPlaceId(memberId, travelPlace.getPlaceId())
+                PlaceReview placeReviewInfo = placeReviewRepository.findByMemberIdAndPlaceId(currentMemberId, travelPlace.getPlaceId())
                         .orElse(PlaceReview.builder().build());
                 PlaceReviewDTO placeReview = null;
                 if (placeReviewInfo.getPlaceReviewId() != null && placeReviewInfo.getPlaceReviewId() != 0) {
-                    placeReview = placeService.getReview(memberId, placeReviewInfo.getPlaceReviewId());
+                    placeReview = placeService.getReview(currentMemberId, placeReviewInfo.getPlaceReviewId());
                 }
-                travelPlaceDTOS.add(TravelPlaceDTO.of(placeReview, travelPlace, placeService.get(memberId, travelPlace.getPlaceId()).place()));
+                travelPlaceDTOS.add(TravelPlaceDTO.of(placeReview, travelPlace, placeService.get(currentMemberId, travelPlace.getPlaceId()).place()));
             }
             travelPlaceDTOList.add(travelPlaceDTOS);
         }
@@ -216,8 +216,8 @@ public class TravelService {
      * 내 전체 일정 조회
      * */
     @Transactional(readOnly = true)
-    public GetMyTravelsResponse getMyTravels(final int page, final String memberId) {
-        Slice<TravelDTO> travels = travelRepository.findByMemberId(memberId, generatePageDesc(page, LARGE_PAGE_SIZE, "travelId"));
+    public GetMyTravelsResponse getMyTravels(final String currentMemberId, final int page) {
+        Slice<TravelDTO> travels = travelRepository.findByMemberId(currentMemberId, generatePageDesc(page, LARGE_PAGE_SIZE, "travelId"));
 
         return GetMyTravelsResponse.of(
                 LARGE_PAGE_SIZE,
@@ -226,5 +226,16 @@ public class TravelService {
                 travels.hasNext(),
                 travels.getContent()
         );
+    }
+
+    /*
+     * 내 특정 일정 삭제
+     * */
+    @Transactional
+    public void deleteMyTravel(final String currentMemberId, final Long travelId) {
+        Travel travel = travelRepository.findByTravelIdAndMemberId(travelId, currentMemberId)
+                .orElseThrow(() -> new TravelNotFoundException(travelId));
+
+        travelRepository.delete(travel);
     }
 }

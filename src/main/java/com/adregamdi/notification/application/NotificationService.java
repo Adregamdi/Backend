@@ -9,7 +9,7 @@ import java.util.List;
 public interface NotificationService {
     void create(final CreateNotificationRequest request);
 
-    GetNotificationResponse get(final Long lastId, final String username);
+    GetNotificationResponse getMyNotification(final String currentMemberId, final Long lastId);
 
     void update(final List<UpdateNotificationRequest> requests);
 }

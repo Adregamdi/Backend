@@ -28,7 +28,9 @@ public class NotificationServiceImpl implements NotificationService {
     @Override
     @Transactional
     public void create(final CreateNotificationRequest request) {
-        notificationRepository.save(new Notification(request));
+        notificationRepository.save(Notification.builder()
+                .memberId(request.memberId())
+                .build());
     }
 
     /*
@@ -36,9 +38,9 @@ public class NotificationServiceImpl implements NotificationService {
      */
     @Override
     @Transactional(readOnly = true)
-    public GetNotificationResponse get(final Long lastId, final String memberId) {
-        List<Notification> notifications = notificationRepository.findByMemberId(memberId, LocalDateTime.now().minusDays(31), lastId)
-                .orElseThrow(() -> new NotificationNotFoundException(memberId));
+    public GetNotificationResponse getMyNotification(final String currentMemberId, final Long lastId) {
+        List<Notification> notifications = notificationRepository.findByMemberId(currentMemberId, LocalDateTime.now().minusDays(31), lastId)
+                .orElseThrow(() -> new NotificationNotFoundException(currentMemberId));
 
         return GetNotificationResponse.of(
                 countNoReadNotification(notifications),

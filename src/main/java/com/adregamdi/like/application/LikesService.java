@@ -10,7 +10,19 @@ import com.adregamdi.like.dto.response.CreateShortsLikeResponse;
 import com.adregamdi.like.dto.response.GetLikesContentsResponse;
 import com.adregamdi.like.exception.LikesException;
 import com.adregamdi.like.infrastructure.LikesRepository;
+import com.adregamdi.member.domain.Member;
 import com.adregamdi.member.domain.Role;
+import com.adregamdi.member.exception.MemberException;
+import com.adregamdi.member.infrastructure.MemberRepository;
+import com.adregamdi.notification.application.NotificationService;
+import com.adregamdi.notification.domain.NotificationType;
+import com.adregamdi.notification.dto.request.CreateNotificationRequest;
+import com.adregamdi.shorts.domain.Shorts;
+import com.adregamdi.shorts.exception.ShortsException;
+import com.adregamdi.shorts.infrastructure.ShortsRepository;
+import com.adregamdi.travelogue.domain.Travelogue;
+import com.adregamdi.travelogue.exception.TravelogueException;
+import com.adregamdi.travelogue.infrastructure.TravelogueRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -24,7 +36,12 @@ public class LikesService {
 
     private final LikesRepository likesRepository;
     private final LikesValidService likesValidService;
+    private final NotificationService notificationService;
+    private final ShortsRepository shortsRepository;
+    private final TravelogueRepository travelogueRepository;
+    private final MemberRepository memberRepository;
 
+    @Transactional
     public CreateLikesResponse create(String memberId, CreateLikesRequest request) {
 
         boolean isLiked = likesRepository.findByMemberIdAndContentTypeAndContentId(memberId, request.getContentType(), request.contentId()).isPresent();
@@ -32,16 +49,43 @@ public class LikesService {
             return new CreateLikesResponse(true);
         }
 
-
         Like like = Like.builder()
                 .memberId(memberId)
                 .contentType(request.getContentType())
                 .contentId(request.contentId())
                 .build();
 
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new MemberException.MemberNotFoundException(memberId));
+        Member opponentMember = null;
+        com.adregamdi.notification.domain.ContentType contentType = null;
+        if (request.contentType().equals("SHORTS")) {
+            Shorts shorts = shortsRepository.findById(request.contentId())
+                    .orElseThrow(() -> new ShortsException.ShortsNotFoundException(request.contentId()));
+            opponentMember = memberRepository.findById(shorts.getMemberId())
+                    .orElseThrow(() -> new MemberException.MemberNotFoundException(shorts.getMemberId()));
+            contentType = com.adregamdi.notification.domain.ContentType.SHORTS;
+        } else if (request.contentType().equals("TRAVELOGUE")) {
+            Travelogue travelogue = travelogueRepository.findById(request.contentId())
+                    .orElseThrow(() -> new TravelogueException.TravelogueNotFoundException(request.contentId()));
+            opponentMember = memberRepository.findById(travelogue.getMemberId())
+                    .orElseThrow(() -> new MemberException.MemberNotFoundException(travelogue.getMemberId()));
+            contentType = com.adregamdi.notification.domain.ContentType.TRAVELOGUE;
+        }
+
+        if (opponentMember != null) {
+            notificationService.create(CreateNotificationRequest.of(
+                    opponentMember.getMemberId(),
+                    member.getProfile(),
+                    member.getHandle(),
+                    contentType,
+                    NotificationType.LIKES));
+        }
+
         return new CreateLikesResponse(likesRepository.save(like).equals(like));
     }
 
+    @Transactional
     public CreateShortsLikeResponse createShortsLike(String memberId, Long shortsId) {
 
         Like like = Like.builder()
@@ -51,6 +95,21 @@ public class LikesService {
                 .build();
 
         likesRepository.save(like);
+
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new MemberException.MemberNotFoundException(memberId));
+        Shorts shorts = shortsRepository.findById(shortsId)
+                .orElseThrow(() -> new ShortsException.ShortsNotFoundException(shortsId));
+        Member opponentMember = memberRepository.findById(shorts.getMemberId())
+                .orElseThrow(() -> new MemberException.MemberNotFoundException(shorts.getMemberId()));
+        com.adregamdi.notification.domain.ContentType contentType = com.adregamdi.notification.domain.ContentType.SHORTS;
+
+        notificationService.create(CreateNotificationRequest.of(
+                opponentMember.getMemberId(),
+                member.getProfile(),
+                member.getHandle(),
+                contentType,
+                NotificationType.LIKES));
 
         return new CreateShortsLikeResponse(
                 likesRepository.countByContentTypeAndContentId(ContentType.SHORTS, shortsId)

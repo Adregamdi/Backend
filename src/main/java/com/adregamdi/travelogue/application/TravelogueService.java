@@ -317,4 +317,15 @@ public class TravelogueService {
     public GetHotTraveloguesResponse getHotTravelogue(String memberId, int lastLikeCount, int size) {
         return travelogueRepository.findOrderByLikeCount(memberId, lastLikeCount, size);
     }
+
+    /*
+     * 내 특정 여행기 삭제
+     * */
+    @Transactional
+    public void deleteMyTravelogue(final String currentMemberId, final Long travelogueId) {
+        Travelogue travelogue = travelogueRepository.findByTravelogueIdAndMemberId(travelogueId, currentMemberId)
+                .orElseThrow(() -> new TravelogueNotFoundException(travelogueId));
+
+        travelogueRepository.delete(travelogue);
+    }
 }

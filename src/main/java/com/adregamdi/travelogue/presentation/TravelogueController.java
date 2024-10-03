@@ -92,4 +92,18 @@ public class TravelogueController {
                         .data(travelogueService.getHotTravelogue(userDetails.getUsername(), lastLikeCount != null ? lastLikeCount : Integer.MAX_VALUE, size))
                         .build());
     }
+
+    @DeleteMapping
+    @MemberAuthorize
+    public ResponseEntity<ApiResponse<Void>> deleteMyTravelogue(
+            @AuthenticationPrincipal final UserDetails userDetails,
+            @RequestParam("travelogue_id") @Positive final Long travelogueId
+    ) {
+        travelogueService.deleteMyTravelogue(userDetails.getUsername(), travelogueId);
+        return ResponseEntity.ok()
+                .body(ApiResponse.<Void>builder()
+                        .statusCode(HttpStatus.OK.value())
+                        .build()
+                );
+    }
 }

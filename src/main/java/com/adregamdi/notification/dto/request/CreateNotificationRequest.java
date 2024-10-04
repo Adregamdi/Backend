@@ -1,25 +1,30 @@
 package com.adregamdi.notification.dto.request;
 
+import com.adregamdi.notification.domain.ContentType;
 import com.adregamdi.notification.domain.NotificationType;
 import lombok.Builder;
 
 @Builder
 public record CreateNotificationRequest(
         String memberId,
-        String content,
-        String uri,
-        NotificationType type
+        String opponentMemberProfile,
+        String opponentMemberHandle,
+        ContentType contentType,
+        NotificationType notificationType
 ) {
-    // 여행기 좋아요 알림
-    public static CreateNotificationRequest of(final NotificationType type) {
+    public static CreateNotificationRequest of(
+            final String memberId,
+            final String opponentMemberProfile,
+            final String opponentMemberHandle,
+            final ContentType contentType,
+            final NotificationType notificationType
+    ) {
         return CreateNotificationRequest.builder()
-                .type(type)
-                .build();
-    }
-
-    // 쇼츠 좋아요 알림
-    public static CreateNotificationRequest of() {
-        return CreateNotificationRequest.builder()
+                .memberId(memberId)
+                .opponentMemberProfile(opponentMemberProfile)
+                .opponentMemberHandle(opponentMemberHandle)
+                .contentType(contentType)
+                .notificationType(notificationType)
                 .build();
     }
 }

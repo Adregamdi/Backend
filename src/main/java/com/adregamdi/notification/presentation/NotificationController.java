@@ -23,14 +23,14 @@ public class NotificationController {
 
     @GetMapping
     @MemberAuthorize
-    public ResponseEntity<ApiResponse<GetNotificationResponse>> get(
-            @RequestParam(defaultValue = "", required = false) final Long lastId,
-            @AuthenticationPrincipal final UserDetails userDetails
+    public ResponseEntity<ApiResponse<GetNotificationResponse>> getMyNotification(
+            @AuthenticationPrincipal final UserDetails userDetails,
+            @RequestParam(defaultValue = "", required = false) final Long lastId
     ) {
         return ResponseEntity.ok()
                 .body(ApiResponse.<GetNotificationResponse>builder()
                         .statusCode(HttpStatus.OK.value())
-                        .data(notificationService.get(lastId, userDetails.getUsername()))
+                        .data(notificationService.getMyNotification(userDetails.getUsername(), lastId))
                         .build()
                 );
     }
@@ -41,7 +41,7 @@ public class NotificationController {
         notificationService.update(requests);
         return ResponseEntity.ok()
                 .body(ApiResponse.<Void>builder()
-                        .statusCode(HttpStatus.NO_CONTENT.value())
+                        .statusCode(HttpStatus.OK.value())
                         .build()
                 );
     }

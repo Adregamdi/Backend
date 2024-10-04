@@ -21,7 +21,7 @@ public class QNotification extends EntityPathBase<Notification> {
 
     public final com.adregamdi.core.entity.QBaseTime _super = new com.adregamdi.core.entity.QBaseTime(this);
 
-    public final StringPath content = createString("content");
+    public final EnumPath<ContentType> contentType = createEnum("contentType", ContentType.class);
 
     //inherited
     public final DateTimePath<java.time.LocalDateTime> createdAt = _super.createdAt;
@@ -32,12 +32,14 @@ public class QNotification extends EntityPathBase<Notification> {
 
     public final NumberPath<Long> notificationId = createNumber("notificationId", Long.class);
 
-    public final EnumPath<NotificationType> type = createEnum("type", NotificationType.class);
+    public final EnumPath<NotificationType> notificationType = createEnum("notificationType", NotificationType.class);
+
+    public final StringPath opponentMemberHandle = createString("opponentMemberHandle");
+
+    public final StringPath opponentMemberProfile = createString("opponentMemberProfile");
 
     //inherited
     public final DateTimePath<java.time.LocalDateTime> updatedAt = _super.updatedAt;
-
-    public final StringPath uri = createString("uri");
 
     public QNotification(String variable) {
         super(Notification.class, forVariable(variable));

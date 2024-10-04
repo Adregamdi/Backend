@@ -59,13 +59,13 @@ public class LikesService {
                 .orElseThrow(() -> new MemberException.MemberNotFoundException(memberId));
         Member opponentMember = null;
         com.adregamdi.notification.domain.ContentType contentType = null;
-        if (request.contentType().equals("SHORTS")) {
+        if (request.getContentType().equals(ContentType.SHORTS)) {
             Shorts shorts = shortsRepository.findById(request.contentId())
                     .orElseThrow(() -> new ShortsException.ShortsNotFoundException(request.contentId()));
             opponentMember = memberRepository.findById(shorts.getMemberId())
                     .orElseThrow(() -> new MemberException.MemberNotFoundException(shorts.getMemberId()));
             contentType = com.adregamdi.notification.domain.ContentType.SHORTS;
-        } else if (request.contentType().equals("TRAVELOGUE")) {
+        } else if (request.getContentType().equals(ContentType.TRAVELOGUE)) {
             Travelogue travelogue = travelogueRepository.findById(request.contentId())
                     .orElseThrow(() -> new TravelogueException.TravelogueNotFoundException(request.contentId()));
             opponentMember = memberRepository.findById(travelogue.getMemberId())

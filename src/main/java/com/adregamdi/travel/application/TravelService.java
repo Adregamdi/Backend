@@ -237,10 +237,10 @@ public class TravelService {
                 .orElseThrow(() -> new TravelNotFoundException(travelId));
 
         List<TravelDay> travelDays = travelDayRepository.findAllByTravelId(travel.getTravelId());
-        for (TravelDay travelday : travelDays) {
-            List<TravelPlace> travelPlaces = travelPlaceRepository.findAllByTravelDayId(travelday.getTravelDayId());
+        for (TravelDay travelDay : travelDays) {
+            List<TravelPlace> travelPlaces = travelPlaceRepository.findAllByTravelDayId(travelDay.getTravelDayId());
 
-            travelPlaceRepository.deleteAll(travelPlaces);
+            travelPlaceRepository.deleteAllByTravelDayId(travelDay.getTravelDayId());
             
             for (TravelPlace travelPlace : travelPlaces) {
                 placeService.addCount(travelPlace.getPlaceId(), false);

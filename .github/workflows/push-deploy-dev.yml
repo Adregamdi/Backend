@@ -53,14 +53,14 @@ jobs:
       - name: Add remote server to known hosts
         run: |
           mkdir -p ~/.ssh
-          ssh-keyscan ${{ secrets.SERVER_HOST }} >> ~/.ssh/known_hosts
+          ssh-keyscan -p ${{ secrets.SERVER_SSH_PORT }} ${{ secrets.SERVER_HOST }} >> ~/.ssh/known_hosts
 
       # 서버에 jar파일을 보내기 위해 scp 명령어를 사용합니다.
       - name: SCP transfer
         run: |
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > /tmp/private_key
           chmod 400 /tmp/private_key
-          scp -i /tmp/private_key ./build/libs/*.jar ${{ secrets.SERVER_USERNAME }}@${{ secrets.SERVER_HOST }}:/home/ubuntu/develop/
+          scp -i /tmp/private_key -P ${{ secrets.SERVER_SSH_PORT }} ./build/libs/*.jar ${{ secrets.SERVER_USERNAME }}@${{ secrets.SERVER_HOST }}:/home/ubuntu/develop/
 
       # 서버에 통신하기 위한 SSH를 설정합니다.
       - name: Setup SSH and Deploy
@@ -69,6 +69,7 @@ jobs:
           host: ${{ secrets.SERVER_HOST }}
           username: ${{ secrets.SERVER_USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: ${{ secrets.SERVER_SSH_PORT }}
           script: |
             # 서버 원격으로 명령어를 실행합니다. 서버 포트를 확인하고 실행중이면 종료합니다. 빌드된 jar파일을 실행합니다.
             sudo fuser -k ${{ secrets.SERVER_PORT }}/tcp || true;

@@ -236,6 +236,18 @@ public class TravelService {
         Travel travel = travelRepository.findByTravelIdAndMemberId(travelId, currentMemberId)
                 .orElseThrow(() -> new TravelNotFoundException(travelId));
 
+        List<TravelDay> travelDays = travelDayRepository.findAllByTravelId(travel.getTravelId());
+        for (TravelDay travelday : travelDays) {
+            List<TravelPlace> travelPlaces = travelPlaceRepository.findAllByTravelDayId(travelday.getTravelDayId());
+
+            travelPlaceRepository.deleteAll(travelPlaces);
+            
+            for (TravelPlace travelPlace : travelPlaces) {
+                placeService.addCount(travelPlace.getPlaceId(), false);
+            }
+        }
+
+        travelDayRepository.deleteAll(travelDays);
         travelRepository.delete(travel);
     }
 }

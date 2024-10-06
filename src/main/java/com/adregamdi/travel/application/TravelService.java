@@ -237,17 +237,19 @@ public class TravelService {
                 .orElseThrow(() -> new TravelNotFoundException(travelId));
 
         List<TravelDay> travelDays = travelDayRepository.findAllByTravelId(travel.getTravelId());
-        for (TravelDay travelDay : travelDays) {
-            List<TravelPlace> travelPlaces = travelPlaceRepository.findAllByTravelDayId(travelDay.getTravelDayId());
+        if (!travelDays.isEmpty()) {
+            for (TravelDay travelDay : travelDays) {
+                List<TravelPlace> travelPlaces = travelPlaceRepository.findAllByTravelDayId(travelDay.getTravelDayId());
 
-            travelPlaceRepository.deleteAllByTravelDayId(travelDay.getTravelDayId());
-            
-            for (TravelPlace travelPlace : travelPlaces) {
-                placeService.addCount(travelPlace.getPlaceId(), false);
+                travelPlaceRepository.deleteAllByTravelDayId(travelDay.getTravelDayId());
+
+                for (TravelPlace travelPlace : travelPlaces) {
+                    placeService.addCount(travelPlace.getPlaceId(), false);
+                }
             }
+            travelDayRepository.deleteAll(travelDays);
         }
 
-        travelDayRepository.deleteAll(travelDays);
         travelRepository.delete(travel);
     }
 }

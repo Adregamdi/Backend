@@ -12,4 +12,6 @@ public interface TravelogueDayPlaceReviewRepository extends JpaRepository<Travel
     List<TravelogueDayPlaceReview> findByTravelogueDayId(Long travelogueDayId);
 
     Optional<TravelogueDayPlaceReview> findByPlaceReviewId(Long placeReviewId);
+
+    void deleteAllByTravelogueDayId(Long travelogueDayId);
 }

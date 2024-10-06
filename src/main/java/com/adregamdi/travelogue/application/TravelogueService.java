@@ -326,6 +326,21 @@ public class TravelogueService {
         Travelogue travelogue = travelogueRepository.findByTravelogueIdAndMemberId(travelogueId, currentMemberId)
                 .orElseThrow(() -> new TravelogueNotFoundException(travelogueId));
 
+        List<TravelogueDay> travelogueDays = travelogueDayRepository.findByTravelogueIdOrderByDay(travelogueId)
+                .orElse(Collections.emptyList());
+        if (!travelogueDays.isEmpty()) {
+            for (TravelogueDay travelogueDay : travelogueDays) {
+                travelogueDayPlaceReviewRepository.deleteAllByTravelogueDayId(travelogueDay.getTravelogueDayId());
+            }
+            travelogueDayRepository.deleteAll(travelogueDays);
+        }
+
+        List<TravelogueImage> travelogueImages = travelogueImageRepository.findByTravelogueId(travelogueId)
+                .orElse(Collections.emptyList());
+        if (!travelogueImages.isEmpty()) {
+            travelogueImageRepository.deleteAll(travelogueImages);
+        }
+
         travelogueRepository.delete(travelogue);
     }
 }

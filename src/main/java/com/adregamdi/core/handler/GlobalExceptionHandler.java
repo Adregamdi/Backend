@@ -33,7 +33,6 @@ import java.util.stream.Collectors;
 public class GlobalExceptionHandler {
 
     private static final String DEFAULT_ERROR_MESSAGE = "관리자에게 문의해 주세요.";
-    private static final String DEFAULT_FORMAT_ERROR_MESSAGE = "잘못된 형식입니다.";
     private static final String ERROR_KEY_FORMAT = "%n error key : %s";
     private static final String CHARACTERS = "abcdefghijklmnopqrstuvwxyz";
     private static final int ERROR_KEY_LENGTH = 5;

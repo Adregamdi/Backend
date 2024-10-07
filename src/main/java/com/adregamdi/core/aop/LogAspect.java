@@ -12,7 +12,6 @@ import java.lang.reflect.Method;
 @Component
 @Aspect
 public class LogAspect {
-
     @Pointcut("execution(* com.adregamdi..*Controller.*(..))")
     public void controller() {
     }
@@ -21,45 +20,54 @@ public class LogAspect {
     public void service() {
     }
 
-    // 특정 JoinPoint 에서 수행될 부가기능을 정리
+    // 메서드 진입 로깅
     @Before("controller() || service()")
     public void beforeLogic(final JoinPoint joinPoint) {
         Method method = getMethod(joinPoint);
-        log.info("====== method = {} ======", method.getName());
+        String className = joinPoint.getTarget().getClass().getSimpleName();
+        log.info("====== Entering: {} - Method: {} ======", className, method.getName());
 
         Object[] args = joinPoint.getArgs();
-        for (Object arg : args) {
-            if (arg != null) {
-                log.info("parameter type = {}", arg.getClass().getSimpleName());
-                log.info("parameter value = {}", arg);
+        for (int i = 0; i < args.length; i++) {
+            if (args[i] != null) {
+                log.info("Param[{}] type = {}, value = {}", i, args[i].getClass().getSimpleName(), args[i]);
+            } else {
+                log.info("Param[{}] is null", i);
             }
         }
     }
 
-    @AfterReturning("controller() || service()")
-    public void afterLogic(final JoinPoint joinPoint) {
+    // 메서드 종료 로깅
+    @AfterReturning(pointcut = "controller() || service()", returning = "result")
+    public void afterLogic(final JoinPoint joinPoint, Object result) {
         Method method = getMethod(joinPoint);
-        log.info("====== method = {} ======", method.getName());
+        String className = joinPoint.getTarget().getClass().getSimpleName();
+        log.info("====== Exiting: {} - Method: {} ======", className, method.getName());
 
-        Object[] args = joinPoint.getArgs();
-        for (Object arg : args) {
-            if (arg != null) {
-                log.info("return type = {}", arg.getClass().getSimpleName());
-                log.info("return value = {}", arg);
-            }
+        if (result != null) {
+            log.info("Return type = {}, value = {}", result.getClass().getSimpleName(), result);
+        } else {
+            log.info("Return value is null");
         }
     }
 
-    @AfterThrowing(pointcut = "controller()", throwing = "e")
-    public void afterThrowingLogging(
-            final JoinPoint joinPoint,
-            final Exception e
-    ) {
-        log.error("!!! Occured error in request {}", joinPoint.getSignature().toShortString());
-        log.error("{}", e.getMessage());
+    // 예외 로깅
+    @AfterThrowing(pointcut = "controller() || service()", throwing = "e")
+    public void afterThrowingLogging(final JoinPoint joinPoint, final Throwable e) {
+        String className = joinPoint.getTarget().getClass().getSimpleName();
+        String methodName = joinPoint.getSignature().getName();
+        log.error("!!! Exception in {}.{}", className, methodName);
+        log.error("Exception type: {}", e.getClass().getName());
+        log.error("Exception message: {}", e.getMessage());
+        log.error("Stack trace:", e);
+
+        // 원인 예외 로깅
+        Throwable cause = e.getCause();
+        if (cause != null) {
+            log.error("Caused by: {} - {}", cause.getClass().getName(), cause.getMessage());
+        }
     }
 
-    // JoinPoint로 메서드 정보 가져오기
     private Method getMethod(final JoinPoint joinPoint) {
         MethodSignature signature = (MethodSignature) joinPoint.getSignature();
         return signature.getMethod();

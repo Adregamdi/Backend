@@ -40,25 +40,6 @@ public class GlobalExceptionHandler {
     private static final String EXCEPTION_CLASS_TYPE_MESSAGE_FORMANT = "%n class type : %s";
     private final Random random = new Random();
 
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ErrorResponse> handleMethodArgumentNotValidException(final MethodArgumentNotValidException exception) {
-        log.warn(exception.getBindingResult().getAllErrors().get(0).getDefaultMessage());
-        return ResponseEntity
-                .status(HttpStatus.BAD_REQUEST.value())
-                .body(new ErrorResponse(HttpStatus.BAD_REQUEST.value(), exception.getBindingResult().getAllErrors().get(0).getDefaultMessage()));
-    }
-
-    @ExceptionHandler(value = {
-            HttpMessageNotReadableException.class,
-            DateTimeException.class
-    })
-    public ResponseEntity<ErrorResponse> handleDateTimeParseException(final DateTimeException exception) {
-        log.warn(exception.getMessage());
-        return ResponseEntity
-                .status(HttpStatus.BAD_REQUEST.value())
-                .body(new ErrorResponse(HttpStatus.BAD_REQUEST.value(), "DateTime 형식이 잘못되었습니다. 서버 관리자에게 문의해 주세요."));
-    }
-
     // 필수 파라미터 예외
     @ExceptionHandler(MissingServletRequestParameterException.class)
     public ResponseEntity<ErrorResponse> handleMissingServletRequestParameter(MissingServletRequestParameterException exception) {
@@ -86,6 +67,7 @@ public class GlobalExceptionHandler {
                 .body(new ErrorResponse(HttpStatus.BAD_REQUEST.value(), errorMessage));
     }
 
+    // @Validated 있는 클래스에서 @RequestParam, @PathVariable 등에 적용된 제약 조건 예외
     @ExceptionHandler(ConstraintViolationException.class)
     public ResponseEntity<ErrorResponse> handleConstraintViolationException(final ConstraintViolationException exception) {
         log.warn("Constraint violation: {}", exception.getMessage());
@@ -99,6 +81,27 @@ public class GlobalExceptionHandler {
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST.value())
                 .body(new ErrorResponse(HttpStatus.BAD_REQUEST.value(), "입력값이 유효하지 않습니다: " + errorMessage));
+    }
+
+    // @Valid, @Validated 있는 곳에서 주로 @RequestBody dto 필드에 적용된 검증 어노테이션 유효성 검사 실패 예외
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<ErrorResponse> handleMethodArgumentNotValidException(final MethodArgumentNotValidException exception) {
+        log.warn(exception.getBindingResult().getAllErrors().get(0).getDefaultMessage());
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST.value())
+                .body(new ErrorResponse(HttpStatus.BAD_REQUEST.value(), exception.getBindingResult().getAllErrors().get(0).getDefaultMessage()));
+    }
+
+    // json 파싱, 날짜/시간 형식 예외
+    @ExceptionHandler(value = {
+            HttpMessageNotReadableException.class,
+            DateTimeException.class
+    })
+    public ResponseEntity<ErrorResponse> handleDateTimeParseException(final DateTimeException exception) {
+        log.warn(exception.getMessage());
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST.value())
+                .body(new ErrorResponse(HttpStatus.BAD_REQUEST.value(), "DateTime 형식이 잘못되었습니다. 서버 관리자에게 문의해 주세요."));
     }
 
     // 존재x 예외

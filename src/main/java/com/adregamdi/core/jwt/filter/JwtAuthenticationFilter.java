@@ -93,18 +93,17 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         try {
             String memberId = redisService.getMemberIdByRefreshToken(refreshToken);
             if (memberId == null) {
-                throw new GlobalException.TokenValidationException("유효하지 않은 리프레시 토큰입니다.");
+                throw new GlobalException.TokenValidationException("해당 리프레시 토큰을 가진 회원이 없습니다.");
             }
 
             Member member = memberRepository.findById(memberId)
                     .orElseThrow(() -> new GlobalException.TokenValidationException("해당 리프레시 토큰을 가진 회원이 없습니다."));
 
-            jwtService.validateRefreshToken(refreshToken);
+            jwtService.validateRefreshToken(memberId, refreshToken);
             String newAccessToken = jwtService.createAccessToken(member.getMemberId(), member.getRole());
             String newRefreshToken = reIssueRefreshToken(member.getMemberId());
             jwtService.sendAccessAndRefreshToken(response, newAccessToken, newRefreshToken);
-
-        } catch (GlobalException.TokenValidationException e) {
+        } catch (GlobalException.TokenValidationException | GlobalException.RefreshTokenMismatchException e) {
             response.setStatus(HttpStatus.UNAUTHORIZED.value());
             response.setContentType(MediaType.APPLICATION_JSON_VALUE);
             response.setCharacterEncoding("UTF-8");

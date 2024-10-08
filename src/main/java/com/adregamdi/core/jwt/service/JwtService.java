@@ -202,7 +202,12 @@ public class JwtService {
         }
     }
 
-    public void validateRefreshToken(final String refreshToken) {
+    public void validateRefreshToken(final String memberId, final String refreshToken) {
+        if (!refreshToken.equals(redisService.getRefreshToken(memberId))) {
+            log.info("저장된 리프레시 토큰과 제공된 리프레시 토큰이 일치하지 않습니다. MemberId: {}", memberId);
+            throw new GlobalException.RefreshTokenMismatchException();
+        }
+
         try {
             DecodedJWT jwt = JWT.decode(refreshToken);
 

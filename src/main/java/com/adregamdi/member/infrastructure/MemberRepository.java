@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
-public interface MemberRepository extends JpaRepository<Member, String> {
+public interface MemberRepository extends JpaRepository<Member, String>, MemberCustomRepository {
     Optional<Member> findByRefreshToken(String refreshToken);
 
     Optional<Member> findByMemberIdAndMemberStatus(String memberId, boolean memberStatus);

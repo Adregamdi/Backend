@@ -297,6 +297,12 @@ public class TravelogueService {
     }
 
     /*
+     * 특정 회원 전체 여행기 조회
+     * */
+    @Transactional(readOnly = true)
+    public
+
+    /*
      * 최근 등록된 여행기 조회
      * */
     public GetRecentTraveloguesResponse getRecentTravelogues(final String currentMemberId, final int page) {

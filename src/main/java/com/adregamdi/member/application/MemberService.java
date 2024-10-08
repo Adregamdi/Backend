@@ -4,11 +4,18 @@ import com.adregamdi.media.application.ImageService;
 import com.adregamdi.member.domain.Member;
 import com.adregamdi.member.domain.Role;
 import com.adregamdi.member.domain.SocialType;
+import com.adregamdi.member.dto.request.GetMemberContentsRequest;
 import com.adregamdi.member.dto.request.UpdateMyMemberRequest;
+import com.adregamdi.member.dto.response.GetMemberContentsResponse;
 import com.adregamdi.member.dto.response.GetMyMemberResponse;
 import com.adregamdi.member.exception.MemberException.HandleExistException;
 import com.adregamdi.member.exception.MemberException.MemberNotFoundException;
 import com.adregamdi.member.infrastructure.MemberRepository;
+import com.adregamdi.place.application.PlaceService;
+import com.adregamdi.place.dto.MyPlaceReviewDTO;
+import com.adregamdi.place.dto.response.GetMyPlaceReviewResponse;
+import com.adregamdi.shorts.application.ShortsService;
+import com.adregamdi.travelogue.application.TravelogueService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
@@ -23,6 +30,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
 
+import static com.adregamdi.media.domain.ImageTarget.PLACEREVIEW;
 import static com.adregamdi.media.domain.ImageTarget.PROFILE;
 
 @Slf4j
@@ -32,6 +40,10 @@ public class MemberService {
     private final WebClient webClient;
     private final ImageService imageService;
     private final MemberRepository memberRepository;
+
+    private final PlaceService placeService;
+    private final TravelogueService travelogueService;
+    private final ShortsService shortsService;
 
     /*
      * [마지막 접속 시간 체크]
@@ -167,5 +179,20 @@ public class MemberService {
                         .build())
                 .retrieve()
                 .bodyToMono(String.class);
+    }
+
+    /*
+     * [특정 멤버 컨텐츠 조회]
+     */
+    @Transactional(readOnly = true)
+    public GetMemberContentsResponse<?> getMemberContents(GetMemberContentsRequest request) {
+
+        return switch (request.selectedType()) {
+            case ALL -> memberRepository.getMemberContentsOfAll(request);
+            case TRAVELOGUE -> memberRepository.getMemberContentsOfTravelogue(request);
+            case SHORTS -> memberRepository.getMemberContentsOfShorts(request);
+            case PLACE_REVIEW -> memberRepository.getMemberContentsOfPlaceReview(request);
+            case PLACE -> null;
+        };
     }
 }

@@ -37,10 +37,6 @@ public class Member extends BaseTime {
     @Column
     private String socialAccessToken; // 소셜 액세스 토큰
     @Column
-    private String refreshToken; // 리프레쉬 토큰
-    @Column
-    private Boolean refreshTokenStatus; // 리프레쉬 토큰 상태 (T: 로그인/F: 로그아웃)
-    @Column
     private LocalDateTime connectedAt; // 마지막 접속 시간
     @Column
     private Boolean memberStatus; // 회원 상태 (T: 등록/F: 탈퇴)
@@ -63,7 +59,6 @@ public class Member extends BaseTime {
         this.socialId = socialId;
         this.socialType = socialType;
         this.role = Role.MEMBER;
-        this.refreshTokenStatus = false;
         this.memberStatus = true;
     }
 
@@ -75,14 +70,6 @@ public class Member extends BaseTime {
 
     public void updateSocialAccessToken(String socialAccessToken) {
         this.socialAccessToken = socialAccessToken;
-    }
-
-    public void updateRefreshToken(String refreshToken) {
-        this.refreshToken = refreshToken;
-    }
-
-    public void updateRefreshTokenStatus(Boolean status) {
-        this.refreshTokenStatus = status;
     }
 
     public void updateAuthorization(Role role) {

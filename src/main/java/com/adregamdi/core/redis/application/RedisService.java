@@ -1,11 +1,15 @@
 package com.adregamdi.core.redis.application;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.redis.core.Cursor;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.ScanOptions;
 import org.springframework.stereotype.Service;
 
 import java.util.concurrent.TimeUnit;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class RedisService {
@@ -23,6 +27,28 @@ public class RedisService {
 
     public String getRefreshToken(final String memberId) {
         return redisTemplate.opsForValue().get(REFRESH_TOKEN_PREFIX + memberId);
+    }
+
+    public String getMemberIdByRefreshToken(String refreshToken) {
+        if (refreshToken == null) {
+            return null;
+        }
+
+        String result = null;
+        ScanOptions scanOptions = ScanOptions.scanOptions().match(REFRESH_TOKEN_PREFIX + "*").build();
+        try (Cursor<String> cursor = redisTemplate.scan(scanOptions)) {
+            while (cursor.hasNext()) {
+                String key = cursor.next();
+                String storedToken = redisTemplate.opsForValue().get(key);
+                if (refreshToken.equals(storedToken)) {
+                    result = key.substring(REFRESH_TOKEN_PREFIX.length());
+                    break;
+                }
+            }
+        } catch (Exception e) {
+            log.error("Error while scanning Redis keys", e);
+        }
+        return result;
     }
 
     public void deleteRefreshToken(final String memberId) {

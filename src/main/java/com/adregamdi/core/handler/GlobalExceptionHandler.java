@@ -1,6 +1,7 @@
 package com.adregamdi.core.handler;
 
 import com.adregamdi.block.exception.BlockException;
+import com.adregamdi.core.redis.exception.RedisException;
 import com.adregamdi.like.exception.LikesException;
 import com.adregamdi.media.exception.ImageException;
 import com.adregamdi.member.exception.MemberException;
@@ -142,6 +143,41 @@ public class GlobalExceptionHandler {
         return ResponseEntity
                 .status(HttpStatus.CONFLICT.value())
                 .body(new ErrorResponse(HttpStatus.CONFLICT.value(), exception.getMessage()));
+    }
+
+    // Redis 관련 예외 처리
+    @ExceptionHandler(RedisException.class)
+    public ResponseEntity<ErrorResponse> handleRedisException(RedisException exception) {
+        log.error("Redis 작업 중 오류 발생: {}", exception.getMessage());
+        HttpStatus status = HttpStatus.INTERNAL_SERVER_ERROR;
+        String message = exception.getMessage();
+
+        if (exception instanceof RedisException.RedisConnectionFailureException) {
+            status = HttpStatus.SERVICE_UNAVAILABLE;
+            message = exception.getMessage();
+        } else if (exception instanceof RedisException.RedisQueryTimeoutException) {
+            status = HttpStatus.REQUEST_TIMEOUT;
+            message = exception.getMessage();
+        } else if (exception instanceof RedisException.RedisSystemException) {
+            message = exception.getMessage();
+        } else if (exception instanceof RedisException.RedisInvalidDataAccessException) {
+            status = HttpStatus.BAD_REQUEST;
+            message = exception.getMessage();
+        } else if (exception instanceof RedisException.RedisCommandExecutionException) {
+            message = exception.getMessage();
+        } else if (exception instanceof RedisException.RedisKeyNotFoundException) {
+            status = HttpStatus.NOT_FOUND;
+            message = exception.getMessage();
+        } else if (exception instanceof RedisException.RedisDataSerializationException) {
+            message = exception.getMessage();
+        } else if (exception instanceof RedisException.RedisOperationNotSupportedException) {
+            status = HttpStatus.BAD_REQUEST;
+            message = exception.getMessage();
+        }
+
+        return ResponseEntity
+                .status(status)
+                .body(new ErrorResponse(status.value(), message));
     }
 
     // 커스텀 예외

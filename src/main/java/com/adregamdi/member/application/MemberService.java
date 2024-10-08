@@ -1,5 +1,6 @@
 package com.adregamdi.member.application;
 
+import com.adregamdi.core.redis.application.RedisService;
 import com.adregamdi.media.application.ImageService;
 import com.adregamdi.member.domain.Member;
 import com.adregamdi.member.domain.Role;
@@ -31,6 +32,7 @@ import static com.adregamdi.media.domain.ImageTarget.PROFILE;
 public class MemberService {
     private final WebClient webClient;
     private final ImageService imageService;
+    private final RedisService redisService;
     private final MemberRepository memberRepository;
 
     /*
@@ -73,11 +75,14 @@ public class MemberService {
      * [로그아웃]
      */
     @Transactional
-    public void logout(final String memberId) {
-        Member member = memberRepository.findByMemberIdAndMemberStatus(memberId, true)
-                .orElseThrow(() -> new MemberNotFoundException(memberId));
+    public void logout(final String memberId, final String accessToken) {
+//        Member member = memberRepository.findByMemberIdAndMemberStatus(memberId, true)
+//                .orElseThrow(() -> new MemberNotFoundException(memberId));
+//
+//        member.updateRefreshTokenStatus(false);
 
-        member.updateRefreshTokenStatus(false);
+        // Redis에서 리프레시 토큰 삭제 및 액세스 토큰 로그아웃 처리
+        redisService.logoutUser(memberId, accessToken);
     }
 
     /*
@@ -90,7 +95,6 @@ public class MemberService {
 
         member.updateAuthorization(Role.GUEST);
         member.updateMemberStatus(false);
-        member.updateRefreshTokenStatus(false);
     }
 
     /*
@@ -116,7 +120,7 @@ public class MemberService {
     }
 
     private void deleteData(final String memberId) {
-
+        
     }
 
     /*

@@ -1,7 +1,7 @@
 package com.adregamdi.core.jwt.service;
 
 import com.adregamdi.core.exception.GlobalException;
-import com.adregamdi.member.domain.Member;
+import com.adregamdi.core.redis.application.RedisService;
 import com.adregamdi.member.domain.Role;
 import com.adregamdi.member.infrastructure.MemberRepository;
 import com.auth0.jwt.JWT;
@@ -20,7 +20,6 @@ import java.util.Date;
 import java.util.Optional;
 
 import static com.adregamdi.core.exception.GlobalException.LogoutMemberException;
-import static com.adregamdi.member.exception.MemberException.MemberNotFoundException;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -32,6 +31,7 @@ public class JwtService {
     private static final String MEMBER_ID_CLAIM = "memberId";
     private static final String ROLE = "role";
     private static final String BEARER = "Bearer ";
+    private final RedisService redisService;
     private final MemberRepository memberRepository;
     @Value("${jwt.secret-key}")
     private String secretKey;
@@ -121,19 +121,24 @@ public class JwtService {
 
     public Optional<String> extractMemberId(final String accessToken) {
         try {
+            if (redisService.isLoggedOutAccessToken(accessToken)) {
+                log.info("로그아웃된 액세스 토큰입니다.");
+                throw new LogoutMemberException();
+            }
+
             String memberId = JWT.require(Algorithm.HMAC512(secretKey))
                     .build()
                     .verify(accessToken)
                     .getClaim(MEMBER_ID_CLAIM)
                     .as(String.class);
 
-            Member member = memberRepository.findById(memberId)
-                    .orElseThrow(MemberNotFoundException::new);
-
-            if (Boolean.FALSE.equals(member.getRefreshTokenStatus())) {
-                log.info("{} 로그아웃 상태인 회원입니다. 유효하지 않은 토큰.", memberId);
-                throw new LogoutMemberException();
-            }
+//            Member member = memberRepository.findById(memberId)
+//                    .orElseThrow(MemberNotFoundException::new);
+//
+//            if (Boolean.FALSE.equals(member.getRefreshTokenStatus())) {
+//                log.info("{} 로그아웃 상태인 회원입니다. 유효하지 않은 토큰.", memberId);
+//                throw new LogoutMemberException();
+//            }
 
             log.info("액세스 토큰으로부터 추출된 memberId: {}", memberId);
             return Optional.of(memberId);
@@ -197,12 +202,7 @@ public class JwtService {
         }
     }
 
-    public void validateRefreshToken(final String refreshToken, final Member member) {
-        if (!refreshToken.equals(member.getRefreshToken())) {
-            log.info("저장된 리프레시 토큰과 제공된 리프레시 토큰이 일치하지 않습니다. MemberId: {}", member.getMemberId());
-            throw new GlobalException.RefreshTokenMismatchException();
-        }
-
+    public void validateRefreshToken(final String refreshToken) {
         try {
             DecodedJWT jwt = JWT.decode(refreshToken);
 
@@ -226,7 +226,7 @@ public class JwtService {
             log.info("토큰 서명이 유효하지 않습니다.");
             throw new GlobalException.TokenValidationException("토큰 서명이 유효하지 않습니다.");
         } catch (JWTVerificationException e) {
-            log.info("리프레시 토큰이 유효하지 않습니다. MemberId: {}", member.getMemberId());
+            log.info("리프레시 토큰이 유효하지 않습니다.");
             throw new GlobalException.TokenValidationException("리프레시 토큰이 유효하지 않습니다.");
         }
     }

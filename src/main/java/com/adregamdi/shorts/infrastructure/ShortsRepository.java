@@ -21,4 +21,5 @@ public interface ShortsRepository extends JpaRepository<Shorts, Long>, ShortsCus
               AND s.createdAt < :date""")
     List<Shorts> findUnassignedBeforeDate(@Param("date") LocalDateTime date);
 
+    List<Shorts> findAllByMemberId(String memberId);
 }

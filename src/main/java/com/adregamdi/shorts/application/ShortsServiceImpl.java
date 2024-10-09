@@ -126,6 +126,22 @@ public class ShortsServiceImpl implements ShortsService {
         shortsRepository.delete(savedShorts);
     }
 
+    @Override
+    public void deleteMyShorts(String memberId) {
+        List<Shorts> savedShorts = shortsRepository.findAllByMemberId(memberId);
+        if (savedShorts.isEmpty()) {
+            return;
+        }
+
+        for (Shorts shorts : savedShorts) {
+            // 비디오 & 썸네일 스토리지 내에서 삭제
+            fileUploadService.deleteFile(shorts.getShortsVideoUrl());
+            fileUploadService.deleteFile(shorts.getThumbnailUrl());
+
+            shortsRepository.delete(shorts);
+        }
+    }
+
     @Scheduled(cron = "0 0 1 * * ?") // 매일 새벽 1시에 실행
     private void deleteUnassignedVideo() {
 

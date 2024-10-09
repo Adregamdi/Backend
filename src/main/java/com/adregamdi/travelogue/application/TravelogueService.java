@@ -298,9 +298,12 @@ public class TravelogueService {
 
     /*
      * 특정 회원 전체 여행기 조회
-     * */
+     */
     @Transactional(readOnly = true)
-    public
+    public GetMemberTraveloguesResponse getMemberTravelogues(final String memberId, final Long lastTravelogueId, final int size) {
+
+        return travelogueRepository.findMemberTravelogues(memberId, lastTravelogueId, size);
+    }
 
     /*
      * 최근 등록된 여행기 조회
@@ -349,4 +352,5 @@ public class TravelogueService {
 
         travelogueRepository.delete(travelogue);
     }
+
 }

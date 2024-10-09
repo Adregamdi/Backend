@@ -1,13 +1,12 @@
 package com.adregamdi.member.dto.request;
 
 
-import com.adregamdi.member.domain.SelectedType;
+import java.time.LocalDateTime;
 
 public record GetMemberContentsRequest(
 
         String memberId,
-        SelectedType selectedType,
-        Long lastContentId,
+        LocalDateTime createAt,
         int size
 ) {
 }

@@ -12,8 +12,6 @@ import com.adregamdi.member.exception.MemberException.HandleExistException;
 import com.adregamdi.member.exception.MemberException.MemberNotFoundException;
 import com.adregamdi.member.infrastructure.MemberRepository;
 import com.adregamdi.place.application.PlaceService;
-import com.adregamdi.place.dto.MyPlaceReviewDTO;
-import com.adregamdi.place.dto.response.GetMyPlaceReviewResponse;
 import com.adregamdi.shorts.application.ShortsService;
 import com.adregamdi.travelogue.application.TravelogueService;
 import lombok.RequiredArgsConstructor;
@@ -30,7 +28,6 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
 
-import static com.adregamdi.media.domain.ImageTarget.PLACEREVIEW;
 import static com.adregamdi.media.domain.ImageTarget.PROFILE;
 
 @Slf4j
@@ -185,14 +182,7 @@ public class MemberService {
      * [특정 멤버 컨텐츠 조회]
      */
     @Transactional(readOnly = true)
-    public GetMemberContentsResponse<?> getMemberContents(GetMemberContentsRequest request) {
-
-        return switch (request.selectedType()) {
-            case ALL -> memberRepository.getMemberContentsOfAll(request);
-            case TRAVELOGUE -> memberRepository.getMemberContentsOfTravelogue(request);
-            case SHORTS -> memberRepository.getMemberContentsOfShorts(request);
-            case PLACE_REVIEW -> memberRepository.getMemberContentsOfPlaceReview(request);
-            case PLACE -> null;
-        };
+    public GetMemberContentsResponse<?> getMemberContentsOfAll(GetMemberContentsRequest request) {
+        return memberRepository.getMemberContentsOfAll(request);
     }
 }

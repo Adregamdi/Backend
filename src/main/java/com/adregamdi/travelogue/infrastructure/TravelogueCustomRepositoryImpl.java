@@ -4,6 +4,7 @@ import com.adregamdi.like.domain.enumtype.ContentType;
 import com.adregamdi.travelogue.dto.HotTravelogueDTO;
 import com.adregamdi.travelogue.dto.TravelogueDTO;
 import com.adregamdi.travelogue.dto.response.GetHotTraveloguesResponse;
+import com.adregamdi.travelogue.dto.response.GetMemberTraveloguesResponse;
 import com.querydsl.core.Tuple;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.NumberExpression;
@@ -186,5 +187,58 @@ public class TravelogueCustomRepositoryImpl implements TravelogueCustomRepositor
         }
 
         return new GetHotTraveloguesResponse(hasNext, contents);
+    }
+
+    @Override
+    public GetMemberTraveloguesResponse findMemberTravelogues(String memberId, Long lastTravelogueId, int size) {
+
+        List<Tuple> results = jpaQueryFactory
+                .select(
+                        travelogue.travelogueId,
+                        travelogue.title,
+                        member.memberId,
+                        member.profile,
+                        member.handle,
+                        travelogueImage.url,
+                        travelogue.createdAt
+                )
+                .from(travelogue)
+                .join(member).on(travelogue.memberId.eq(member.memberId))
+                .leftJoin(travelogueImage).on(travelogue.travelogueId.eq(travelogueImage.travelogueId))
+                .where(
+                        travelogue.memberId.eq(memberId),
+                        travelogue.travelogueId.lt(lastTravelogueId)
+                )
+                .orderBy(travelogue.travelogueId.desc())
+                .limit(size + 1)
+                .fetch();
+
+        Map<Long, TravelogueDTO> dtoMap = new LinkedHashMap<>();
+        for (Tuple row : results) {
+            Long travelogueId = row.get(travelogue.travelogueId);
+            TravelogueDTO dto = dtoMap.computeIfAbsent(travelogueId,
+                    id -> new TravelogueDTO(
+                            id,
+                            row.get(travelogue.title),
+                            row.get(member.memberId),
+                            row.get(member.profile),
+                            row.get(member.handle),
+                            new ArrayList<>()
+                    )
+            );
+
+            String imageUrl = row.get(travelogueImage.url);
+            if (imageUrl != null && !dto.imageUrls().contains(imageUrl)) {
+                dto.imageUrls().add(imageUrl);
+            }
+        }
+
+        List<TravelogueDTO> travelogueList = new ArrayList<>(dtoMap.values());
+        boolean hasNext = travelogueList.size() > size;
+        if (hasNext) {
+            travelogueList = travelogueList.subList(0, size);
+        }
+
+        return new GetMemberTraveloguesResponse(hasNext, travelogueList);
     }
 }

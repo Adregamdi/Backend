@@ -17,4 +17,5 @@ public interface PlaceReviewRepository extends JpaRepository<PlaceReview, Long> 
     Optional<PlaceReview> findByMemberIdAndPlaceIdAndVisitDate(String memberId, Long placeId, LocalDate localDate);
 
     int countByPlaceId(Long placeId);
+
 }

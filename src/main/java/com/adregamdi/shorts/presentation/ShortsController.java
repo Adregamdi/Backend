@@ -7,10 +7,7 @@ import com.adregamdi.shorts.application.VideoService;
 import com.adregamdi.shorts.dto.request.CreateShortsRequest;
 import com.adregamdi.shorts.dto.request.GetShortsByPlaceIdRequest;
 import com.adregamdi.shorts.dto.request.UpdateShortsRequest;
-import com.adregamdi.shorts.dto.response.GetShortsByPlaceIdResponse;
-import com.adregamdi.shorts.dto.response.GetShortsResponse;
-import com.adregamdi.shorts.dto.response.SaveVideoResponse;
-import com.adregamdi.shorts.dto.response.UploadVideoDTO;
+import com.adregamdi.shorts.dto.response.*;
 import com.amazonaws.services.s3.AmazonS3Client;
 import com.amazonaws.services.s3.model.GetObjectRequest;
 import com.amazonaws.services.s3.model.ObjectMetadata;
@@ -71,7 +68,7 @@ public class ShortsController {
 
     @GetMapping("/my-list")
     @MemberAuthorize
-    public ResponseEntity<ApiResponse<GetShortsResponse>> getUserShorts(
+    public ResponseEntity<ApiResponse<GetShortsResponse>> getMyShorts(
             @AuthenticationPrincipal final UserDetails userDetails,
             @RequestParam(value = "shorts_id", required = false) @PositiveOrZero final Long lastShortsId,
             @RequestParam(value = "size", defaultValue = "10") @Positive final int size
@@ -79,6 +76,27 @@ public class ShortsController {
         GetShortsResponse response = shortsService.getUserShorts(userDetails.getUsername(), lastShortsId != null ? lastShortsId : Long.MAX_VALUE, size);
         return ResponseEntity
                 .ok()
+                .body(ApiResponse.<GetShortsResponse>builder()
+                        .statusCode(HttpStatus.OK.value())
+                        .data(response)
+                        .build());
+    }
+
+    @GetMapping("/list/member")
+    @MemberAuthorize
+    public ResponseEntity<ApiResponse<GetShortsResponse>> getMemberShorts(
+            @RequestParam(value = "member_id") final String memberId,
+            @RequestParam(value = "shorts_id", required = false)
+            @PositiveOrZero final Long lastShortsId,
+            @RequestParam(value = "size", required = false, defaultValue = "10")
+            @Positive final int size
+    ) {
+        GetShortsResponse response = shortsService.getUserShorts(
+                memberId,
+                lastShortsId != null ? lastShortsId : Long.MAX_VALUE,
+                size
+        );
+        return ResponseEntity.ok()
                 .body(ApiResponse.<GetShortsResponse>builder()
                         .statusCode(HttpStatus.OK.value())
                         .data(response)

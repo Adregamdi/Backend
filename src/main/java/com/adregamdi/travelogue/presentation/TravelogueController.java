@@ -65,6 +65,28 @@ public class TravelogueController {
                 );
     }
 
+    @GetMapping("/list/member")
+    @MemberAuthorize
+    public ResponseEntity<ApiResponse<GetMemberTraveloguesResponse>> getMemberTravelogues(
+            @RequestParam(value = "member_id") final String memberId,
+            @RequestParam(value = "travelogue_id", required = false)
+            @PositiveOrZero final Long lastTravelogueId,
+            @RequestParam(value = "size", required = false, defaultValue = "10")
+            @Positive final int size
+    ) {
+        GetMemberTraveloguesResponse response = travelogueService.getMemberTravelogues(
+                memberId,
+                lastTravelogueId != null ? lastTravelogueId : Long.MAX_VALUE,
+                size
+        );
+        return ResponseEntity.ok()
+                .body(ApiResponse.<GetMemberTraveloguesResponse>builder()
+                        .statusCode(HttpStatus.OK.value())
+                        .data(response)
+                        .build());
+
+    }
+
     @GetMapping("/list/recent")
     @MemberAuthorize
     public ResponseEntity<ApiResponse<GetRecentTraveloguesResponse>> getRecentTravelogues(

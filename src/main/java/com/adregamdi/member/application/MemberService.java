@@ -5,11 +5,16 @@ import com.adregamdi.media.application.ImageService;
 import com.adregamdi.member.domain.Member;
 import com.adregamdi.member.domain.Role;
 import com.adregamdi.member.domain.SocialType;
+import com.adregamdi.member.dto.request.GetMemberContentsRequest;
 import com.adregamdi.member.dto.request.UpdateMyMemberRequest;
+import com.adregamdi.member.dto.response.GetMemberContentsResponse;
 import com.adregamdi.member.dto.response.GetMyMemberResponse;
 import com.adregamdi.member.exception.MemberException.HandleExistException;
 import com.adregamdi.member.exception.MemberException.MemberNotFoundException;
 import com.adregamdi.member.infrastructure.MemberRepository;
+import com.adregamdi.place.application.PlaceService;
+import com.adregamdi.shorts.application.ShortsService;
+import com.adregamdi.travelogue.application.TravelogueService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
@@ -34,6 +39,10 @@ public class MemberService {
     private final ImageService imageService;
     private final RedisService redisService;
     private final MemberRepository memberRepository;
+
+    private final PlaceService placeService;
+    private final TravelogueService travelogueService;
+    private final ShortsService shortsService;
 
     /*
      * [마지막 접속 시간 체크]
@@ -171,5 +180,13 @@ public class MemberService {
                         .build())
                 .retrieve()
                 .bodyToMono(String.class);
+    }
+
+    /*
+     * [특정 멤버 컨텐츠 조회]
+     */
+    @Transactional(readOnly = true)
+    public GetMemberContentsResponse<?> getMemberContentsOfAll(GetMemberContentsRequest request) {
+        return memberRepository.getMemberContentsOfAll(request);
     }
 }

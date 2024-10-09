@@ -75,4 +75,5 @@ public interface PlaceService {
      * [특정 장소의 전체 사진 조회]
      * */
     GetPlaceImagesResponse getPlaceImages(final Long placeId);
+
 }

@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Optional;
 
 public interface PlaceReviewRepository extends JpaRepository<PlaceReview, Long> {
-    Optional<List<PlaceReview>> findAllByMemberIdOrderByPlaceReviewIdDesc(String memberId);
+    List<PlaceReview> findAllByMemberIdOrderByPlaceReviewIdDesc(String memberId);
 
     List<PlaceReview> findAllByPlaceIdOrderByPlaceReviewIdDesc(Long placeId);
 

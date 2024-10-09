@@ -353,4 +353,32 @@ public class TravelogueService {
         travelogueRepository.delete(travelogue);
     }
 
+    /*
+     * 특정 회원의 여행기 전체 삭제
+     * */
+    @Transactional
+    public void deleteMyTravelogue(final String memberId) {
+        List<Travelogue> travelogues = travelogueRepository.findAllByMemberId(memberId);
+        if (travelogues.isEmpty()) {
+            return;
+        }
+
+        for (Travelogue travelogue : travelogues) {
+            List<TravelogueDay> travelogueDays = travelogueDayRepository.findByTravelogueIdOrderByDay(travelogue.getTravelogueId())
+                    .orElse(Collections.emptyList());
+            if (!travelogueDays.isEmpty()) {
+                for (TravelogueDay travelogueDay : travelogueDays) {
+                    travelogueDayPlaceReviewRepository.deleteAllByTravelogueDayId(travelogueDay.getTravelogueDayId());
+                }
+                travelogueDayRepository.deleteAll(travelogueDays);
+            }
+
+            List<TravelogueImage> travelogueImages = travelogueImageRepository.findByTravelogueId(travelogue.getTravelogueId())
+                    .orElse(Collections.emptyList());
+            if (!travelogueImages.isEmpty()) {
+                travelogueImageRepository.deleteAll(travelogueImages);
+            }
+            travelogueRepository.delete(travelogue);
+        }
+    }
 }

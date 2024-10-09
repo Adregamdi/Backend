@@ -3,17 +3,13 @@ package com.adregamdi.member.infrastructure;
 import com.adregamdi.member.dto.AllContentDTO;
 import com.adregamdi.member.dto.request.GetMemberContentsRequest;
 import com.adregamdi.member.dto.response.GetMemberContentsResponse;
-import com.querydsl.core.Tuple;
-import com.querydsl.core.types.dsl.DateTimePath;
+import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.Expressions;
-import com.querydsl.core.types.dsl.NumberPath;
-import com.querydsl.core.types.dsl.StringPath;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -35,85 +31,59 @@ public class MemberCustomRepositoryImpl implements MemberCustomRepository {
     @Override
     public GetMemberContentsResponse<List<AllContentDTO>> getMemberContentsOfAll(GetMemberContentsRequest request) {
 
-        // 필요한 Expression 정의
-        StringPath contentType = Expressions.stringPath("contentType");
-        NumberPath<Long> contentId = Expressions.numberPath(Long.class, "contentId");
-        StringPath imageUrl = Expressions.stringPath("imageUrl");
-        DateTimePath<LocalDateTime> createdAt = Expressions.dateTimePath(LocalDateTime.class, "createdAt");
-
-        List<Tuple> travelogueResults = jpaQueryFactory
-                .select(
+        // Travelogue 결과
+        List<AllContentDTO> travelogueResults = jpaQueryFactory
+                .select(Projections.constructor(AllContentDTO.class,
                         Expressions.constant("TRAVELOGUE"),
                         travelogue.travelogueId,
-                        Expressions.stringTemplate("MIN({0})", travelogueImage.url).as(imageUrl),
-                        travelogue.createdAt)
+                        Expressions.stringTemplate("MIN({0})", travelogueImage.url),
+                        travelogue.createdAt
+                ))
                 .from(travelogue)
                 .leftJoin(travelogueImage)
-                    .on(travelogue.travelogueId.eq(travelogueImage.travelogueId))
+                .on(travelogue.travelogueId.eq(travelogueImage.travelogueId))
                 .where(
                         travelogue.memberId.eq(request.memberId()),
                         travelogue.createdAt.lt(request.createAt()))
                 .groupBy(travelogue.travelogueId)
                 .fetch();
 
-        List<Tuple> shortsResults = jpaQueryFactory
-                .select(
+        // Shorts 결과
+        List<AllContentDTO> shortsResults = jpaQueryFactory
+                .select(Projections.constructor(AllContentDTO.class,
                         Expressions.constant("SHORTS"),
                         shorts.shortsId,
                         shorts.thumbnailUrl,
-                        shorts.createdAt)
+                        shorts.createdAt
+                ))
                 .from(shorts)
                 .where(
                         shorts.memberId.eq(request.memberId()),
                         shorts.createdAt.lt(request.createAt()))
                 .fetch();
 
-        List<Tuple> placeReviewResults = jpaQueryFactory
-                .select(
+        // PlaceReview 결과
+        List<AllContentDTO> placeReviewResults = jpaQueryFactory
+                .select(Projections.constructor(AllContentDTO.class,
                         Expressions.constant("PLACE_REVIEW"),
                         placeReview.placeReviewId,
-                        Expressions.stringTemplate("MIN({0})", placeReviewImage.url).as(imageUrl),
-                        placeReview.createdAt)
+                        Expressions.stringTemplate("MIN({0})", placeReviewImage.url),
+                        placeReview.createdAt
+                ))
                 .from(placeReview)
                 .leftJoin(placeReviewImage)
-                    .on(placeReview.placeReviewId.eq(placeReviewImage.placeReviewId))
+                .on(placeReview.placeReviewId.eq(placeReviewImage.placeReviewId))
                 .where(
                         placeReview.memberId.eq(request.memberId()),
                         placeReview.createdAt.lt(request.createAt()))
                 .groupBy(placeReview.placeReviewId)
                 .fetch();
 
+        // 모든 결과 합치기
         List<AllContentDTO> allContents = new ArrayList<>();
-
-        for (Tuple tuple : travelogueResults) {
-            AllContentDTO dto = new AllContentDTO(
-                    tuple.get(contentType),
-                    tuple.get(contentId),
-                    tuple.get(imageUrl),
-                    tuple.get(createdAt)
-            );
-            allContents.add(dto);
-        }
-
-        for (Tuple tuple : shortsResults) {
-            AllContentDTO dto = new AllContentDTO(
-                    tuple.get(contentType),
-                    tuple.get(contentId),
-                    tuple.get(imageUrl),
-                    tuple.get(createdAt)
-            );
-            allContents.add(dto);
-        }
-
-        for (Tuple tuple : placeReviewResults) {
-            AllContentDTO dto = new AllContentDTO(
-                    tuple.get(contentType),
-                    tuple.get(contentId),
-                    tuple.get(imageUrl),
-                    tuple.get(createdAt)
-            );
-            allContents.add(dto);
-        }
+        allContents.addAll(travelogueResults);
+        allContents.addAll(shortsResults);
+        allContents.addAll(placeReviewResults);
 
         // createdAt 기준으로 정렬 (최신순)
         allContents.sort(Comparator.comparing(AllContentDTO::getCreatedAt).reversed());

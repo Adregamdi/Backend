@@ -12,8 +12,6 @@ import java.util.List;
 import java.util.Optional;
 
 public interface MemberRepository extends JpaRepository<Member, String>, MemberCustomRepository {
-    Optional<Member> findByRefreshToken(String refreshToken);
-
     Optional<Member> findByMemberIdAndMemberStatus(String memberId, boolean memberStatus);
 
     Optional<Member> findBySocialTypeAndSocialId(SocialType socialType, String id);

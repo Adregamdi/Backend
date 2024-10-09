@@ -42,8 +42,8 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
         String accessToken = jwtService.createAccessToken(findMember.getMemberId(), findMember.getRole());
         String refreshToken = jwtService.createRefreshToken();
 
-        findMember.updateRefreshToken(refreshToken);
-        findMember.updateRefreshTokenStatus(true);
+//        findMember.updateRefreshToken(refreshToken);
+//        findMember.updateRefreshTokenStatus(true);
         String targetUrl = createURI(accessToken, refreshToken).toString();
 
         response.sendRedirect(targetUrl);

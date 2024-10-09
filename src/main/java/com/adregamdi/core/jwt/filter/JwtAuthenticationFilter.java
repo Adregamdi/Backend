@@ -3,6 +3,7 @@ package com.adregamdi.core.jwt.filter;
 import com.adregamdi.core.exception.GlobalException;
 import com.adregamdi.core.handler.ErrorResponse;
 import com.adregamdi.core.jwt.service.JwtService;
+import com.adregamdi.core.redis.application.RedisService;
 import com.adregamdi.core.utils.PasswordUtil;
 import com.adregamdi.member.domain.Member;
 import com.adregamdi.member.infrastructure.MemberRepository;
@@ -33,6 +34,7 @@ import java.util.Objects;
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final GrantedAuthoritiesMapper authoritiesMapper = new NullAuthoritiesMapper();
     private final JwtService jwtService;
+    private final RedisService redisService;
     private final MemberRepository memberRepository;
     private final AntPathMatcher pathMatcher = new AntPathMatcher();
     private final List<String> allowedUris;
@@ -89,16 +91,19 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             final String refreshToken
     ) {
         try {
-            memberRepository.findByRefreshToken(refreshToken)
-                    .ifPresentOrElse(member -> {
-                        jwtService.validateRefreshToken(refreshToken, member);
-                        String newAccessToken = jwtService.createAccessToken(member.getMemberId(), member.getRole());
-                        String newRefreshToken = reIssueRefreshToken(member);
-                        jwtService.sendAccessAndRefreshToken(response, newAccessToken, newRefreshToken);
-                    }, () -> {
-                        throw new GlobalException.TokenValidationException("해당 리프레시 토큰을 가진 회원이 없습니다.");
-                    });
-        } catch (GlobalException.RefreshTokenMismatchException | GlobalException.TokenValidationException e) {
+            String memberId = redisService.getMemberIdByRefreshToken(refreshToken);
+            if (memberId == null) {
+                throw new GlobalException.TokenValidationException("해당 리프레시 토큰을 가진 회원이 없습니다.");
+            }
+
+            Member member = memberRepository.findById(memberId)
+                    .orElseThrow(() -> new GlobalException.TokenValidationException("해당 리프레시 토큰을 가진 회원이 없습니다."));
+
+            jwtService.validateRefreshToken(memberId, refreshToken);
+            String newAccessToken = jwtService.createAccessToken(member.getMemberId(), member.getRole());
+            String newRefreshToken = reIssueRefreshToken(member.getMemberId());
+            jwtService.sendAccessAndRefreshToken(response, newAccessToken, newRefreshToken);
+        } catch (GlobalException.TokenValidationException | GlobalException.RefreshTokenMismatchException e) {
             response.setStatus(HttpStatus.UNAUTHORIZED.value());
             response.setContentType(MediaType.APPLICATION_JSON_VALUE);
             response.setCharacterEncoding("UTF-8");
@@ -110,10 +115,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
     }
 
-    private String reIssueRefreshToken(final Member member) {
+    private String reIssueRefreshToken(final String memberId) {
         String reIssuedRefreshToken = jwtService.createRefreshToken();
-        member.updateRefreshToken(reIssuedRefreshToken);
-        memberRepository.saveAndFlush(member);
+        redisService.saveRefreshToken(memberId, reIssuedRefreshToken);
         return reIssuedRefreshToken;
     }
 

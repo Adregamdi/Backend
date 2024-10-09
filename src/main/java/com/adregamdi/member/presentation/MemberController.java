@@ -2,11 +2,13 @@ package com.adregamdi.member.presentation;
 
 import com.adregamdi.core.annotation.MemberAuthorize;
 import com.adregamdi.core.handler.ApiResponse;
+import com.adregamdi.core.jwt.service.JwtService;
 import com.adregamdi.member.application.MemberService;
 import com.adregamdi.member.dto.request.GetMemberContentsRequest;
 import com.adregamdi.member.dto.request.UpdateMyMemberRequest;
 import com.adregamdi.member.dto.response.GetMemberContentsResponse;
 import com.adregamdi.member.dto.response.GetMyMemberResponse;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -24,6 +26,7 @@ import java.time.LocalDateTime;
 @RequestMapping("/api/member")
 @RestController
 public class MemberController {
+    private final JwtService jwtService;
     private final MemberService memberService;
 
     @GetMapping("/me")
@@ -51,8 +54,15 @@ public class MemberController {
 
     @PostMapping("/logout")
     @MemberAuthorize
-    public ResponseEntity<ApiResponse<Void>> logout(@AuthenticationPrincipal final UserDetails userDetails) {
-        memberService.logout(userDetails.getUsername());
+    public ResponseEntity<ApiResponse<Void>> logout(
+            @AuthenticationPrincipal final UserDetails userDetails,
+            HttpServletRequest request
+    ) {
+        String accessToken = jwtService.extractAccessToken(request)
+                .orElseThrow(() -> new IllegalArgumentException("액세스 토큰이 없습니다."));
+
+        memberService.logout(userDetails.getUsername(), accessToken);
+
         return ResponseEntity.ok()
                 .body(ApiResponse.<Void>builder()
                         .statusCode(HttpStatus.OK.value())

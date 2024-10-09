@@ -142,6 +142,16 @@ public class PlaceController {
                 );
     }
 
+    @GetMapping("/reviews/member")
+    @MemberAuthorize
+    public ResponseEntity<ApiResponse<GetMyPlaceReviewResponse>> getMemberReviews(@RequestParam(value = "member_id") final String memberId) {
+        return ResponseEntity.ok()
+                .body(ApiResponse.<GetMyPlaceReviewResponse>builder()
+                        .statusCode(HttpStatus.OK.value())
+                        .data(placeService.getMyReview(memberId))
+                        .build());
+    }
+
     @GetMapping("/review")
     @MemberAuthorize
     public ResponseEntity<ApiResponse<GetPlaceReviewResponse>> getReview(

@@ -7,7 +7,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
-public interface PlaceReviewRepository extends JpaRepository<PlaceReview, Long> {
+public interface PlaceReviewRepository extends JpaRepository<PlaceReview, Long>, PlaceReviewCustomRepository {
     Optional<List<PlaceReview>> findAllByMemberIdOrderByPlaceReviewIdDesc(String memberId);
 
     List<PlaceReview> findAllByPlaceIdOrderByPlaceReviewIdDesc(Long placeId);
@@ -17,4 +17,5 @@ public interface PlaceReviewRepository extends JpaRepository<PlaceReview, Long> 
     Optional<PlaceReview> findByMemberIdAndPlaceIdAndVisitDate(String memberId, Long placeId, LocalDate localDate);
 
     int countByPlaceId(Long placeId);
+
 }

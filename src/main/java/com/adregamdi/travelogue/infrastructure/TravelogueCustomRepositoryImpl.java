@@ -213,7 +213,6 @@ public class TravelogueCustomRepositoryImpl implements TravelogueCustomRepositor
                 .limit(size + 1)
                 .fetch();
 
-        // 결과 처리
         Map<Long, TravelogueDTO> dtoMap = new LinkedHashMap<>();
         for (Tuple row : results) {
             Long travelogueId = row.get(travelogue.travelogueId);

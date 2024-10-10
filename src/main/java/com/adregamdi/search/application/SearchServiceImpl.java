@@ -28,6 +28,9 @@ import static com.adregamdi.core.utils.PageUtil.generatePageAsc;
 public class SearchServiceImpl implements SearchService {
     private final SearchRepository searchRepository;
 
+    /*
+     * [콘텐츠 검색]
+     * */
     @Transactional(readOnly = true)
     public SearchResponse search(
             final String keyword,

@@ -64,8 +64,8 @@ public class TravelogueServiceImpl implements TravelogueService {
     private final BlockRepository blockRepository;
 
     /*
-     * 여행기 등록
-     */
+     * [여행기 등록]
+     * */
     @Override
     @Transactional
     public CreateMyTravelogueResponse createMyTravelogue(
@@ -223,7 +223,7 @@ public class TravelogueServiceImpl implements TravelogueService {
     }
 
     /*
-     * 특정 여행기 조회
+     * [특정 여행기 조회]
      */
     @Override
     @Transactional(readOnly = true)
@@ -283,7 +283,7 @@ public class TravelogueServiceImpl implements TravelogueService {
     }
 
     /*
-     * 내 전체 여행기 조회
+     * [내 전체 여행기 조회]
      * */
     @Override
     @Transactional(readOnly = true)
@@ -300,7 +300,7 @@ public class TravelogueServiceImpl implements TravelogueService {
     }
 
     /*
-     * 특정 회원 전체 여행기 조회
+     * [특정 회원 전체 여행기 조회]
      */
     @Override
     @Transactional(readOnly = true)
@@ -310,7 +310,7 @@ public class TravelogueServiceImpl implements TravelogueService {
     }
 
     /*
-     * 최근 등록된 여행기 조회
+     * [최근 등록된 여행기 조회]
      * */
     @Override
     @Transactional(readOnly = true)
@@ -327,7 +327,7 @@ public class TravelogueServiceImpl implements TravelogueService {
     }
 
     /*
-     * 인기있는 여행기 조회
+     * [인기있는 여행기 조회]
      * */
     @Override
     @Transactional(readOnly = true)
@@ -336,7 +336,7 @@ public class TravelogueServiceImpl implements TravelogueService {
     }
 
     /*
-     * 내 특정 여행기 삭제
+     * [내 특정 여행기 삭제]
      * */
     @Override
     @Transactional
@@ -363,7 +363,7 @@ public class TravelogueServiceImpl implements TravelogueService {
     }
 
     /*
-     * 특정 회원의 여행기 전체 삭제
+     * [특정 회원의 여행기 전체 삭제]
      * */
     @Override
     @Transactional

@@ -48,7 +48,7 @@ public class TravelServiceImpl implements TravelService {
     private final TravelogueRepository travelogueRepository;
 
     /*
-     * 일정 등록/수정
+     * [일정 등록/수정]
      * */
     @Override
     @Transactional
@@ -180,7 +180,7 @@ public class TravelServiceImpl implements TravelService {
     }
 
     /*
-     * 내 특정 일정 조회
+     * [내 특정 일정 조회]
      * */
     @Override
     @Transactional(readOnly = true)
@@ -215,7 +215,7 @@ public class TravelServiceImpl implements TravelService {
     }
 
     /*
-     * 내 전체 일정 조회
+     * [내 전체 일정 조회]
      * */
     @Override
     @Transactional(readOnly = true)
@@ -232,7 +232,7 @@ public class TravelServiceImpl implements TravelService {
     }
 
     /*
-     * 내 특정 일정 삭제
+     * [내 특정 일정 삭제]
      * */
     @Override
     @Transactional

@@ -26,7 +26,7 @@ public class BlockServiceImpl implements BlockService {
     private final MemberRepository memberRepository;
 
     /*
-     * 차단하기
+     * [차단하기]
      * */
     @Override
     @Transactional
@@ -47,7 +47,7 @@ public class BlockServiceImpl implements BlockService {
     }
 
     /*
-     * 내 차단 목록 조회
+     * [내 차단 목록 조회]
      * */
     @Override
     @Transactional(readOnly = true)
@@ -79,7 +79,7 @@ public class BlockServiceImpl implements BlockService {
     }
 
     /*
-     * 차단해제
+     * [차단해제]
      * */
     @Override
     @Transactional

@@ -66,7 +66,7 @@ public class MemberCustomRepositoryImpl implements MemberCustomRepository {
         List<AllContentDTO> placeReviewResults = jpaQueryFactory
                 .select(Projections.constructor(AllContentDTO.class,
                         Expressions.constant("PLACE_REVIEW"),
-                        placeReview.placeReviewId,
+                        placeReview.placeId,
                         Expressions.stringTemplate("MIN({0})", placeReviewImage.url),
                         placeReview.createdAt
                 ))

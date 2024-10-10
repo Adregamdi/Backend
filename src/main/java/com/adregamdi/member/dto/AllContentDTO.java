@@ -29,7 +29,7 @@ public class AllContentDTO {
         return switch (contentType.toUpperCase()) {
             case "TRAVELOGUE" -> "/api/travelogue?travelogue_id=" + contentId;
             case "SHORTS" -> "/api/shorts/stream/" + contentId;
-            case "PLACE_REVIEW" -> "/api/placereview?place_id=" + contentId;
+            case "PLACE_REVIEW" -> "/api/place?place_id=" + contentId;
             default -> throw new IllegalStateException("유효하지 않은 값: " + contentType.toUpperCase());
         };
     }

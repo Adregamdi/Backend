@@ -325,8 +325,7 @@ public class PlaceServiceImpl implements PlaceService {
     public GetMyPlaceReviewResponse getMyReview(final String memberId) {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new MemberException.MemberNotFoundException(memberId));
-        List<PlaceReview> placeReviews = placeReviewRepository.findAllByMemberIdOrderByPlaceReviewIdDesc(memberId)
-                .orElseThrow(() -> new PlaceReviewNotFoundException(memberId));
+        List<PlaceReview> placeReviews = placeReviewRepository.findAllByMemberIdOrderByPlaceReviewIdDesc(memberId);
         List<MyPlaceReviewDTO> myPlaceReviews = new ArrayList<>();
 
         for (PlaceReview placeReview : placeReviews) {
@@ -447,6 +446,22 @@ public class PlaceServiceImpl implements PlaceService {
         }
         placeImageDTOS.add(new PlaceImageDTO(LocalDate.from(place.getCreatedAt()), place.getImgPath()));
         return GetPlaceImagesResponse.of(placeId, placeImageDTOS);
+    }
+
+    @Override
+    @Transactional
+    public void deleteMyReview(final String memberId) {
+        List<PlaceReview> placeReviews = placeReviewRepository.findAllByMemberIdOrderByPlaceReviewIdDesc(memberId);
+        if (placeReviews.isEmpty()) {
+            return;
+        }
+
+        for (PlaceReview placeReview : placeReviews) {
+            List<PlaceReviewImage> placeReviewImages = placeReviewImageRepository.findByPlaceReviewIdOrderByPlaceReviewImageIdDesc(placeReview.getPlaceReviewId());
+            
+            placeReviewImageRepository.deleteAll(placeReviewImages);
+            placeReviewRepository.delete(placeReview);
+        }
     }
 
     private String formatTags(final String tag) {

@@ -22,7 +22,7 @@ public interface MemberRepository extends JpaRepository<Member, String>, MemberC
             WHERE m.memberStatus= false
             AND m.updatedAt <= :date
             """)
-    Optional<List<Member>> findByMemberStatusAndUpdatedAt(@Param("date") final LocalDateTime date);
+    List<Member> findByMemberStatusAndUpdatedAt(@Param("date") final LocalDateTime date);
 
     @Modifying
     @Query("""

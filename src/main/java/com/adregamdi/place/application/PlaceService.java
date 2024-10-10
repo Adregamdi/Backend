@@ -64,16 +64,20 @@ public interface PlaceService {
     /*
      * [특정 리뷰 조회]
      * */
-    PlaceReviewDTO getReview(String username, final Long placeReviewId);
+    PlaceReviewDTO getReview(final String memberId, final Long placeReviewId);
 
     /*
      * [특정 장소의 전체 리뷰 조회]
      * */
-    GetPlaceReviewsResponse getReviews(String username, final Long placeId);
+    GetPlaceReviewsResponse getReviews(final String memberId, final Long placeId);
 
     /*
      * [특정 장소의 전체 사진 조회]
      * */
     GetPlaceImagesResponse getPlaceImages(final Long placeId);
 
+    /*
+     * [특정 회원의 모든 리뷰 삭제]
+     * */
+    void deleteMyReview(final String memberId);
 }

@@ -1,6 +1,7 @@
 package com.adregamdi.member.application;
 
 import com.adregamdi.core.redis.application.RedisService;
+import com.adregamdi.like.application.LikesService;
 import com.adregamdi.media.application.ImageService;
 import com.adregamdi.member.domain.Member;
 import com.adregamdi.member.domain.Role;
@@ -40,6 +41,7 @@ public class MemberService {
     private final RedisService redisService;
     private final MemberRepository memberRepository;
 
+    private final LikesService likesService;
     private final PlaceService placeService;
     private final TravelogueService travelogueService;
     private final ShortsService shortsService;
@@ -113,8 +115,10 @@ public class MemberService {
     @Transactional
     protected void leave() {
         LocalDateTime date = LocalDateTime.now().minusDays(30);
-        List<Member> members = memberRepository.findByMemberStatusAndUpdatedAt(date)
-                .orElseThrow(MemberNotFoundException::new);
+        List<Member> members = memberRepository.findByMemberStatusAndUpdatedAt(date);
+        if (members.isEmpty()) {
+            return;
+        }
 
         for (Member member : members) {
             // 회원과 관련된 데이터 삭제
@@ -129,7 +133,10 @@ public class MemberService {
     }
 
     private void deleteData(final String memberId) {
-        
+        likesService.deleteMyLike(memberId);
+        placeService.deleteMyReview(memberId);
+        shortsService.deleteMyShorts(memberId);
+        travelogueService.deleteMyTravelogue(memberId);
     }
 
     /*

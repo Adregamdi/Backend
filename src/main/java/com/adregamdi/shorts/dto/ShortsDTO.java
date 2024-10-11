@@ -1,5 +1,6 @@
 package com.adregamdi.shorts.dto;
 
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -27,6 +28,7 @@ public class ShortsDTO {
     private int likeCount;
     private Boolean isLiked;
 
+    @Builder
     public ShortsDTO(Long shortsId, String title, String memberId, String name, String handle, String profile, Long placeId, String placeTitle, String placeImage, Long travelogueId, String travelogueTitle, String travelogueImage, String shortsVideoUrl, String thumbnailUrl, Integer viewCount, Integer likeCount, Boolean isLiked) {
         this.shortsId = shortsId;
         this.title = title;
@@ -46,5 +48,5 @@ public class ShortsDTO {
         this.likeCount = likeCount == null ? 0 : likeCount;
         this.isLiked = isLiked;
     }
-    
+
 }

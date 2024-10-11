@@ -3,9 +3,9 @@ package com.adregamdi.shorts.application;
 import com.adregamdi.like.application.LikesService;
 import com.adregamdi.like.domain.enumtype.ContentType;
 import com.adregamdi.media.application.FileUploadService;
-import com.adregamdi.member.application.MemberService;
-import com.adregamdi.member.dto.response.GetMyMemberResponse;
+import com.adregamdi.member.dto.ShortsWithMemberDTO;
 import com.adregamdi.place.application.PlaceService;
+import com.adregamdi.place.domain.Place;
 import com.adregamdi.place.dto.response.GetPlaceResponse;
 import com.adregamdi.shorts.domain.Shorts;
 import com.adregamdi.shorts.dto.ShortsDTO;
@@ -24,6 +24,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
 
 @Slf4j
@@ -34,39 +35,97 @@ public class ShortsServiceImpl implements ShortsService {
     private final ShortsRepository shortsRepository;
     private final FileUploadService fileUploadService;
     private final ShortsValidService shortsValidService;
-    private final MemberService memberService;
     private final PlaceService placeService;
     private final TravelogueService travelogueService;
     private final LikesService likesService;
 
     @Override
     public GetShortsByShortsIdResponse getShortsByShortsId(final String currentMemberId, final Long shortsId) {
-        Shorts shorts = shortsRepository.findByShortsId(shortsId)
+        ShortsWithMemberDTO shortsWithMember = shortsRepository.findShortsWithMemberByShortsId(shortsId)
+                .map(this::mapToShortsWithMemberDTO)
                 .orElseThrow(() -> new ShortsException.ShortsNotFoundException(shortsId));
-        GetMyMemberResponse member = memberService.getMyMember(shorts.getMemberId());
-        GetPlaceResponse place = placeService.get(currentMemberId, shorts.getPlaceId());
-        GetTravelogueResponse travelogue = travelogueService.get(currentMemberId, shorts.getTravelogueId());
+        GetPlaceResponse place = GetPlaceResponse.builder().place(Place.builder().build()).build();
+        if (shortsWithMember.placeId() != null) {
+            place = placeService.get(currentMemberId, shortsWithMember.placeId());
+        }
+        GetTravelogueResponse travelogue = GetTravelogueResponse.builder().travelogueImageList(Collections.emptyList()).build();
+        if (shortsWithMember.travelogueId() != null) {
+            travelogue = travelogueService.get(currentMemberId, shortsWithMember.travelogueId());
+        }
         Integer likeCount = likesService.getLikesCount(ContentType.SHORTS, shortsId);
         Boolean isLiked = likesService.checkIsLiked(currentMemberId, ContentType.SHORTS, shortsId);
         return GetShortsByShortsIdResponse.from(ShortsDTO.builder()
-                .shortsId(shorts.getShortsId())
-                .title(shorts.getTitle())
-                .memberId(member.memberId())
-                .name(member.name())
-                .handle(member.handle())
-                .profile(member.profile())
-                .placeId(shorts.getPlaceId())
-                .placeTitle(place.place().getTitle())
-                .placeImage(place.place().getImgPath())
-                .travelogueId(shorts.getTravelogueId())
+                .shortsId(shortsWithMember.shortsId())
+                .title(shortsWithMember.title())
+                .memberId(shortsWithMember.memberId())
+                .name(shortsWithMember.memberName())
+                .handle(shortsWithMember.memberHandle())
+                .profile(shortsWithMember.memberProfile())
+                .placeId(shortsWithMember.placeId())
+                .placeTitle(place.place().getTitle() == null ? "" : place.place().getTitle())
+                .placeImage(place.place().getImgPath() == null ? "" : place.place().getImgPath())
+                .travelogueId(shortsWithMember.travelogueId())
                 .travelogueTitle(travelogue.title())
-                .travelogueImage(travelogue.travelogueImageList().get(0).url())
-                .shortsVideoUrl(shorts.getShortsVideoUrl())
-                .thumbnailUrl(shorts.getThumbnailUrl())
-                .viewCount(shorts.getViewCount())
+                .travelogueImage(travelogue.travelogueImageList().isEmpty() ? "" : travelogue.travelogueImageList().get(0).url())
+                .shortsVideoUrl(shortsWithMember.shortsVideoUrl())
+                .thumbnailUrl(shortsWithMember.thumbnailUrl())
+                .viewCount(shortsWithMember.viewCount())
                 .likeCount(likeCount)
                 .isLiked(isLiked)
                 .build());
+    }
+
+    private ShortsWithMemberDTO mapToShortsWithMemberDTO(Object[] result) {
+        if (result == null || result.length == 0 || !(result[0] instanceof Object[] data)) {
+            throw new IllegalArgumentException("Unexpected result format");
+        }
+
+        if (data.length < 12) {
+            throw new IllegalArgumentException("Insufficient data in result");
+        }
+
+        return new ShortsWithMemberDTO(
+                toLong(data[0]),
+                toString(data[1]),
+                toString(data[2]),
+                toLong(data[3]),
+                toLong(data[4]),
+                toString(data[5]),
+                toString(data[6]),
+                toBoolean(data[7]),
+                toInt(data[8]),
+                toString(data[9]),
+                toString(data[10]),
+                toString(data[11])
+        );
+    }
+
+    private Long toLong(Object obj) {
+        if (obj instanceof Number) {
+            return ((Number) obj).longValue();
+        }
+        return null;
+    }
+
+    private String toString(Object obj) {
+        return obj != null ? obj.toString() : null;
+    }
+
+    private Boolean toBoolean(Object obj) {
+        if (obj instanceof Boolean) {
+            return (Boolean) obj;
+        }
+        if (obj instanceof Number) {
+            return ((Number) obj).intValue() != 0;
+        }
+        return null;
+    }
+
+    private Integer toInt(Object obj) {
+        if (obj instanceof Number) {
+            return ((Number) obj).intValue();
+        }
+        return null;
     }
 
     @Override

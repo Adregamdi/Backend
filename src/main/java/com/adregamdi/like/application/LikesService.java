@@ -78,6 +78,7 @@ public class LikesService {
         if (opponentMember != null) {
             notificationService.create(CreateNotificationRequest.of(
                     opponentMember.getMemberId(),
+                    request.contentId(),
                     member.getProfile(),
                     member.getHandle(),
                     contentType,
@@ -108,6 +109,7 @@ public class LikesService {
 
         notificationService.create(CreateNotificationRequest.of(
                 opponentMember.getMemberId(),
+                shortsId,
                 member.getProfile(),
                 member.getHandle(),
                 contentType,

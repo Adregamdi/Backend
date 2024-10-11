@@ -21,6 +21,8 @@ public class QNotification extends EntityPathBase<Notification> {
 
     public final com.adregamdi.core.entity.QBaseTime _super = new com.adregamdi.core.entity.QBaseTime(this);
 
+    public final NumberPath<Long> contentId = createNumber("contentId", Long.class);
+
     public final EnumPath<ContentType> contentType = createEnum("contentType", ContentType.class);
 
     //inherited

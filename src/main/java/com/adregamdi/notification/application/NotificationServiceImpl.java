@@ -30,6 +30,7 @@ public class NotificationServiceImpl implements NotificationService {
     public void create(final CreateNotificationRequest request) {
         notificationRepository.save(Notification.builder()
                 .memberId(request.memberId())
+                .contentId(request.contentId())
                 .opponentMemberProfile(request.opponentMemberProfile())
                 .opponentMemberHandle(request.opponentMemberHandle())
                 .contentType(request.contentType())

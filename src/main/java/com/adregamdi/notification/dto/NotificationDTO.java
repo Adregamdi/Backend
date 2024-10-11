@@ -16,6 +16,7 @@ import java.time.LocalDate;
 @AllArgsConstructor
 public class NotificationDTO {
     private Long notificationId;
+    private Long contentId;
     private String opponentMemberProfile;
     private String opponentMemberHandle;
     private ContentType contentType;
@@ -26,6 +27,7 @@ public class NotificationDTO {
     public static NotificationDTO from(final Notification notification) {
         return NotificationDTO.builder()
                 .notificationId(notification.getNotificationId())
+                .contentId(notification.getContentId())
                 .opponentMemberProfile(notification.getOpponentMemberProfile())
                 .opponentMemberHandle(notification.getOpponentMemberHandle())
                 .contentType(notification.getContentType())

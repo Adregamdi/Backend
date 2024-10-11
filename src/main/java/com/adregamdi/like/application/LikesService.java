@@ -45,7 +45,6 @@ public class LikesService {
 
     @Transactional
     public CreateLikesResponse create(String memberId, CreateLikesRequest request) {
-
         boolean isLiked = likesRepository.findByMemberIdAndContentTypeAndContentId(memberId, request.getContentType(), request.contentId()).isPresent();
         if (isLiked) {
             return new CreateLikesResponse(true);
@@ -84,13 +83,11 @@ public class LikesService {
                     contentType,
                     NotificationType.LIKES));
         }
-
         return new CreateLikesResponse(likesRepository.save(like).equals(like));
     }
 
     @Transactional
     public CreateShortsLikeResponse createShortsLike(String memberId, Long shortsId) {
-
         Like like = Like.builder()
                 .memberId(memberId)
                 .contentType(ContentType.SHORTS)
@@ -114,10 +111,7 @@ public class LikesService {
                 member.getHandle(),
                 contentType,
                 NotificationType.LIKES));
-
-        return new CreateShortsLikeResponse(
-                likesRepository.countByContentTypeAndContentId(ContentType.SHORTS, shortsId)
-        );
+        return new CreateShortsLikeResponse(likesRepository.countByContentTypeAndContentId(ContentType.SHORTS, shortsId));
     }
 
 
@@ -147,9 +141,13 @@ public class LikesService {
 
     }
 
+    @Transactional
+    public Integer getLikesCount(final ContentType contentType, final Long contentId) {
+        return likesRepository.countByContentTypeAndContentId(contentType, contentId);
+    }
+
     @Transactional(readOnly = true)
     public Boolean checkIsLiked(String memberId, ContentType contentType, Long contentId) {
-
         return likesRepository.checkIsLiked(memberId, contentType, contentId);
     }
 
@@ -158,7 +156,6 @@ public class LikesService {
         if (likes.isEmpty()) {
             return;
         }
-
         likesRepository.deleteAll(likes);
     }
 }

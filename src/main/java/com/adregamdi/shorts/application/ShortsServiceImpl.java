@@ -1,16 +1,22 @@
 package com.adregamdi.shorts.application;
 
+import com.adregamdi.like.application.LikesService;
+import com.adregamdi.like.domain.enumtype.ContentType;
 import com.adregamdi.media.application.FileUploadService;
+import com.adregamdi.member.application.MemberService;
+import com.adregamdi.member.dto.response.GetMyMemberResponse;
+import com.adregamdi.place.application.PlaceService;
+import com.adregamdi.place.dto.response.GetPlaceResponse;
 import com.adregamdi.shorts.domain.Shorts;
+import com.adregamdi.shorts.dto.ShortsDTO;
 import com.adregamdi.shorts.dto.request.CreateShortsRequest;
 import com.adregamdi.shorts.dto.request.GetShortsByPlaceIdRequest;
 import com.adregamdi.shorts.dto.request.UpdateShortsRequest;
-import com.adregamdi.shorts.dto.response.GetShortsByPlaceIdResponse;
-import com.adregamdi.shorts.dto.response.GetShortsResponse;
-import com.adregamdi.shorts.dto.response.SaveVideoResponse;
-import com.adregamdi.shorts.dto.response.UploadVideoDTO;
+import com.adregamdi.shorts.dto.response.*;
 import com.adregamdi.shorts.exception.ShortsException;
 import com.adregamdi.shorts.infrastructure.ShortsRepository;
+import com.adregamdi.travelogue.application.TravelogueService;
+import com.adregamdi.travelogue.dto.response.GetTravelogueResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -25,11 +31,43 @@ import java.util.List;
 @Transactional
 @RequiredArgsConstructor
 public class ShortsServiceImpl implements ShortsService {
-
     private final ShortsRepository shortsRepository;
     private final FileUploadService fileUploadService;
-
     private final ShortsValidService shortsValidService;
+    private final MemberService memberService;
+    private final PlaceService placeService;
+    private final TravelogueService travelogueService;
+    private final LikesService likesService;
+
+    @Override
+    public GetShortsByShortsIdResponse getShortsByShortsId(final String currentMemberId, final Long shortsId) {
+        Shorts shorts = shortsRepository.findByShortsId(shortsId)
+                .orElseThrow(() -> new ShortsException.ShortsNotFoundException(shortsId));
+        GetMyMemberResponse member = memberService.getMyMember(shorts.getMemberId());
+        GetPlaceResponse place = placeService.get(currentMemberId, shorts.getPlaceId());
+        GetTravelogueResponse travelogue = travelogueService.get(currentMemberId, shorts.getTravelogueId());
+        Integer likeCount = likesService.getLikesCount(ContentType.SHORTS, shortsId);
+        Boolean isLiked = likesService.checkIsLiked(currentMemberId, ContentType.SHORTS, shortsId);
+        return GetShortsByShortsIdResponse.from(ShortsDTO.builder()
+                .shortsId(shorts.getShortsId())
+                .title(shorts.getTitle())
+                .memberId(member.memberId())
+                .name(member.name())
+                .handle(member.handle())
+                .profile(member.profile())
+                .placeId(shorts.getPlaceId())
+                .placeTitle(place.place().getTitle())
+                .placeImage(place.place().getImgPath())
+                .travelogueId(shorts.getTravelogueId())
+                .travelogueTitle(travelogue.title())
+                .travelogueImage(travelogue.travelogueImageList().get(0).url())
+                .shortsVideoUrl(shorts.getShortsVideoUrl())
+                .thumbnailUrl(shorts.getThumbnailUrl())
+                .viewCount(shorts.getViewCount())
+                .likeCount(likeCount)
+                .isLiked(isLiked)
+                .build());
+    }
 
     @Override
     public GetShortsResponse getShorts(String memberId, long lastId, int size) {

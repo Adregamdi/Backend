@@ -14,6 +14,8 @@ import java.util.Optional;
 public interface ShortsRepository extends JpaRepository<Shorts, Long>, ShortsCustomRepository {
     Optional<Slice<Shorts>> findAllByMemberId(Pageable pageable, String memberId);
 
+    Optional<Shorts> findByShortsId(Long shortsId);
+
     @Query("""
             SELECT s
              FROM Shorts s

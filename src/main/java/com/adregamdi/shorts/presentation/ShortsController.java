@@ -47,6 +47,20 @@ public class ShortsController {
     @Value("${cloud.aws.s3.bucket}")
     private String bucketName;
 
+    @GetMapping
+    @MemberAuthorize
+    public ResponseEntity<ApiResponse<GetShortsByShortsIdResponse>> getShortsByShortsId(
+            @AuthenticationPrincipal final UserDetails userDetails,
+            @RequestParam(value = "shorts_id") @Positive final Long shortsId
+    ) {
+        GetShortsByShortsIdResponse response = shortsService.getShortsByShortsId(userDetails.getUsername(), shortsId);
+        return ResponseEntity.ok()
+                .body(ApiResponse.<GetShortsByShortsIdResponse>builder()
+                        .statusCode(HttpStatus.OK.value())
+                        .data(response)
+                        .build());
+    }
+
     @GetMapping("/list")
     @MemberAuthorize
     public ResponseEntity<ApiResponse<GetShortsResponse>> getShorts(

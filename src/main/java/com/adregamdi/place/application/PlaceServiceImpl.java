@@ -73,6 +73,9 @@ public class PlaceServiceImpl implements PlaceService {
     @Value("${api-key.kor-service}")
     private String korServiceKey;
 
+    /*
+     * [장소 등록]
+     * */
     @Override
     @Transactional
     public void create(final CreatePlaceRequest request) {
@@ -100,6 +103,9 @@ public class PlaceServiceImpl implements PlaceService {
         );
     }
 
+    /*
+     * [장소 등록 By 외부 API]
+     * */
     @Override
     @Transactional
     public void createByAPI() {
@@ -170,6 +176,9 @@ public class PlaceServiceImpl implements PlaceService {
         });
     }
 
+    /*
+     * [장소 리뷰 등록]
+     * */
     @Override
     @Transactional
     public CreatePlaceReviewResponse createReview(final String memberId, final CreatePlaceReviewRequest request) {
@@ -203,6 +212,9 @@ public class PlaceServiceImpl implements PlaceService {
         return new CreatePlaceReviewResponse(savePlaceReview.getPlaceReviewId());
     }
 
+    /*
+     * [장소 추가 카운트 증감]
+     * */
     @Override
     @Transactional
     public void addCount(final Long placeId, final boolean choice) {
@@ -212,6 +224,9 @@ public class PlaceServiceImpl implements PlaceService {
         place.updateAddCount(choice ? 1 : -1);
     }
 
+    /*
+     * [특정 장소 조회]
+     * */
     @Override
     @Transactional(readOnly = true)
     public GetPlaceResponse get(final String memberId, final Long placeId) {
@@ -221,6 +236,9 @@ public class PlaceServiceImpl implements PlaceService {
         return GetPlaceResponse.from(isLiked, place);
     }
 
+    /*
+     * [장소 리스트 조회]
+     * */
     @Override
     @Transactional(readOnly = true)
     public GetPlacesResponse getPlaces(final int pageNo, final String title) {
@@ -234,6 +252,9 @@ public class PlaceServiceImpl implements PlaceService {
         );
     }
 
+    /*
+     * [선택 기반 추천 장소 리스트 조회]
+     * */
     @Override
     @Transactional
     public List<GetSelectionBasedRecommendationPlacesResponse> getSelectionBasedRecommendationPlaces(final Double latitude, final Double longitude) throws URISyntaxException {
@@ -278,6 +299,9 @@ public class PlaceServiceImpl implements PlaceService {
         }
     }
 
+    /*
+     * [최적 거리 정렬]
+     * */
     @Override
     @Transactional
     public List<GetSortingPlacesResponse> getSortingPlaces(final List<GetSortingPlacesRequest> requests) {
@@ -286,6 +310,9 @@ public class PlaceServiceImpl implements PlaceService {
                 .collect(Collectors.toList());
     }
 
+    /*
+     * [일정에 많이 추가된 장소 리스트 조회]
+     * */
     @Override
     @Transactional(readOnly = true)
     public GetPopularPlacesResponse getPopularPlaces(final Long lastId, final Integer lastAddCount) {
@@ -320,6 +347,9 @@ public class PlaceServiceImpl implements PlaceService {
         );
     }
 
+    /*
+     * [내 리뷰 조회]
+     * */
     @Override
     @Transactional(readOnly = true)
     public GetMyPlaceReviewResponse getMyReview(final String memberId) {
@@ -356,6 +386,9 @@ public class PlaceServiceImpl implements PlaceService {
         return GetMyPlaceReviewResponse.from(myPlaceReviews);
     }
 
+    /*
+     * [특정 리뷰 조회]
+     * */
     @Override
     @Transactional(readOnly = true)
     public PlaceReviewDTO getReview(final String memberId, final Long placeReviewId) {
@@ -388,6 +421,9 @@ public class PlaceServiceImpl implements PlaceService {
         );
     }
 
+    /*
+     * [특정 장소의 전체 리뷰 조회]
+     * */
     @Override
     @Transactional(readOnly = true)
     public GetPlaceReviewsResponse getReviews(final String memberId, final Long placeId) {
@@ -429,6 +465,9 @@ public class PlaceServiceImpl implements PlaceService {
         return GetPlaceReviewsResponse.from(placeReviewDTOS);
     }
 
+    /*
+     * [특정 장소의 전체 사진 조회]
+     * */
     @Override
     @Transactional(readOnly = true)
     public GetPlaceImagesResponse getPlaceImages(final Long placeId) {
@@ -448,6 +487,9 @@ public class PlaceServiceImpl implements PlaceService {
         return GetPlaceImagesResponse.of(placeId, placeImageDTOS);
     }
 
+    /*
+     * [특정 회원의 모든 리뷰 삭제]
+     * */
     @Override
     @Transactional
     public void deleteMyReview(final String memberId) {
@@ -458,7 +500,7 @@ public class PlaceServiceImpl implements PlaceService {
 
         for (PlaceReview placeReview : placeReviews) {
             List<PlaceReviewImage> placeReviewImages = placeReviewImageRepository.findByPlaceReviewIdOrderByPlaceReviewImageIdDesc(placeReview.getPlaceReviewId());
-            
+
             placeReviewImageRepository.deleteAll(placeReviewImages);
             placeReviewRepository.delete(placeReview);
         }

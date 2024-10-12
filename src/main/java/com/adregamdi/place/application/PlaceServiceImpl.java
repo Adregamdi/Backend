@@ -233,7 +233,7 @@ public class PlaceServiceImpl implements PlaceService {
         Place place = placeRepository.findById(placeId)
                 .orElseThrow(() -> new PlaceNotFoundException(placeId));
         boolean isLiked = likesService.checkIsLiked(memberId, ContentType.PLACE, placeId);
-        return GetPlaceResponse.from(isLiked, place);
+        return GetPlaceResponse.of(isLiked, place);
     }
 
     /*

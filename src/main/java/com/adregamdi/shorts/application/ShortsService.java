@@ -3,12 +3,11 @@ package com.adregamdi.shorts.application;
 import com.adregamdi.shorts.dto.request.CreateShortsRequest;
 import com.adregamdi.shorts.dto.request.GetShortsByPlaceIdRequest;
 import com.adregamdi.shorts.dto.request.UpdateShortsRequest;
-import com.adregamdi.shorts.dto.response.GetShortsByPlaceIdResponse;
-import com.adregamdi.shorts.dto.response.GetShortsResponse;
-import com.adregamdi.shorts.dto.response.SaveVideoResponse;
-import com.adregamdi.shorts.dto.response.UploadVideoDTO;
+import com.adregamdi.shorts.dto.response.*;
 
 public interface ShortsService {
+    GetShortsByShortsIdResponse getShortsByShortsId(final String currentMemberId, final Long shortsId);
+
     GetShortsResponse getShorts(String memberId, long lastShortsId, int size);
 
     GetShortsResponse getUserShorts(String memberIdForTest, long lastShortsId, int size);

@@ -15,6 +15,16 @@ public interface ShortsRepository extends JpaRepository<Shorts, Long>, ShortsCus
     Optional<Slice<Shorts>> findAllByMemberId(Pageable pageable, String memberId);
 
     @Query("""
+                SELECT s.shortsId, s.title, s.memberId, s.placeId, s.travelogueId,
+                       s.shortsVideoUrl, s.thumbnailUrl, s.assignedStatus, s.viewCount,
+                       m.name, m.handle, m.profile
+                FROM Shorts s
+                JOIN Member m ON s.memberId = m.memberId
+                WHERE s.shortsId = :shortsId
+            """)
+    Optional<Object[]> findShortsWithMemberByShortsId(@Param("shortsId") Long shortsId);
+
+    @Query("""
             SELECT s
              FROM Shorts s
             WHERE s.assignedStatus IS false

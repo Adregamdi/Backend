@@ -59,7 +59,7 @@ public class MemberServiceImpl implements MemberService {
      * [내 정보 조회]
      */
     @Override
-    @Transactional
+    @Transactional(readOnly = true)
     public GetMyMemberResponse getMyMember(final String memberId) {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new MemberNotFoundException(memberId));

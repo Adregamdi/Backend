@@ -45,11 +45,11 @@ public class ShortsServiceImpl implements ShortsService {
                 .map(this::mapToShortsWithMemberDTO)
                 .orElseThrow(() -> new ShortsException.ShortsNotFoundException(shortsId));
         GetPlaceResponse place = GetPlaceResponse.builder().place(Place.builder().build()).build();
-        if (shortsWithMember.placeId() != null) {
+        if (shortsWithMember.placeId() != null && shortsWithMember.placeId() != 0) {
             place = placeService.get(currentMemberId, shortsWithMember.placeId());
         }
         GetTravelogueResponse travelogue = GetTravelogueResponse.builder().travelogueImageList(Collections.emptyList()).build();
-        if (shortsWithMember.travelogueId() != null) {
+        if (shortsWithMember.travelogueId() != null && shortsWithMember.travelogueId() != 0) {
             travelogue = travelogueService.get(currentMemberId, shortsWithMember.travelogueId());
         }
         Integer likeCount = likesService.getLikesCount(ContentType.SHORTS, shortsId);

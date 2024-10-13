@@ -4,10 +4,9 @@ import com.adregamdi.travel.domain.TravelDay;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
-import java.util.Optional;
 
 public interface TravelDayRepository extends JpaRepository<TravelDay, Long> {
-    Optional<List<TravelDay>> findByTravelId(Long travelId);
+    List<TravelDay> findByTravelId(Long travelId);
 
     List<TravelDay> findAllByTravelId(Long travelId);
 }

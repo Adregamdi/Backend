@@ -14,7 +14,6 @@ import com.adregamdi.travel.dto.response.CreateMyTravelResponse;
 import com.adregamdi.travel.dto.response.GetMyTravelResponse;
 import com.adregamdi.travel.dto.response.GetMyTravelsResponse;
 import com.adregamdi.travel.exception.TravelException.InvalidTravelDateException;
-import com.adregamdi.travel.exception.TravelException.TravelDayNotFoundException;
 import com.adregamdi.travel.exception.TravelException.TravelNotFoundException;
 import com.adregamdi.travel.exception.TravelException.TravelPlaceNotFoundException;
 import com.adregamdi.travel.infrastructure.TravelDayRepository;
@@ -188,8 +187,7 @@ public class TravelServiceImpl implements TravelService {
         Travel travel = travelRepository.findByTravelIdAndMemberId(travelId, currentMemberId)
                 .orElseThrow(() -> new TravelNotFoundException(currentMemberId));
 
-        List<TravelDay> travelDays = travelDayRepository.findByTravelId(travelId)
-                .orElseThrow(() -> new TravelDayNotFoundException(travelId));
+        List<TravelDay> travelDays = travelDayRepository.findByTravelId(travelId);
 
         List<List<TravelPlaceDTO>> travelPlaceDTOList = new ArrayList<>();
         for (TravelDay travelDay : travelDays) {
@@ -209,7 +207,6 @@ public class TravelServiceImpl implements TravelService {
             }
             travelPlaceDTOList.add(travelPlaceDTOS);
         }
-
         Travelogue travelogue = travelogueRepository.findByTravelId(travelId);
         return GetMyTravelResponse.of(travelogue != null, travel, travelDays, travelPlaceDTOList);
     }

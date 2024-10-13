@@ -43,6 +43,7 @@ public record GetTravelogueResponse(
                         day.getDate(),
                         day.getDay(),
                         day.getContent(),
+                        day.getMemo(),
                         placeReviewsMap.getOrDefault(day.getTravelogueDayId(), Collections.emptyList())
                 ))
                 .collect(Collectors.toList());
@@ -73,6 +74,7 @@ public record GetTravelogueResponse(
             LocalDate date,
             Integer day,
             String content,
+            String memo,
             List<PlaceInfo> placeList
     ) {
     }

@@ -14,7 +14,7 @@ public interface NotificationRepository extends JpaRepository<Notification, Long
             DELETE FROM Notification n
             WHERE n.createdAt< :date
             """)
-    void deleteByCreatedAt(@Param("date") final LocalDateTime date);
+    void deleteByCreatedAt(@Param("date") LocalDateTime date);
 
     void deleteByMemberId(String memberId);
 }

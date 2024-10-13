@@ -22,7 +22,7 @@ public interface MemberRepository extends JpaRepository<Member, String>, MemberC
             WHERE m.memberStatus= false
             AND m.updatedAt <= :date
             """)
-    List<Member> findByMemberStatusAndUpdatedAt(@Param("date") final LocalDateTime date);
+    List<Member> findByMemberStatusAndUpdatedAt(@Param("date") LocalDateTime date);
 
     @Modifying
     @Query("""
@@ -30,7 +30,7 @@ public interface MemberRepository extends JpaRepository<Member, String>, MemberC
             WHERE m.memberStatus= false
             AND m.updatedAt < :date
             """)
-    void deleteByMemberStatusAndUpdatedAt(@Param("date") final LocalDateTime date);
+    void deleteByMemberStatusAndUpdatedAt(@Param("date") LocalDateTime date);
 
     Member findByHandle(String handle);
 }

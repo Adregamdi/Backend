@@ -140,8 +140,7 @@ public class TravelogueServiceImpl implements TravelogueService {
                 saveOrUpdateImages(request.travelogueId(), requestImages);
             }
 
-            List<TravelogueDay> travelogueDays = travelogueDayRepository.findByTravelogueIdOrderByDay(travelogue.getTravelogueId())
-                    .orElse(Collections.emptyList());
+            List<TravelogueDay> travelogueDays = travelogueDayRepository.findByTravelogueIdOrderByDay(travelogue.getTravelogueId());
             List<CreateMyTravelogueRequest.DayInfo> days = (request.dayList() != null) ? request.dayList() : Collections.emptyList();
             for (int i = 0; i < travelogueDays.size(); i++) {
                 List<TravelogueDayPlaceReview> travelogueDayPlaceReviews = travelogueDayPlaceReviewRepository.findByTravelogueDayId(request.travelogueId());
@@ -202,6 +201,7 @@ public class TravelogueServiceImpl implements TravelogueService {
                     .date(dayInfo.date())
                     .day(dayInfo.day())
                     .content(dayInfo.content())
+                    .memo(dayInfo.memo())
                     .build());
             saveTravelogueDayPlaceReview(dayInfo.placeList(), travelogueDay.getTravelogueDayId());
         }
@@ -237,11 +237,9 @@ public class TravelogueServiceImpl implements TravelogueService {
         blockRepository.findByBlockedMemberIdAndBlockingMemberId(travelogue.getMemberId(), currentMemberId)
                 .ifPresent(BlockException.BlockExistException::new);
 
-        List<TravelogueImage> travelogueImages = travelogueImageRepository.findByTravelogueId(travelogueId)
-                .orElse(Collections.emptyList());
+        List<TravelogueImage> travelogueImages = travelogueImageRepository.findByTravelogueId(travelogueId);
 
-        List<TravelogueDay> travelogueDays = travelogueDayRepository.findByTravelogueIdOrderByDay(travelogueId)
-                .orElse(Collections.emptyList());
+        List<TravelogueDay> travelogueDays = travelogueDayRepository.findByTravelogueIdOrderByDay(travelogueId);
 
         Map<Long, List<GetTravelogueResponse.PlaceInfo>> placeReviewsMap = new LinkedHashMap<>();
         for (TravelogueDay travelogueDay : travelogueDays) {
@@ -305,7 +303,6 @@ public class TravelogueServiceImpl implements TravelogueService {
     @Override
     @Transactional(readOnly = true)
     public GetMemberTraveloguesResponse getMemberTravelogues(final String memberId, final Long lastTravelogueId, final int size) {
-
         return travelogueRepository.findMemberTravelogues(memberId, lastTravelogueId, size);
     }
 
@@ -344,8 +341,7 @@ public class TravelogueServiceImpl implements TravelogueService {
         Travelogue travelogue = travelogueRepository.findByTravelogueIdAndMemberId(travelogueId, currentMemberId)
                 .orElseThrow(() -> new TravelogueNotFoundException(travelogueId));
 
-        List<TravelogueDay> travelogueDays = travelogueDayRepository.findByTravelogueIdOrderByDay(travelogueId)
-                .orElse(Collections.emptyList());
+        List<TravelogueDay> travelogueDays = travelogueDayRepository.findByTravelogueIdOrderByDay(travelogueId);
         if (!travelogueDays.isEmpty()) {
             for (TravelogueDay travelogueDay : travelogueDays) {
                 travelogueDayPlaceReviewRepository.deleteAllByTravelogueDayId(travelogueDay.getTravelogueDayId());
@@ -353,8 +349,7 @@ public class TravelogueServiceImpl implements TravelogueService {
             travelogueDayRepository.deleteAll(travelogueDays);
         }
 
-        List<TravelogueImage> travelogueImages = travelogueImageRepository.findByTravelogueId(travelogueId)
-                .orElse(Collections.emptyList());
+        List<TravelogueImage> travelogueImages = travelogueImageRepository.findByTravelogueId(travelogueId);
         if (!travelogueImages.isEmpty()) {
             travelogueImageRepository.deleteAll(travelogueImages);
         }
@@ -374,8 +369,7 @@ public class TravelogueServiceImpl implements TravelogueService {
         }
 
         for (Travelogue travelogue : travelogues) {
-            List<TravelogueDay> travelogueDays = travelogueDayRepository.findByTravelogueIdOrderByDay(travelogue.getTravelogueId())
-                    .orElse(Collections.emptyList());
+            List<TravelogueDay> travelogueDays = travelogueDayRepository.findByTravelogueIdOrderByDay(travelogue.getTravelogueId());
             if (!travelogueDays.isEmpty()) {
                 for (TravelogueDay travelogueDay : travelogueDays) {
                     travelogueDayPlaceReviewRepository.deleteAllByTravelogueDayId(travelogueDay.getTravelogueDayId());
@@ -383,8 +377,7 @@ public class TravelogueServiceImpl implements TravelogueService {
                 travelogueDayRepository.deleteAll(travelogueDays);
             }
 
-            List<TravelogueImage> travelogueImages = travelogueImageRepository.findByTravelogueId(travelogue.getTravelogueId())
-                    .orElse(Collections.emptyList());
+            List<TravelogueImage> travelogueImages = travelogueImageRepository.findByTravelogueId(travelogue.getTravelogueId());
             if (!travelogueImages.isEmpty()) {
                 travelogueImageRepository.deleteAll(travelogueImages);
             }

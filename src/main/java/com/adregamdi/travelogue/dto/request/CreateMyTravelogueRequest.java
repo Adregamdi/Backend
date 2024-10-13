@@ -30,6 +30,7 @@ public record CreateMyTravelogueRequest(
             @Positive
             Integer day,
             String content,
+            String memo,
             List<PlaceInfo> placeList
     ) {
     }

@@ -25,12 +25,15 @@ public class TravelogueDay extends BaseTime {
     private Integer day; // 해당 날
     @Column
     private String content; // 내용
+    @Column
+    private String memo; // 메모
 
     @Builder
-    public TravelogueDay(Long travelogueId, LocalDate date, Integer day, String content) {
+    public TravelogueDay(Long travelogueId, LocalDate date, Integer day, String content, String memo) {
         this.travelogueId = travelogueId;
         this.date = date;
         this.day = day;
         this.content = content;
+        this.memo = memo;
     }
 }

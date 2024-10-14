@@ -1,4 +1,4 @@
-package com.adregamdi.like.domain.enumtype;
+package com.adregamdi.core.constant;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -6,9 +6,10 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public enum ContentType {
+    ALL("전체"),
+    TRAVELOGUE("여행기"),
     SHORTS("쇼츠"),
-    PLACE("장소"),
-    TRAVELOGUE("여행기");
+    PLACE("장소");
 
     private final String description;
 

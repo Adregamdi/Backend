@@ -23,7 +23,7 @@ public class QLike extends EntityPathBase<Like> {
 
     public final NumberPath<Long> contentId = createNumber("contentId", Long.class);
 
-    public final EnumPath<com.adregamdi.like.domain.enumtype.ContentType> contentType = createEnum("contentType", com.adregamdi.like.domain.enumtype.ContentType.class);
+    public final EnumPath<com.adregamdi.core.constant.ContentType> contentType = createEnum("contentType", com.adregamdi.core.constant.ContentType.class);
 
     //inherited
     public final DateTimePath<java.time.LocalDateTime> createdAt = _super.createdAt;

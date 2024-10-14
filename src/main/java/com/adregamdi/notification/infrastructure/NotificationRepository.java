@@ -1,6 +1,6 @@
 package com.adregamdi.notification.infrastructure;
 
-import com.adregamdi.notification.domain.ContentType;
+import com.adregamdi.core.constant.ContentType;
 import com.adregamdi.notification.domain.Notification;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;

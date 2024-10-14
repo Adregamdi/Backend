@@ -1,7 +1,7 @@
 package com.adregamdi.like.infrastructure;
 
+import com.adregamdi.core.constant.ContentType;
 import com.adregamdi.like.domain.Like;
-import com.adregamdi.like.domain.enumtype.ContentType;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;

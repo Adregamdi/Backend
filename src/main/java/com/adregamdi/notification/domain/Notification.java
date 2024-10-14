@@ -1,5 +1,6 @@
 package com.adregamdi.notification.domain;
 
+import com.adregamdi.core.constant.ContentType;
 import com.adregamdi.core.entity.BaseTime;
 import jakarta.persistence.*;
 import lombok.AccessLevel;

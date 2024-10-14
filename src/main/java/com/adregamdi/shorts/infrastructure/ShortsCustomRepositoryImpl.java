@@ -1,6 +1,6 @@
 package com.adregamdi.shorts.infrastructure;
 
-import com.adregamdi.like.domain.enumtype.ContentType;
+import com.adregamdi.core.constant.ContentType;
 import com.adregamdi.shorts.dto.ShortsDTO;
 import com.adregamdi.shorts.dto.request.GetShortsByPlaceIdRequest;
 import com.adregamdi.shorts.dto.response.GetShortsByPlaceIdResponse;

@@ -1,6 +1,6 @@
 package com.adregamdi.notification.application;
 
-import com.adregamdi.notification.domain.ContentType;
+import com.adregamdi.core.constant.ContentType;
 import com.adregamdi.notification.dto.request.CreateNotificationRequest;
 import com.adregamdi.notification.dto.request.UpdateNotificationRequest;
 import com.adregamdi.notification.dto.response.GetNotificationResponse;

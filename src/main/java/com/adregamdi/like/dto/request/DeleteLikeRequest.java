@@ -1,6 +1,6 @@
 package com.adregamdi.like.dto.request;
 
-import com.adregamdi.like.domain.enumtype.ContentType;
+import com.adregamdi.core.constant.ContentType;
 import lombok.Builder;
 
 @Builder
@@ -10,7 +10,7 @@ public record DeleteLikeRequest(
         Long contentId
 ) {
 
-        public ContentType getContentType() {
-                return ContentType.valueOf(contentType.toUpperCase());
-        }
+    public ContentType getContentType() {
+        return ContentType.valueOf(contentType.toUpperCase());
+    }
 }

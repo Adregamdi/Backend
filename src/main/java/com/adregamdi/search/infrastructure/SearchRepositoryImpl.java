@@ -1,6 +1,6 @@
 package com.adregamdi.search.infrastructure;
 
-import com.adregamdi.like.domain.enumtype.ContentType;
+import com.adregamdi.core.constant.ContentType;
 import com.adregamdi.search.dto.PlaceSearchDTO;
 import com.adregamdi.search.dto.ShortsSearchDTO;
 import com.adregamdi.search.dto.TravelogueSearchDTO;

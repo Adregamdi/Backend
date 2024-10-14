@@ -1,7 +1,7 @@
 package com.adregamdi.shorts.application;
 
+import com.adregamdi.core.constant.ContentType;
 import com.adregamdi.like.application.LikesService;
-import com.adregamdi.like.domain.enumtype.ContentType;
 import com.adregamdi.media.application.FileUploadService;
 import com.adregamdi.member.dto.ShortsWithMemberDTO;
 import com.adregamdi.place.application.PlaceService;

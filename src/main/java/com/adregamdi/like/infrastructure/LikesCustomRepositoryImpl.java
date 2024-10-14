@@ -1,6 +1,6 @@
 package com.adregamdi.like.infrastructure;
 
-import com.adregamdi.like.domain.enumtype.ContentType;
+import com.adregamdi.core.constant.ContentType;
 import com.adregamdi.like.dto.AllContentDTO;
 import com.adregamdi.like.dto.PlaceContentDTO;
 import com.adregamdi.like.dto.ShortsContentDTO;

@@ -2,8 +2,8 @@ package com.adregamdi.travelogue.application;
 
 import com.adregamdi.block.exception.BlockException;
 import com.adregamdi.block.infrastructure.BlockRepository;
+import com.adregamdi.core.constant.ContentType;
 import com.adregamdi.like.application.LikesService;
-import com.adregamdi.like.domain.enumtype.ContentType;
 import com.adregamdi.media.application.ImageService;
 import com.adregamdi.member.domain.Member;
 import com.adregamdi.member.exception.MemberException;

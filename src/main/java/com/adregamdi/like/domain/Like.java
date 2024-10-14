@@ -1,7 +1,7 @@
 package com.adregamdi.like.domain;
 
+import com.adregamdi.core.constant.ContentType;
 import com.adregamdi.core.entity.BaseTime;
-import com.adregamdi.like.domain.enumtype.ContentType;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

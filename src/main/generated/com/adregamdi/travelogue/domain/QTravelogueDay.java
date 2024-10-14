@@ -30,6 +30,8 @@ public class QTravelogueDay extends EntityPathBase<TravelogueDay> {
 
     public final NumberPath<Integer> day = createNumber("day", Integer.class);
 
+    public final StringPath memo = createString("memo");
+
     public final NumberPath<Long> travelogueDayId = createNumber("travelogueDayId", Long.class);
 
     public final NumberPath<Long> travelogueId = createNumber("travelogueId", Long.class);

@@ -128,6 +128,7 @@ public class LikesService {
         }
 
         likesRepository.delete(like);
+        notificationService.delete(request.contentId(), request.getContentType());
     }
 
     @Transactional(readOnly = true)

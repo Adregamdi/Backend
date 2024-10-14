@@ -1,5 +1,6 @@
 package com.adregamdi.notification.application;
 
+import com.adregamdi.notification.domain.ContentType;
 import com.adregamdi.notification.dto.request.CreateNotificationRequest;
 import com.adregamdi.notification.dto.request.UpdateNotificationRequest;
 import com.adregamdi.notification.dto.response.GetNotificationResponse;
@@ -22,4 +23,10 @@ public interface NotificationService {
      * 사용자가 알림 읽으면 상태 true 로 변경
      */
     void update(final List<UpdateNotificationRequest> requests);
+
+    /*
+     * [알림 삭제]
+     * 좋아요 취소 시 해당 알림 데이터 삭제
+     */
+    void delete(final Long contentId, final ContentType contentType);
 }

@@ -98,7 +98,7 @@ public class NotificationServiceImpl implements NotificationService {
         String opponentMemberHandle = memberRepository.findById(opponentMemberId)
                 .orElseThrow(() -> new MemberException.MemberNotFoundException(opponentMemberId))
                 .getHandle();
-        Notification notification = notificationRepository.findByMemberIdAndContentIdAndContentType(opponentMemberHandle, contentId, contentType)
+        Notification notification = notificationRepository.findByOpponentMemberHandleAndContentIdAndContentType(opponentMemberHandle, contentId, contentType)
                 .orElseThrow(NotificationNotFoundException::new);
         notificationRepository.deleteById(notification.getNotificationId());
     }

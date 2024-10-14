@@ -11,22 +11,22 @@ public interface NotificationService {
     /*
      * [알림 생성]
      */
-    void create(final CreateNotificationRequest request);
+    void create(CreateNotificationRequest request);
 
     /*
      * [내 알림 조회]
      */
-    GetNotificationResponse getMyNotification(final String currentMemberId, final Long lastId);
+    GetNotificationResponse getMyNotification(String currentMemberId, Long lastId);
 
     /*
      * [알림 수정]
      * 사용자가 알림 읽으면 상태 true 로 변경
      */
-    void update(final List<UpdateNotificationRequest> requests);
+    void update(List<UpdateNotificationRequest> requests);
 
     /*
      * [알림 삭제]
      * 좋아요 취소 시 해당 알림 데이터 삭제
      */
-    void delete(final Long contentId, final ContentType contentType);
+    void delete(Long contentId, ContentType contentType);
 }

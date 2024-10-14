@@ -9,5 +9,5 @@ public interface SearchService {
     /*
      * [콘텐츠 검색]
      * */
-    SearchResponse search(final String keyword, final int page, final Set<ContentType> types, final String memberId);
+    SearchResponse search(String keyword, int page, Set<ContentType> types, String memberId);
 }

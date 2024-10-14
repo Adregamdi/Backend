@@ -1,9 +1,9 @@
 package com.adregamdi.like.dto.request;
 
-import com.adregamdi.like.domain.enumtype.SelectedType;
+import com.adregamdi.core.constant.ContentType;
 
 public record GetLikesContentsRequest(
-        SelectedType selectedType,
+        ContentType selectedType,
         String memberId,
         Long lastLikeId,
         int size

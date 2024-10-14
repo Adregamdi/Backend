@@ -1,6 +1,8 @@
 package com.adregamdi.notification.application;
 
 import com.adregamdi.core.constant.ContentType;
+import com.adregamdi.member.exception.MemberException;
+import com.adregamdi.member.infrastructure.MemberRepository;
 import com.adregamdi.notification.domain.Notification;
 import com.adregamdi.notification.dto.NotificationDTO;
 import com.adregamdi.notification.dto.NotificationPageResult;
@@ -23,6 +25,7 @@ import java.util.List;
 @Service
 public class NotificationServiceImpl implements NotificationService {
     private final NotificationRepository notificationRepository;
+    private final MemberRepository memberRepository;
 
     /*
      * [알림 생성]
@@ -91,8 +94,11 @@ public class NotificationServiceImpl implements NotificationService {
      */
     @Override
     @Transactional
-    public void delete(final String memberId, final Long contentId, final ContentType contentType) {
-        Notification notification = notificationRepository.findByMemberIdAndContentIdAndContentType(memberId, contentId, contentType)
+    public void delete(final String opponentMemberId, final Long contentId, final ContentType contentType) {
+        String opponentMemberHandle = memberRepository.findById(opponentMemberId)
+                .orElseThrow(() -> new MemberException.MemberNotFoundException(opponentMemberId))
+                .getMemberId();
+        Notification notification = notificationRepository.findByMemberIdAndContentIdAndContentType(opponentMemberHandle, contentId, contentType)
                 .orElseThrow(NotificationNotFoundException::new);
         notificationRepository.deleteById(notification.getNotificationId());
     }

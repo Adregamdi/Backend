@@ -3,6 +3,7 @@ package com.adregamdi.notification.application;
 import com.adregamdi.core.constant.ContentType;
 import com.adregamdi.notification.domain.Notification;
 import com.adregamdi.notification.dto.NotificationDTO;
+import com.adregamdi.notification.dto.NotificationPageResult;
 import com.adregamdi.notification.dto.request.CreateNotificationRequest;
 import com.adregamdi.notification.dto.request.UpdateNotificationRequest;
 import com.adregamdi.notification.dto.response.GetNotificationResponse;
@@ -45,12 +46,20 @@ public class NotificationServiceImpl implements NotificationService {
     @Override
     @Transactional(readOnly = true)
     public GetNotificationResponse getMyNotification(final String currentMemberId, final Long lastId) {
-        List<Notification> notifications = notificationRepository.findByMemberId(currentMemberId, LocalDateTime.now().minusDays(31), lastId)
-                .orElseThrow(() -> new NotificationNotFoundException(currentMemberId));
+        NotificationPageResult pageResult = notificationRepository.findByMemberId(
+                currentMemberId,
+                LocalDateTime.now().minusDays(31),
+                lastId
+        );
+
+        List<NotificationDTO> notificationDTOs = pageResult.notifications().stream()
+                .map(NotificationDTO::from)
+                .toList();
 
         return GetNotificationResponse.of(
-                countNoReadNotification(notifications),
-                notifications.stream().map(NotificationDTO::from).toList()
+                countNoReadNotification(pageResult.notifications()),
+                pageResult.hasNext(),
+                notificationDTOs
         );
     }
 

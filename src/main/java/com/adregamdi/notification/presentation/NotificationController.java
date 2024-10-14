@@ -25,7 +25,7 @@ public class NotificationController {
     @MemberAuthorize
     public ResponseEntity<ApiResponse<GetNotificationResponse>> getMyNotification(
             @AuthenticationPrincipal final UserDetails userDetails,
-            @RequestParam(defaultValue = "", required = false) final Long lastId
+            @RequestParam(required = false) final Long lastId
     ) {
         return ResponseEntity.ok()
                 .body(ApiResponse.<GetNotificationResponse>builder()

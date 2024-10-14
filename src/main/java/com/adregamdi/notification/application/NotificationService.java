@@ -28,5 +28,5 @@ public interface NotificationService {
      * [알림 삭제]
      * 좋아요 취소 시 해당 알림 데이터 삭제
      */
-    void delete(Long contentId, ContentType contentType);
+    void delete(String memberId, Long contentId, ContentType contentType);
 }

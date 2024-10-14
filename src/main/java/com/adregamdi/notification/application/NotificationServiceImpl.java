@@ -82,8 +82,8 @@ public class NotificationServiceImpl implements NotificationService {
      */
     @Override
     @Transactional
-    public void delete(final Long contentId, final ContentType contentType) {
-        Notification notification = notificationRepository.findByContentIdAndContentType(contentId, contentType)
+    public void delete(final String memberId, final Long contentId, final ContentType contentType) {
+        Notification notification = notificationRepository.findByMemberIdAndContentIdAndContentType(memberId, contentId, contentType)
                 .orElseThrow(NotificationNotFoundException::new);
         notificationRepository.deleteById(notification.getNotificationId());
     }

@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 import java.util.Optional;
 
 public interface NotificationRepository extends JpaRepository<Notification, Long>, NotificationCustomRepository {
-    Optional<Notification> findByContentIdAndContentType(Long contentId, ContentType contentType);
+    Optional<Notification> findByMemberIdAndContentIdAndContentType(String memberId, Long contentId, ContentType contentType);
 
     @Modifying
     @Query("""

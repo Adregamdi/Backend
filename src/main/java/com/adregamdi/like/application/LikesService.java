@@ -114,7 +114,7 @@ public class LikesService {
         return new CreateShortsLikeResponse(likesRepository.countByContentTypeAndContentId(ContentType.SHORTS, shortsId));
     }
 
-
+    @Transactional
     public void delete(String memberId, Role memberRole, DeleteLikeRequest request) {
 
         Like like = likesRepository.findByMemberIdAndContentTypeAndContentId(memberId, request.getContentType(), request.contentId())
@@ -128,7 +128,7 @@ public class LikesService {
         }
 
         likesRepository.delete(like);
-        notificationService.delete(request.contentId(), request.getContentType());
+        notificationService.delete(memberId, request.contentId(), request.getContentType());
     }
 
     @Transactional(readOnly = true)

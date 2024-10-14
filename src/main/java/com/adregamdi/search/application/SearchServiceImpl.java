@@ -1,7 +1,7 @@
 package com.adregamdi.search.application;
 
+import com.adregamdi.core.constant.ContentType;
 import com.adregamdi.search.dto.PlaceSearchDTO;
-import com.adregamdi.search.dto.SearchType;
 import com.adregamdi.search.dto.ShortsSearchDTO;
 import com.adregamdi.search.dto.TravelogueSearchDTO;
 import com.adregamdi.search.dto.response.SearchResponse;
@@ -35,26 +35,26 @@ public class SearchServiceImpl implements SearchService {
     public SearchResponse search(
             final String keyword,
             final int page,
-            final Set<SearchType> types,
+            final Set<ContentType> types,
             final String memberId
     ) {
         int pageSize = LARGE_PAGE_SIZE;
         Slice<TravelogueSearchDTO> travelogues = emptySlice(page, pageSize);
         Slice<ShortsSearchDTO> shorts = emptySlice(page, pageSize);
         Slice<PlaceSearchDTO> places = emptySlice(page, pageSize);
-        Map<SearchType, Long> totalCounts = new EnumMap<>(SearchType.class);
+        Map<ContentType, Long> totalCounts = new EnumMap<>(ContentType.class);
 
-        if (types.contains(SearchType.TRAVELOGUE)) {
+        if (types.contains(ContentType.TRAVELOGUE)) {
             travelogues = searchRepository.searchTravelogues(keyword, generatePageAsc(page, pageSize, "title"));
-            totalCounts.put(SearchType.TRAVELOGUE, searchRepository.countTravelogues(keyword));
+            totalCounts.put(ContentType.TRAVELOGUE, searchRepository.countTravelogues(keyword));
         }
-        if (types.contains(SearchType.SHORTS)) {
+        if (types.contains(ContentType.SHORTS)) {
             shorts = searchRepository.searchShorts(keyword, generatePageAsc(page, pageSize, "title"), memberId);
-            totalCounts.put(SearchType.SHORTS, searchRepository.countShorts(keyword));
+            totalCounts.put(ContentType.SHORTS, searchRepository.countShorts(keyword));
         }
-        if (types.contains(SearchType.PLACE)) {
+        if (types.contains(ContentType.PLACE)) {
             places = searchRepository.searchPlaces(keyword, generatePageAsc(page, pageSize, "title"));
-            totalCounts.put(SearchType.PLACE, searchRepository.countPlaces(keyword));
+            totalCounts.put(ContentType.PLACE, searchRepository.countPlaces(keyword));
         }
 
         return SearchResponse.of(
@@ -63,9 +63,9 @@ public class SearchServiceImpl implements SearchService {
                 travelogues.hasNext(),
                 shorts.hasNext(),
                 places.hasNext(),
-                totalCounts.getOrDefault(SearchType.TRAVELOGUE, 0L),
-                totalCounts.getOrDefault(SearchType.SHORTS, 0L),
-                totalCounts.getOrDefault(SearchType.PLACE, 0L),
+                totalCounts.getOrDefault(ContentType.TRAVELOGUE, 0L),
+                totalCounts.getOrDefault(ContentType.SHORTS, 0L),
+                totalCounts.getOrDefault(ContentType.PLACE, 0L),
                 travelogues.getContent(),
                 shorts.getContent(),
                 places.getContent()

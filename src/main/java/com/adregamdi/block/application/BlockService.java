@@ -7,15 +7,15 @@ public interface BlockService {
     /*
      * [차단하기]
      * */
-    CreateBlockResponse create(final String memberId, final String blockedMemberId);
+    CreateBlockResponse create(String memberId, String blockedMemberId);
 
     /*
      * [내 차단 목록 조회]
      * */
-    GetMyBlockingMembers getMyBlockingMembers(final String memberId);
+    GetMyBlockingMembers getMyBlockingMembers(String memberId);
 
     /*
      * [차단해제]
      * */
-    void delete(final String memberId, final String blockedMemberId);
+    void delete(String memberId, String blockedMemberId);
 }

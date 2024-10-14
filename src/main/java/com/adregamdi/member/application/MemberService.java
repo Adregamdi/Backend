@@ -10,27 +10,27 @@ public interface MemberService {
     /*
      * [마지막 접속 시간 체크]
      */
-    void connectedAt(final Member member);
+    void connectedAt(Member member);
 
     /*
      * [내 정보 조회]
      */
-    GetMyMemberResponse getMyMember(final String memberId);
+    GetMyMemberResponse getMyMember(String memberId);
 
     /*
      * [내 정보 수정]
      */
-    void update(final UpdateMyMemberRequest request, final String memberId);
+    void update(UpdateMyMemberRequest request, String memberId);
 
     /*
      * [로그아웃]
      */
-    void logout(final String memberId, final String accessToken);
+    void logout(String memberId, String accessToken);
 
     /*
      * [소프트 탈퇴]
      */
-    void delete(final String memberId);
+    void delete(String memberId);
 
     /*
      * [특정 멤버 컨텐츠 조회]

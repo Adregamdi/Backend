@@ -1,5 +1,6 @@
 package com.adregamdi.notification.application;
 
+import com.adregamdi.core.constant.ContentType;
 import com.adregamdi.notification.domain.Notification;
 import com.adregamdi.notification.dto.NotificationDTO;
 import com.adregamdi.notification.dto.request.CreateNotificationRequest;
@@ -77,11 +78,23 @@ public class NotificationServiceImpl implements NotificationService {
 
     /*
      * [알림 삭제]
+     * 좋아요 취소 시 해당 알림 데이터 삭제
+     */
+    @Override
+    @Transactional
+    public void delete(final Long contentId, final ContentType contentType) {
+        Notification notification = notificationRepository.findByContentIdAndContentType(contentId, contentType)
+                .orElseThrow(NotificationNotFoundException::new);
+        notificationRepository.deleteById(notification.getNotificationId());
+    }
+
+    /*
+     * [주기적 알림 삭제]
      * 30일이 지난 알림들 매일 자정에 삭제
      */
     @Scheduled(cron = "0 0 0 * * ?")
     @Transactional
-    protected void delete() {
+    protected void deleteMonth() {
         LocalDateTime date = LocalDateTime.now().minusDays(30);
         notificationRepository.deleteByCreatedAt(date);
     }

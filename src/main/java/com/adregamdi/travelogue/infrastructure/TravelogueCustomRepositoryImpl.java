@@ -1,6 +1,6 @@
 package com.adregamdi.travelogue.infrastructure;
 
-import com.adregamdi.like.domain.enumtype.ContentType;
+import com.adregamdi.core.constant.ContentType;
 import com.adregamdi.travelogue.dto.HotTravelogueDTO;
 import com.adregamdi.travelogue.dto.TravelogueDTO;
 import com.adregamdi.travelogue.dto.response.GetHotTraveloguesResponse;

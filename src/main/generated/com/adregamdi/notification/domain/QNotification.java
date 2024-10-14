@@ -23,7 +23,7 @@ public class QNotification extends EntityPathBase<Notification> {
 
     public final NumberPath<Long> contentId = createNumber("contentId", Long.class);
 
-    public final EnumPath<ContentType> contentType = createEnum("contentType", ContentType.class);
+    public final EnumPath<com.adregamdi.core.constant.ContentType> contentType = createEnum("contentType", com.adregamdi.core.constant.ContentType.class);
 
     //inherited
     public final DateTimePath<java.time.LocalDateTime> createdAt = _super.createdAt;

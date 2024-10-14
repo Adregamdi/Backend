@@ -1,9 +1,9 @@
 package com.adregamdi.like.presentation;
 
 import com.adregamdi.core.annotation.MemberAuthorize;
+import com.adregamdi.core.constant.ContentType;
 import com.adregamdi.core.handler.ApiResponse;
 import com.adregamdi.like.application.LikesService;
-import com.adregamdi.like.domain.enumtype.SelectedType;
 import com.adregamdi.like.dto.request.CreateLikesRequest;
 import com.adregamdi.like.dto.request.DeleteLikeRequest;
 import com.adregamdi.like.dto.request.GetLikesContentsRequest;
@@ -43,7 +43,7 @@ public class LikesController {
             @RequestParam(value = "size") @Positive int size
     ) {
         GetLikesContentsRequest request = new GetLikesContentsRequest(
-                SelectedType.valueOf(selectedContent.toUpperCase()),
+                ContentType.valueOf(selectedContent.toUpperCase()),
                 userDetails.getUsername(),
                 lastLikeId != null ? lastLikeId : Long.MAX_VALUE,
                 size);

@@ -6,7 +6,7 @@ import com.adregamdi.shorts.dto.request.UpdateShortsRequest;
 import com.adregamdi.shorts.dto.response.*;
 
 public interface ShortsService {
-    GetShortsByShortsIdResponse getShortsByShortsId(final String currentMemberId, final Long shortsId);
+    GetShortsByShortsIdResponse getShortsByShortsId(String currentMemberId, Long shortsId);
 
     GetShortsResponse getShorts(String memberId, long lastShortsId, int size);
 

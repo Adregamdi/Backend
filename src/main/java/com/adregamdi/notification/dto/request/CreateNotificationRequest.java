@@ -1,6 +1,6 @@
 package com.adregamdi.notification.dto.request;
 
-import com.adregamdi.notification.domain.ContentType;
+import com.adregamdi.core.constant.ContentType;
 import com.adregamdi.notification.domain.NotificationType;
 import lombok.Builder;
 

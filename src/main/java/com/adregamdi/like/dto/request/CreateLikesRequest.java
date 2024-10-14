@@ -1,6 +1,6 @@
 package com.adregamdi.like.dto.request;
 
-import com.adregamdi.like.domain.enumtype.ContentType;
+import com.adregamdi.core.constant.ContentType;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Positive;
 

@@ -21,9 +21,7 @@ public class Notification extends BaseTime {
     @Column
     private Long contentId; // 콘텐츠 id
     @Column
-    private String opponentMemberProfile; // 상대 회원 프로필
-    @Column
-    private String opponentMemberHandle; // 상대 회원 핸들
+    private String opponentMemberId; // 상대 회원 id
     @Column
     private boolean isRead; // 상태 (T: 읽음, F: 안 읽음)
 
@@ -33,11 +31,10 @@ public class Notification extends BaseTime {
     private NotificationType notificationType; // 알림 종류 (좋아요, 일정)
 
     @Builder
-    public Notification(String memberId, Long contentId, String opponentMemberProfile, String opponentMemberHandle, ContentType contentType, NotificationType notificationType) {
+    public Notification(String memberId, Long contentId, String opponentMemberId, ContentType contentType, NotificationType notificationType) {
         this.memberId = memberId;
         this.contentId = contentId;
-        this.opponentMemberProfile = opponentMemberProfile;
-        this.opponentMemberHandle = opponentMemberHandle;
+        this.opponentMemberId = opponentMemberId;
         this.contentType = contentType;
         this.notificationType = notificationType;
         this.isRead = false;

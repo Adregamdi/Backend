@@ -5,7 +5,6 @@ import com.adregamdi.core.oauth2.dto.LoginRequest;
 import com.adregamdi.core.oauth2.dto.LoginResponse;
 import com.adregamdi.core.oauth2.dto.OAuth2Attributes;
 import com.adregamdi.core.redis.application.RedisService;
-import com.adregamdi.member.application.MemberService;
 import com.adregamdi.member.domain.Member;
 import com.adregamdi.member.domain.SocialType;
 import com.adregamdi.member.infrastructure.MemberRepository;
@@ -46,7 +45,6 @@ public class OAuth2Service {
     private final WebClient webClient;
     private final JwtService jwtService;
     private final RedisService redisService;
-    private final MemberService memberService;
     private final MemberRepository memberRepository;
 
     @Value("${social-login.provider.apple.team-id}")
@@ -94,8 +92,6 @@ public class OAuth2Service {
 
 //        findMember.updateRefreshToken(refreshToken);
 //        findMember.updateRefreshTokenStatus(true);
-
-        memberService.connectedAt(findMember);
 
         return new LoginResponse(accessToken, refreshToken);
     }

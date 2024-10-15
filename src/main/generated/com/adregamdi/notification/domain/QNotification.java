@@ -36,9 +36,7 @@ public class QNotification extends EntityPathBase<Notification> {
 
     public final EnumPath<NotificationType> notificationType = createEnum("notificationType", NotificationType.class);
 
-    public final StringPath opponentMemberHandle = createString("opponentMemberHandle");
-
-    public final StringPath opponentMemberProfile = createString("opponentMemberProfile");
+    public final StringPath opponentMemberId = createString("opponentMemberId");
 
     //inherited
     public final DateTimePath<java.time.LocalDateTime> updatedAt = _super.updatedAt;

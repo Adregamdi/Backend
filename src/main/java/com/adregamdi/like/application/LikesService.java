@@ -29,6 +29,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Objects;
 
 @Slf4j
 @Service
@@ -72,7 +73,7 @@ public class LikesService {
             contentType = ContentType.TRAVELOGUE;
         }
 
-        if (opponentMember != null) {
+        if (opponentMember != null && !Objects.equals(opponentMember.getMemberId(), memberId)) {
             notificationService.create(CreateNotificationRequest.of(
                     opponentMember.getMemberId(),
                     request.contentId(),
@@ -99,12 +100,14 @@ public class LikesService {
                 .orElseThrow(() -> new MemberException.MemberNotFoundException(shorts.getMemberId()));
         ContentType contentType = ContentType.SHORTS;
 
-        notificationService.create(CreateNotificationRequest.of(
-                opponentMember.getMemberId(),
-                shortsId,
-                memberId,
-                contentType,
-                NotificationType.LIKES));
+        if (opponentMember != null && !Objects.equals(opponentMember.getMemberId(), memberId)) {
+            notificationService.create(CreateNotificationRequest.of(
+                    opponentMember.getMemberId(),
+                    shortsId,
+                    memberId,
+                    contentType,
+                    NotificationType.LIKES));
+        }
         return new CreateShortsLikeResponse(likesRepository.countByContentTypeAndContentId(ContentType.SHORTS, shortsId));
     }
 
@@ -121,8 +124,24 @@ public class LikesService {
             return;
         }
 
+        Member opponentMember = null;
+        if (request.getContentType().equals(ContentType.SHORTS)) {
+            Shorts shorts = shortsRepository.findById(request.contentId())
+                    .orElseThrow(() -> new ShortsException.ShortsNotFoundException(request.contentId()));
+            opponentMember = memberRepository.findById(shorts.getMemberId())
+                    .orElseThrow(() -> new MemberException.MemberNotFoundException(shorts.getMemberId()));
+        } else if (request.getContentType().equals(ContentType.TRAVELOGUE)) {
+            Travelogue travelogue = travelogueRepository.findById(request.contentId())
+                    .orElseThrow(() -> new TravelogueException.TravelogueNotFoundException(request.contentId()));
+            opponentMember = memberRepository.findById(travelogue.getMemberId())
+                    .orElseThrow(() -> new MemberException.MemberNotFoundException(travelogue.getMemberId()));
+        }
+        
+        if (opponentMember != null && !Objects.equals(opponentMember.getMemberId(), memberId)) {
+            notificationService.delete(memberId, request.contentId(), request.getContentType());
+        }
+
         likesRepository.delete(like);
-        notificationService.delete(memberId, request.contentId(), request.getContentType());
     }
 
     @Transactional(readOnly = true)
@@ -146,6 +165,7 @@ public class LikesService {
         return likesRepository.checkIsLiked(memberId, contentType, contentId);
     }
 
+    @Transactional
     public void deleteMyLike(final String memberId) {
         List<Like> likes = likesRepository.findAllByMemberId(memberId);
         if (likes.isEmpty()) {

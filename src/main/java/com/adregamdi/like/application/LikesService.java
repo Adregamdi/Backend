@@ -56,8 +56,6 @@ public class LikesService {
                 .contentId(request.contentId())
                 .build();
 
-        Member member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new MemberException.MemberNotFoundException(memberId));
         Member opponentMember = null;
         ContentType contentType = null;
         if (request.getContentType().equals(ContentType.SHORTS)) {
@@ -78,8 +76,7 @@ public class LikesService {
             notificationService.create(CreateNotificationRequest.of(
                     opponentMember.getMemberId(),
                     request.contentId(),
-                    member.getProfile(),
-                    member.getHandle(),
+                    memberId,
                     contentType,
                     NotificationType.LIKES));
         }
@@ -96,8 +93,6 @@ public class LikesService {
 
         likesRepository.save(like);
 
-        Member member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new MemberException.MemberNotFoundException(memberId));
         Shorts shorts = shortsRepository.findById(shortsId)
                 .orElseThrow(() -> new ShortsException.ShortsNotFoundException(shortsId));
         Member opponentMember = memberRepository.findById(shorts.getMemberId())
@@ -107,8 +102,7 @@ public class LikesService {
         notificationService.create(CreateNotificationRequest.of(
                 opponentMember.getMemberId(),
                 shortsId,
-                member.getProfile(),
-                member.getHandle(),
+                memberId,
                 contentType,
                 NotificationType.LIKES));
         return new CreateShortsLikeResponse(likesRepository.countByContentTypeAndContentId(ContentType.SHORTS, shortsId));

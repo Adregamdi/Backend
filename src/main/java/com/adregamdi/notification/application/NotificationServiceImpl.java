@@ -1,6 +1,7 @@
 package com.adregamdi.notification.application;
 
 import com.adregamdi.core.constant.ContentType;
+import com.adregamdi.member.domain.Member;
 import com.adregamdi.member.exception.MemberException;
 import com.adregamdi.member.infrastructure.MemberRepository;
 import com.adregamdi.notification.domain.Notification;
@@ -19,6 +20,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -36,8 +40,7 @@ public class NotificationServiceImpl implements NotificationService {
         notificationRepository.save(Notification.builder()
                 .memberId(request.memberId())
                 .contentId(request.contentId())
-                .opponentMemberProfile(request.opponentMemberProfile())
-                .opponentMemberHandle(request.opponentMemberHandle())
+                .opponentMemberId(request.opponentMemberId())
                 .contentType(request.contentType())
                 .notificationType(request.notificationType())
                 .build());
@@ -55,8 +58,16 @@ public class NotificationServiceImpl implements NotificationService {
                 lastId
         );
 
+        List<String> opponentMemberIds = pageResult.notifications().stream()
+                .map(Notification::getOpponentMemberId)
+                .distinct()
+                .toList();
+
+        Map<String, Member> memberMap = memberRepository.findAllById(opponentMemberIds).stream()
+                .collect(Collectors.toMap(Member::getMemberId, Function.identity()));
+
         List<NotificationDTO> notificationDTOs = pageResult.notifications().stream()
-                .map(NotificationDTO::from)
+                .map(notification -> createNotificationDTO(notification, memberMap))
                 .toList();
 
         return GetNotificationResponse.of(
@@ -64,6 +75,15 @@ public class NotificationServiceImpl implements NotificationService {
                 pageResult.hasNext(),
                 notificationDTOs
         );
+    }
+
+    private NotificationDTO createNotificationDTO(final Notification notification, final Map<String, Member> memberMap) {
+        Member opponentMember = memberMap.get(notification.getOpponentMemberId());
+        if (opponentMember == null) {
+            throw new MemberException.MemberNotFoundException(notification.getOpponentMemberId());
+        }
+
+        return NotificationDTO.from(notification, opponentMember);
     }
 
     /*
@@ -95,10 +115,9 @@ public class NotificationServiceImpl implements NotificationService {
     @Override
     @Transactional
     public void delete(final String opponentMemberId, final Long contentId, final ContentType contentType) {
-        String opponentMemberHandle = memberRepository.findById(opponentMemberId)
-                .orElseThrow(() -> new MemberException.MemberNotFoundException(opponentMemberId))
-                .getHandle();
-        Notification notification = notificationRepository.findByOpponentMemberHandleAndContentIdAndContentType(opponentMemberHandle, contentId, contentType)
+        memberRepository.findById(opponentMemberId)
+                .orElseThrow(() -> new MemberException.MemberNotFoundException(opponentMemberId));
+        Notification notification = notificationRepository.findByOpponentMemberIdAndContentIdAndContentType(opponentMemberId, contentId, contentType)
                 .orElseThrow(NotificationNotFoundException::new);
         notificationRepository.deleteById(notification.getNotificationId());
     }

@@ -8,24 +8,21 @@ import lombok.Builder;
 public record CreateNotificationRequest(
         String memberId,
         Long contentId,
-        String opponentMemberProfile,
-        String opponentMemberHandle,
+        String opponentMemberId,
         ContentType contentType,
         NotificationType notificationType
 ) {
     public static CreateNotificationRequest of(
             final String memberId,
             final Long contentId,
-            final String opponentMemberProfile,
-            final String opponentMemberHandle,
+            final String opponentMemberId,
             final ContentType contentType,
             final NotificationType notificationType
     ) {
         return CreateNotificationRequest.builder()
                 .memberId(memberId)
                 .contentId(contentId)
-                .opponentMemberProfile(opponentMemberProfile)
-                .opponentMemberHandle(opponentMemberHandle)
+                .opponentMemberId(opponentMemberId)
                 .contentType(contentType)
                 .notificationType(notificationType)
                 .build();

@@ -1,6 +1,7 @@
 package com.adregamdi.notification.dto;
 
 import com.adregamdi.core.constant.ContentType;
+import com.adregamdi.member.domain.Member;
 import com.adregamdi.notification.domain.Notification;
 import com.adregamdi.notification.domain.NotificationType;
 import lombok.AllArgsConstructor;
@@ -24,12 +25,12 @@ public class NotificationDTO {
     private boolean isRead;
     private LocalDate createdAt;
 
-    public static NotificationDTO from(final Notification notification) {
+    public static NotificationDTO from(final Notification notification, final Member opponentMember) {
         return NotificationDTO.builder()
                 .notificationId(notification.getNotificationId())
                 .contentId(notification.getContentId())
-                .opponentMemberProfile(notification.getOpponentMemberProfile())
-                .opponentMemberHandle(notification.getOpponentMemberHandle())
+                .opponentMemberProfile(opponentMember.getProfile())
+                .opponentMemberHandle(opponentMember.getHandle())
                 .contentType(notification.getContentType())
                 .notificationType(notification.getNotificationType())
                 .isRead(notification.isRead())

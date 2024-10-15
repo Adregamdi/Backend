@@ -2,6 +2,7 @@ package com.adregamdi.core.jwt.service;
 
 import com.adregamdi.core.exception.GlobalException;
 import com.adregamdi.core.redis.application.RedisService;
+import com.adregamdi.member.application.MemberService;
 import com.adregamdi.member.domain.Role;
 import com.adregamdi.member.infrastructure.MemberRepository;
 import com.auth0.jwt.JWT;
@@ -10,7 +11,6 @@ import com.auth0.jwt.exceptions.*;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -23,7 +23,6 @@ import static com.adregamdi.core.exception.GlobalException.LogoutMemberException
 
 @Slf4j
 @RequiredArgsConstructor
-@Getter
 @Service
 public class JwtService {
     private static final String ACCESS_TOKEN_SUBJECT = "AccessToken";
@@ -32,6 +31,7 @@ public class JwtService {
     private static final String ROLE = "role";
     private static final String BEARER = "Bearer ";
     private final RedisService redisService;
+    private final MemberService memberService;
     private final MemberRepository memberRepository;
     @Value("${jwt.secret-key}")
     private String secretKey;
@@ -53,8 +53,10 @@ public class JwtService {
                 .withClaim(MEMBER_ID_CLAIM, memberId)
                 .withClaim(ROLE, role.toString())
                 .sign(Algorithm.HMAC512(secretKey));
-
         log.info("memberId로 액세스 토큰 생성: {}. 만료 기간: {}", memberId, expiresAt);
+
+        memberRepository.findById(memberId)
+                .ifPresent(memberService::connectedAt);
         return token;
     }
 

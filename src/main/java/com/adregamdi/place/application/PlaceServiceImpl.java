@@ -4,6 +4,7 @@ import com.adregamdi.block.domain.Block;
 import com.adregamdi.block.exception.BlockException;
 import com.adregamdi.block.infrastructure.BlockRepository;
 import com.adregamdi.core.constant.ContentType;
+import com.adregamdi.core.redis.application.RedisService;
 import com.adregamdi.like.application.LikesService;
 import com.adregamdi.media.application.ImageService;
 import com.adregamdi.member.domain.Member;
@@ -32,6 +33,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Slice;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -62,6 +64,7 @@ public class PlaceServiceImpl implements PlaceService {
     private final ObjectMapper objectMapper;
     private final ImageService imageService;
     private final LikesService likesService;
+    private final RedisService redisService;
     private final MemberRepository memberRepository;
     private final PlaceRepository placeRepository;
     private final PlaceReviewRepository placeReviewRepository;
@@ -345,6 +348,10 @@ public class PlaceServiceImpl implements PlaceService {
                 totalPlaces,
                 placeInfos
         );
+    }
+
+    @Scheduled
+    private void savePopularPlaces() {
     }
 
     /*

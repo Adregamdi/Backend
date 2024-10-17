@@ -4,7 +4,7 @@ import com.adregamdi.core.jwt.service.JwtService;
 import com.adregamdi.core.oauth2.dto.LoginRequest;
 import com.adregamdi.core.oauth2.dto.LoginResponse;
 import com.adregamdi.core.oauth2.dto.OAuth2Attributes;
-import com.adregamdi.core.redis.application.RedisService;
+import com.adregamdi.core.redis.application.TokenRedisService;
 import com.adregamdi.member.domain.Member;
 import com.adregamdi.member.domain.SocialType;
 import com.adregamdi.member.infrastructure.MemberRepository;
@@ -44,7 +44,7 @@ public class OAuth2Service {
     private static final String KAKAO = "kakao";
     private final WebClient webClient;
     private final JwtService jwtService;
-    private final RedisService redisService;
+    private final TokenRedisService tokenRedisService;
     private final MemberRepository memberRepository;
 
     @Value("${social-login.provider.apple.team-id}")
@@ -88,7 +88,7 @@ public class OAuth2Service {
         String refreshToken = jwtService.createRefreshToken();
 
         // Redis에 리프레시 토큰 저장
-        redisService.saveRefreshToken(findMember.getMemberId(), refreshToken);
+        tokenRedisService.saveRefreshToken(findMember.getMemberId(), refreshToken);
 
 //        findMember.updateRefreshToken(refreshToken);
 //        findMember.updateRefreshTokenStatus(true);

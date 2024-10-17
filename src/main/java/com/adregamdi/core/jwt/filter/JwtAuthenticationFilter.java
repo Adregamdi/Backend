@@ -3,7 +3,7 @@ package com.adregamdi.core.jwt.filter;
 import com.adregamdi.core.exception.GlobalException;
 import com.adregamdi.core.handler.ErrorResponse;
 import com.adregamdi.core.jwt.service.JwtService;
-import com.adregamdi.core.redis.application.RedisService;
+import com.adregamdi.core.redis.application.TokenRedisService;
 import com.adregamdi.core.utils.PasswordUtil;
 import com.adregamdi.member.domain.Member;
 import com.adregamdi.member.infrastructure.MemberRepository;
@@ -34,7 +34,7 @@ import java.util.Objects;
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final GrantedAuthoritiesMapper authoritiesMapper = new NullAuthoritiesMapper();
     private final JwtService jwtService;
-    private final RedisService redisService;
+    private final TokenRedisService tokenRedisService;
     private final MemberRepository memberRepository;
     private final AntPathMatcher pathMatcher = new AntPathMatcher();
     private final List<String> allowedUris;
@@ -91,7 +91,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             final String refreshToken
     ) {
         try {
-            String memberId = redisService.getMemberIdByRefreshToken(refreshToken);
+            String memberId = tokenRedisService.getMemberIdByRefreshToken(refreshToken);
             if (memberId == null) {
                 throw new GlobalException.TokenValidationException("해당 리프레시 토큰을 가진 회원이 없습니다.");
             }
@@ -117,7 +117,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private String reIssueRefreshToken(final String memberId) {
         String reIssuedRefreshToken = jwtService.createRefreshToken();
-        redisService.saveRefreshToken(memberId, reIssuedRefreshToken);
+        tokenRedisService.saveRefreshToken(memberId, reIssuedRefreshToken);
         return reIssuedRefreshToken;
     }
 

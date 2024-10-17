@@ -1,6 +1,6 @@
 package com.adregamdi.member.application;
 
-import com.adregamdi.core.redis.application.RedisService;
+import com.adregamdi.core.redis.application.TokenRedisService;
 import com.adregamdi.like.application.LikesService;
 import com.adregamdi.media.application.ImageService;
 import com.adregamdi.member.domain.Member;
@@ -38,7 +38,7 @@ import static com.adregamdi.media.domain.ImageTarget.PROFILE;
 public class MemberServiceImpl implements MemberService {
     private final WebClient webClient;
     private final ImageService imageService;
-    private final RedisService redisService;
+    private final TokenRedisService tokenRedisService;
     private final MemberRepository memberRepository;
 
     private final LikesService likesService;
@@ -97,7 +97,7 @@ public class MemberServiceImpl implements MemberService {
 //        member.updateRefreshTokenStatus(false);
 
         // Redis에서 리프레시 토큰 삭제 및 액세스 토큰 로그아웃 처리
-        redisService.logoutUser(memberId, accessToken);
+        tokenRedisService.logoutUser(memberId, accessToken);
     }
 
     /*

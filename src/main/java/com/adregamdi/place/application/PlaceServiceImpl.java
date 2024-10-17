@@ -28,10 +28,12 @@ import com.adregamdi.place.infrastructure.PlaceReviewRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Slice;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -74,6 +76,12 @@ public class PlaceServiceImpl implements PlaceService {
     private String visitJejuKey;
     @Value("${api-key.kor-service}")
     private String korServiceKey;
+
+    @Async
+    @PostConstruct
+    public void asyncInit() {
+        updatePopularPlacesCache();
+    }
 
     /*
      * [장소 등록]
@@ -349,10 +357,13 @@ public class PlaceServiceImpl implements PlaceService {
     }
 
     @Scheduled(fixedRate = 3600000) // 매 시간마다 실행
-    @Transactional(readOnly = true)
-    public void updatePopularPlacesCache() {
-        List<PopularPlaceDTO> popularPlaces = placeRepository.findInOrderOfPopularAddCount(null, null);
-        placeRedisService.savePopularPlaces(popularPlaces);
+    protected void updatePopularPlacesCache() {
+        try {
+            List<PopularPlaceDTO> popularPlaces = placeRepository.findInOrderOfPopularAddCount(null, null);
+            placeRedisService.savePopularPlaces(popularPlaces);
+        } catch (RuntimeException e) {
+            log.error("인기 장소 캐시 업데이트 중 오류 발생", e);
+        }
     }
 
     /*

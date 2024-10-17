@@ -231,7 +231,7 @@ public class PlaceServiceImpl implements PlaceService {
         Place place = placeRepository.findById(placeId)
                 .orElseThrow(() -> new PlaceNotFoundException(placeId));
 
-        place.updateAddCount(choice ? 1 : -1);
+        place.updateAddCount(choice ? place.getAddCount() + 1 : place.getAddCount() - 1);
     }
 
     /*

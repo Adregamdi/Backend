@@ -5,7 +5,7 @@ import com.adregamdi.core.jwt.service.JwtService;
 import com.adregamdi.core.oauth2.application.CustomOAuth2UserService;
 import com.adregamdi.core.oauth2.handler.OAuth2LoginFailureHandler;
 import com.adregamdi.core.oauth2.handler.OAuth2LoginSuccessHandler;
-import com.adregamdi.core.redis.application.RedisService;
+import com.adregamdi.core.redis.application.TokenRedisService;
 import com.adregamdi.member.infrastructure.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -29,7 +29,7 @@ import java.util.Arrays;
 public class SecurityConfig {
     private final JwtService jwtService;
     private final MemberRepository memberRepository;
-    private final RedisService redisService;
+    private final TokenRedisService redisService;
     private final CustomOAuth2UserService customOAuth2UserService;
     private final OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler;
     private final OAuth2LoginFailureHandler oAuth2LoginFailureHandler;

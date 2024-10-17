@@ -1,7 +1,7 @@
 package com.adregamdi.core.jwt.service;
 
 import com.adregamdi.core.exception.GlobalException;
-import com.adregamdi.core.redis.application.RedisService;
+import com.adregamdi.core.redis.application.TokenRedisService;
 import com.adregamdi.member.application.MemberService;
 import com.adregamdi.member.domain.Role;
 import com.adregamdi.member.infrastructure.MemberRepository;
@@ -30,7 +30,7 @@ public class JwtService {
     private static final String MEMBER_ID_CLAIM = "memberId";
     private static final String ROLE = "role";
     private static final String BEARER = "Bearer ";
-    private final RedisService redisService;
+    private final TokenRedisService tokenRedisService;
     private final MemberService memberService;
     private final MemberRepository memberRepository;
     @Value("${jwt.secret-key}")
@@ -123,7 +123,7 @@ public class JwtService {
 
     public Optional<String> extractMemberId(final String accessToken) {
         try {
-            if (redisService.isLoggedOutAccessToken(accessToken)) {
+            if (tokenRedisService.isLoggedOutAccessToken(accessToken)) {
                 log.info("로그아웃된 액세스 토큰입니다.");
                 throw new LogoutMemberException();
             }
@@ -205,7 +205,7 @@ public class JwtService {
     }
 
     public void validateRefreshToken(final String memberId, final String refreshToken) {
-        if (!refreshToken.equals(redisService.getRefreshToken(memberId))) {
+        if (!refreshToken.equals(tokenRedisService.getRefreshToken(memberId))) {
             log.info("저장된 리프레시 토큰과 제공된 리프레시 토큰이 일치하지 않습니다. MemberId: {}", memberId);
             throw new GlobalException.RefreshTokenMismatchException();
         }

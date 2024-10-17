@@ -18,8 +18,7 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class RedisService {
-
+public class TokenRedisService {
     private static final String REFRESH_TOKEN_PREFIX = "RT:";
     private static final String LOGOUT_ACCESS_TOKEN_PREFIX = "LOGOUT:AT:";
     private final RedisTemplate<String, String> redisTemplate;

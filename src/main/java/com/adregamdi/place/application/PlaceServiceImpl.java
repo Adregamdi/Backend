@@ -4,7 +4,6 @@ import com.adregamdi.block.domain.Block;
 import com.adregamdi.block.exception.BlockException;
 import com.adregamdi.block.infrastructure.BlockRepository;
 import com.adregamdi.core.constant.ContentType;
-import com.adregamdi.core.redis.application.RedisService;
 import com.adregamdi.like.application.LikesService;
 import com.adregamdi.media.application.ImageService;
 import com.adregamdi.member.domain.Member;
@@ -64,7 +63,7 @@ public class PlaceServiceImpl implements PlaceService {
     private final ObjectMapper objectMapper;
     private final ImageService imageService;
     private final LikesService likesService;
-    private final RedisService redisService;
+    private final PlaceRedisService placeRedisService;
     private final MemberRepository memberRepository;
     private final PlaceRepository placeRepository;
     private final PlaceReviewRepository placeReviewRepository;
@@ -319,22 +318,21 @@ public class PlaceServiceImpl implements PlaceService {
     @Override
     @Transactional(readOnly = true)
     public GetPopularPlacesResponse getPopularPlaces(final Long lastId, final Integer lastAddCount) {
-        List<PopularPlaceDTO> popularPlaces = placeRepository.findInOrderOfPopularAddCount(lastId, lastAddCount);
+        List<PopularPlaceDTO> popularPlaces = placeRedisService.getPopularPlaces();
 
+        if (popularPlaces == null || popularPlaces.isEmpty()) {
+            // 캐시 미스 시 DB에서 조회
+            popularPlaces = placeRepository.findInOrderOfPopularAddCount(lastId, lastAddCount);
+            placeRedisService.savePopularPlaces(popularPlaces);
+        }
+
+        // 페이지네이션 로직
         boolean hasNext = popularPlaces.size() > 10;
         List<PopularPlaceDTO> content = hasNext ? popularPlaces.subList(0, 10) : popularPlaces;
 
+        // DTO 변환 및 응답 생성 로직
         List<GetPopularPlacesResponse.PopularPlaceInfo> placeInfos = content.stream()
-                .map(dto -> GetPopularPlacesResponse.PopularPlaceInfo.builder()
-                        .placeId(dto.place().getPlaceId())
-                        .title(dto.place().getTitle())
-                        .contentsLabel(dto.place().getContentsLabel())
-                        .regionLabel(dto.place().getRegionLabel())
-                        .imageUrls(dto.imageUrls())
-                        .addCount(dto.place().getAddCount())
-                        .photoReviewCount(dto.photoReviewCount())
-                        .shortsCount(dto.shortsCount())
-                        .build())
+                .map(GetPopularPlacesResponse.PopularPlaceInfo::from)
                 .collect(Collectors.toList());
 
         int pageSize = placeInfos.size();
@@ -350,8 +348,11 @@ public class PlaceServiceImpl implements PlaceService {
         );
     }
 
-    @Scheduled
-    private void savePopularPlaces() {
+    @Scheduled(fixedRate = 3600000) // 매 시간마다 실행
+    @Transactional(readOnly = true)
+    public void updatePopularPlacesCache() {
+        List<PopularPlaceDTO> popularPlaces = placeRepository.findInOrderOfPopularAddCount(null, null);
+        placeRedisService.savePopularPlaces(popularPlaces);
     }
 
     /*

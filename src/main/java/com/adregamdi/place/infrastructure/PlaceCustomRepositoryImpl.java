@@ -63,7 +63,7 @@ public class PlaceCustomRepositoryImpl implements PlaceCustomRepository {
                 .leftJoin(placeReview).on(placeReview.placeId.eq(place.placeId))
                 .leftJoin(placeReviewImage).on(placeReviewImage.placeReviewId.eq(placeReview.placeReviewId))
                 .where(whereCondition)
-                .groupBy(place.placeId)
+                .groupBy(place.placeId, placeReviewImage.url)
                 .orderBy(place.addCount.desc(),
                         new OrderSpecifier<>(Order.DESC, Expressions.asNumber(photoReviewCountSubQuery)),
                         place.placeId.asc())

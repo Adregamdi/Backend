@@ -14,6 +14,7 @@ import com.adregamdi.travel.dto.response.CreateMyTravelResponse;
 import com.adregamdi.travel.dto.response.GetMyTravelResponse;
 import com.adregamdi.travel.dto.response.GetMyTravelsResponse;
 import com.adregamdi.travel.exception.TravelException.InvalidTravelDateException;
+import com.adregamdi.travel.exception.TravelException.InvalidTravelStartDateException;
 import com.adregamdi.travel.exception.TravelException.TravelNotFoundException;
 import com.adregamdi.travel.exception.TravelException.TravelPlaceNotFoundException;
 import com.adregamdi.travel.infrastructure.TravelDayRepository;
@@ -52,7 +53,12 @@ public class TravelServiceImpl implements TravelService {
     @Override
     @Transactional
     public CreateMyTravelResponse createMyTravel(final String currentMemberId, final CreateMyTravelRequest request) {
+        LocalDate today = LocalDate.now();
         int totalDays = (int) (ChronoUnit.DAYS.between(request.startDate(), request.endDate()) + 1);
+
+        if (request.startDate().isAfter(today) || request.startDate().isEqual(today)) {
+            throw new InvalidTravelStartDateException();
+        }
 
         if (request.startDate().isAfter(request.endDate())) {
             throw new InvalidTravelDateException(request);

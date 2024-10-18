@@ -57,18 +57,16 @@ public class PlaceCustomRepositoryImpl implements PlaceCustomRepository {
                 .select(place,
                         Expressions.as(photoReviewCountSubQuery, "photoReviewCount"),
                         shorts.count(),
-                        placeReviewImage.url,
-                        placeReviewImage.placeReviewImageId)
+                        placeReviewImage.url)
                 .from(place)
                 .leftJoin(shorts).on(shorts.placeId.eq(place.placeId))
                 .leftJoin(placeReview).on(placeReview.placeId.eq(place.placeId))
                 .leftJoin(placeReviewImage).on(placeReviewImage.placeReviewId.eq(placeReview.placeReviewId))
                 .where(whereCondition)
-                .groupBy(place.placeId, placeReviewImage.url, placeReviewImage.placeReviewImageId)
+                .groupBy(place.placeId)
                 .orderBy(place.addCount.desc(),
                         new OrderSpecifier<>(Order.DESC, Expressions.asNumber(photoReviewCountSubQuery)),
-                        place.placeId.asc(),
-                        placeReviewImage.placeReviewImageId.desc())
+                        place.placeId.asc())
                 .limit(11)
                 .fetch();
 
@@ -79,7 +77,7 @@ public class PlaceCustomRepositoryImpl implements PlaceCustomRepository {
             Long placeId = placeEntity.getPlaceId();
             Long photoReviewCount = tuple.get(1, Long.class);
             Long shortsCount = tuple.get(2, Long.class);
-            String imageUrl = tuple.get(placeReviewImage.url);
+            String imageUrl = tuple.get(3, String.class);
 
             PopularPlaceDTO dto = dtoMap.computeIfAbsent(placeId, k ->
                     new PopularPlaceDTO(placeEntity, photoReviewCount, shortsCount, new ArrayList<>()));

@@ -35,6 +35,16 @@ public class TravelException extends RuntimeException {
         }
     }
 
+    public static class InvalidTravelStartDateException extends TravelException {
+        public InvalidTravelStartDateException() {
+            super("여행 시작일이 현재보다 과거입니다.");
+        }
+
+        public InvalidTravelStartDateException(final Object object) {
+            super(String.format("여행 시작일이 현재보다 과거입니다. - request info => %s", object));
+        }
+    }
+
     public static class InvalidTravelDateException extends TravelException {
         public InvalidTravelDateException() {
             super("여행 시작일은 종료일보다 이전이거나 같아야 합니다.");

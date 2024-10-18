@@ -358,6 +358,7 @@ public class PlaceServiceImpl implements PlaceService {
 
     @Scheduled(fixedRate = 3600000) // 매 시간마다 실행
     protected void updatePopularPlacesCache() {
+        log.info("★ 인기 장소 캐시 업데이트 ⭐");
         try {
             List<PopularPlaceDTO> popularPlaces = placeRepository.findInOrderOfPopularAddCount(null, null);
             placeRedisService.savePopularPlaces(popularPlaces);

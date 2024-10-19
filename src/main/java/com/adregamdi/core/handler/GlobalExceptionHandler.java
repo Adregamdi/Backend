@@ -182,7 +182,8 @@ public class GlobalExceptionHandler {
 
     // 커스텀 예외
     @ExceptionHandler(value = {
-            TravelException.class,
+            MemberException.UnsupportedSocialTypeException.class,
+            TravelException.InvalidTravelStartDateException.class,
             TravelogueException.TravelNotEndedException.class,
             ShortsException.ShortsNOTWRITERException.class,
             ImageException.UnSupportedImageTypeException.class,

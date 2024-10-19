@@ -34,4 +34,15 @@ public class MemberException extends RuntimeException {
             super(String.format("이미 존재하는 핸들입니다. - request info => %s", data));
         }
     }
+
+    public static class UnsupportedSocialTypeException extends MemberException {
+
+        public UnsupportedSocialTypeException() {
+            super("지원하지 않는 소셜 타입입니다.");
+        }
+
+        public UnsupportedSocialTypeException(final Object data) {
+            super(String.format("지원하지 않는 소셜 타입입니다. - request info => %s", data));
+        }
+    }
 }

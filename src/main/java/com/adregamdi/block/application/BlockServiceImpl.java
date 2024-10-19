@@ -6,7 +6,6 @@ import com.adregamdi.block.dto.response.CreateBlockResponse;
 import com.adregamdi.block.dto.response.GetMyBlockingMembers;
 import com.adregamdi.block.exception.BlockException;
 import com.adregamdi.block.infrastructure.BlockRepository;
-import com.adregamdi.member.domain.Member;
 import com.adregamdi.member.exception.MemberException;
 import com.adregamdi.member.infrastructure.MemberRepository;
 import lombok.RequiredArgsConstructor;
@@ -14,9 +13,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -31,11 +30,7 @@ public class BlockServiceImpl implements BlockService {
     @Override
     @Transactional
     public CreateBlockResponse create(final String memberId, final String blockedMemberId) {
-        memberRepository.findById(memberId)
-                .orElseThrow(() -> new MemberException.MemberNotFoundException(memberId));
-
-        memberRepository.findById(blockedMemberId)
-                .orElseThrow(() -> new MemberException.MemberNotFoundException(blockedMemberId));
+        validateMembers(memberId, blockedMemberId);
 
         Block block = blockRepository.findByBlockedMemberIdAndBlockingMemberId(blockedMemberId, memberId)
                 .orElse(blockRepository.save(Block.builder()
@@ -52,28 +47,14 @@ public class BlockServiceImpl implements BlockService {
     @Override
     @Transactional(readOnly = true)
     public GetMyBlockingMembers getMyBlockingMembers(final String memberId) {
-        memberRepository.findById(memberId)
-                .orElseThrow(() -> new MemberException.MemberNotFoundException(memberId));
+        validateMember(memberId);
 
         List<Block> blocks = blockRepository.findByBlockingMemberId(memberId);
 
-        List<BlockDTO> blockInfos = new ArrayList<>();
-        if (!blocks.isEmpty()) {
-            for (Block block : blocks) {
-                Optional<Member> blockedMember = memberRepository.findById(block.getBlockedMemberId());
-                if (blockedMember.isEmpty()) {
-                    continue;
-                }
-
-                blockInfos.add(BlockDTO.builder()
-                        .blockId(block.getBlockId())
-                        .blockedMemberId(blockedMember.get().getMemberId())
-                        .blockedMemberName(blockedMember.get().getName())
-                        .blockedMemberProfile(blockedMember.get().getProfile())
-                        .blockedMemberHandle(blockedMember.get().getHandle())
-                        .build());
-            }
-        }
+        List<BlockDTO> blockInfos = blocks.stream()
+                .map(this::createBlockDTO)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
 
         return GetMyBlockingMembers.from(blockInfos);
     }
@@ -84,15 +65,33 @@ public class BlockServiceImpl implements BlockService {
     @Override
     @Transactional
     public void delete(final String memberId, final String blockedMemberId) {
-        memberRepository.findById(memberId)
-                .orElseThrow(() -> new MemberException.MemberNotFoundException(memberId));
-
-        memberRepository.findById(blockedMemberId)
-                .orElseThrow(() -> new MemberException.MemberNotFoundException(blockedMemberId));
+        validateMembers(memberId, blockedMemberId);
 
         Block block = blockRepository.findByBlockedMemberIdAndBlockingMemberId(blockedMemberId, memberId)
                 .orElseThrow(BlockException.BlockNotFoundException::new);
 
         blockRepository.delete(block);
+    }
+
+    private void validateMember(String memberId) {
+        memberRepository.findById(memberId)
+                .orElseThrow(() -> new MemberException.MemberNotFoundException(memberId));
+    }
+
+    private void validateMembers(String memberId, String blockedMemberId) {
+        validateMember(memberId);
+        validateMember(blockedMemberId);
+    }
+
+    private BlockDTO createBlockDTO(Block block) {
+        return memberRepository.findById(block.getBlockedMemberId())
+                .map(blockedMember -> BlockDTO.builder()
+                        .blockId(block.getBlockId())
+                        .blockedMemberId(blockedMember.getMemberId())
+                        .blockedMemberName(blockedMember.getName())
+                        .blockedMemberProfile(blockedMember.getProfile())
+                        .blockedMemberHandle(blockedMember.getHandle())
+                        .build())
+                .orElse(null);
     }
 }

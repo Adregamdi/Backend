@@ -92,7 +92,7 @@ public class NotificationServiceImpl implements NotificationService {
         notificationRepository.deleteByCreatedAt(date);
     }
 
-    private Notification createNotificationFromRequest(CreateNotificationRequest request) {
+    private Notification createNotificationFromRequest(final CreateNotificationRequest request) {
         return Notification.builder()
                 .memberId(request.memberId())
                 .contentId(request.contentId())
@@ -102,7 +102,7 @@ public class NotificationServiceImpl implements NotificationService {
                 .build();
     }
 
-    private NotificationPageResult fetchNotifications(String currentMemberId, Long lastId) {
+    private NotificationPageResult fetchNotifications(final String currentMemberId, final Long lastId) {
         return notificationRepository.findByMemberId(
                 currentMemberId,
                 LocalDateTime.now().minusDays(31),
@@ -110,7 +110,7 @@ public class NotificationServiceImpl implements NotificationService {
         );
     }
 
-    private Map<String, Member> fetchMemberMap(NotificationPageResult pageResult) {
+    private Map<String, Member> fetchMemberMap(final NotificationPageResult pageResult) {
         List<String> opponentMemberIds = pageResult.notifications().stream()
                 .map(Notification::getOpponentMemberId)
                 .distinct()
@@ -120,7 +120,7 @@ public class NotificationServiceImpl implements NotificationService {
                 .collect(Collectors.toMap(Member::getMemberId, Function.identity()));
     }
 
-    private List<NotificationDTO> createNotificationDTOs(NotificationPageResult pageResult, Map<String, Member> memberMap) {
+    private List<NotificationDTO> createNotificationDTOs(final NotificationPageResult pageResult, final Map<String, Member> memberMap) {
         return pageResult.notifications().stream()
                 .map(notification -> createNotificationDTO(notification, memberMap))
                 .toList();
@@ -144,12 +144,12 @@ public class NotificationServiceImpl implements NotificationService {
                 .count();
     }
 
-    private Notification findNotificationById(UpdateNotificationRequest request) {
+    private Notification findNotificationById(final UpdateNotificationRequest request) {
         return notificationRepository.findById(request.notificationId())
                 .orElseThrow(() -> new NotificationNotFoundException(request.notificationId()));
     }
 
-    private void validateMemberExists(String memberId) {
+    private void validateMemberExists(final String memberId) {
         memberRepository.findById(memberId)
                 .orElseThrow(() -> new MemberException.MemberNotFoundException(memberId));
     }

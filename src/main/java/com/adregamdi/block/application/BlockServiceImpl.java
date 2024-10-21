@@ -73,17 +73,17 @@ public class BlockServiceImpl implements BlockService {
         blockRepository.delete(block);
     }
 
-    private void validateMember(String memberId) {
+    private void validateMember(final String memberId) {
         memberRepository.findById(memberId)
                 .orElseThrow(() -> new MemberException.MemberNotFoundException(memberId));
     }
 
-    private void validateMembers(String memberId, String blockedMemberId) {
+    private void validateMembers(final String memberId, final String blockedMemberId) {
         validateMember(memberId);
         validateMember(blockedMemberId);
     }
 
-    private BlockDTO createBlockDTO(Block block) {
+    private BlockDTO createBlockDTO(final Block block) {
         return memberRepository.findById(block.getBlockedMemberId())
                 .map(blockedMember -> BlockDTO.builder()
                         .blockId(block.getBlockId())

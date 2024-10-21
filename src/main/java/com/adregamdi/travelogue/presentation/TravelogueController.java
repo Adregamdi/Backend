@@ -111,7 +111,7 @@ public class TravelogueController {
         return ResponseEntity.ok()
                 .body(ApiResponse.<GetHotTraveloguesResponse>builder()
                         .statusCode(HttpStatus.OK.value())
-                        .data(travelogueService.getHotTravelogue(userDetails.getUsername(), lastLikeCount != null ? lastLikeCount : Integer.MAX_VALUE, size))
+                        .data(travelogueService.getHotTravelogues(userDetails.getUsername(), lastLikeCount != null ? lastLikeCount : Integer.MAX_VALUE, size))
                         .build());
     }
 

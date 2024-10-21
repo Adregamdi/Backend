@@ -15,14 +15,14 @@ public interface TravelogueService {
     GetTravelogueResponse get(String currentMemberId, Long travelogueId);
 
     /*
-     * [내 전체 여행기 조회]
-     * */
-    GetMyTraveloguesResponse getMyTravelogues(String currentMemberId, int page);
-
-    /*
      * [특정 회원 전체 여행기 조회]
      */
     GetMemberTraveloguesResponse getMemberTravelogues(String memberId, Long lastTravelogueId, int size);
+
+    /*
+     * [내 전체 여행기 조회]
+     * */
+    GetMyTraveloguesResponse getMyTravelogues(String currentMemberId, int page);
 
     /*
      * [최근 등록된 여행기 조회]
@@ -32,7 +32,7 @@ public interface TravelogueService {
     /*
      * [인기있는 여행기 조회]
      * */
-    GetHotTraveloguesResponse getHotTravelogue(String currentMemberId, int lastLikeCount, int size);
+    GetHotTraveloguesResponse getHotTravelogues(String currentMemberId, int lastLikeCount, int size);
 
     /*
      * [내 특정 여행기 삭제]

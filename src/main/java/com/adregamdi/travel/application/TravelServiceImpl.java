@@ -20,7 +20,6 @@ import com.adregamdi.travel.exception.TravelException.TravelPlaceNotFoundExcepti
 import com.adregamdi.travel.infrastructure.TravelDayRepository;
 import com.adregamdi.travel.infrastructure.TravelPlaceRepository;
 import com.adregamdi.travel.infrastructure.TravelRepository;
-import com.adregamdi.travelogue.domain.Travelogue;
 import com.adregamdi.travelogue.infrastructure.TravelogueRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -30,8 +29,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static com.adregamdi.core.constant.Constant.LARGE_PAGE_SIZE;
 import static com.adregamdi.core.utils.PageUtil.generatePageDesc;
@@ -53,135 +53,166 @@ public class TravelServiceImpl implements TravelService {
     @Override
     @Transactional
     public CreateMyTravelResponse createMyTravel(final String currentMemberId, final CreateMyTravelRequest request) {
-        LocalDate today = LocalDate.now();
-        int totalDays = (int) (ChronoUnit.DAYS.between(request.startDate(), request.endDate()) + 1);
+        validateTravelDates(request);
 
+        Travel travel = createOrUpdateTravel(currentMemberId, request);
+
+        int totalDays = calculateTotalDays(request);
+        List<TravelDay> existingDays = travelDayRepository.findAllByTravelId(travel.getTravelId());
+
+        if (request.travelId() == null) {
+            handleNewTravel(travel, request, totalDays);
+        } else {
+            handleExistingTravel(request, totalDays, existingDays);
+        }
+
+        return CreateMyTravelResponse.from(travel.getTravelId());
+    }
+
+    private void validateTravelDates(final CreateMyTravelRequest request) {
+        LocalDate today = LocalDate.now();
         if (request.startDate().isBefore(today)) {
             throw new InvalidTravelStartDateException();
         }
-
         if (request.startDate().isAfter(request.endDate())) {
             throw new InvalidTravelDateException(request);
         }
+    }
 
-        Travel travel;
+    private Travel createOrUpdateTravel(final String currentMemberId, final CreateMyTravelRequest request) {
         if (request.travelId() == null) {
-            travel = travelRepository.save(Travel.builder()
+            return travelRepository.save(Travel.builder()
                     .memberId(currentMemberId)
                     .startDate(request.startDate())
                     .endDate(request.endDate())
                     .title(request.title())
                     .build());
-        } else {
-            travel = travelRepository.findById(request.travelId())
-                    .orElseThrow(() -> new TravelNotFoundException(request.travelId()));
-            travel.update(currentMemberId, request.startDate(), request.endDate(), request.title());
         }
 
-        List<TravelDay> existingDays = travelDayRepository.findAllByTravelId(travel.getTravelId());
-        // 첫 등록 시
-        if (request.travelId() == null) {
-            for (int day = 1; day <= totalDays; day++) {
-                LocalDate date = request.startDate().plusDays(day - 1);
-                TravelDay travelDay;
-                if (request.dayList().size() > day - 1) {
-                    travelDay = new TravelDay(travel.getTravelId(), date, day, request.dayList().get(day - 1).memo());
-                    travelDayRepository.save(travelDay);
-                    if (request.dayList().get(day - 1).placeList() != null && !request.dayList().get(day - 1).placeList().isEmpty()) {
-                        for (int i = 0; i < request.dayList().get(day - 1).placeList().size(); i++) {
-                            travelPlaceRepository.save(new TravelPlace(travelDay.getTravelDayId(), request.dayList().get(day - 1).placeList().get(i).placeId(), request.dayList().get(day - 1).placeList().get(i).placeOrder()));
-                            placeService.addCount(request.dayList().get(day - 1).placeList().get(i).placeId(), true);
-                        }
-                    }
-                } else {
-                    travelDay = new TravelDay(travel.getTravelId(), date, day, "");
-                    travelDayRepository.save(travelDay);
-                }
-            }
-            return CreateMyTravelResponse.from(travel.getTravelId());
-        }
+        Travel travel = travelRepository.findById(request.travelId())
+                .orElseThrow(() -> new TravelNotFoundException(request.travelId()));
+        travel.update(currentMemberId, request.startDate(), request.endDate(), request.title());
+        return travel;
+    }
 
-        // 기존 데이터 수정 시
-        // 하루도 설정하지 않으면
-        if (request.dayList() == null || request.dayList().isEmpty()) {
-            for (int day = 1; day <= totalDays; day++) {
-                LocalDate date = request.startDate().plusDays(day - 1);
-                List<TravelPlace> travelPlaces = travelPlaceRepository.findAllByTravelDayId(existingDays.get(day - 1).getTravelDayId());
+    private int calculateTotalDays(final CreateMyTravelRequest request) {
+        return (int) (ChronoUnit.DAYS.between(request.startDate(), request.endDate()) + 1);
+    }
 
-                if (!travelPlaces.isEmpty()) {
-                    for (TravelPlace travelPlace : travelPlaces) {
-                        placeService.addCount(travelPlace.getPlaceId(), false);
-                    }
-                }
-                existingDays.get(day - 1).update(date, day, "");
-                travelPlaceRepository.deleteAllByTravelDayId(existingDays.get(day - 1).getTravelDayId());
-            }
-            return CreateMyTravelResponse.from(travel.getTravelId());
-        }
-        // 하루 이상 설정하면
-        // 전체 기간에서 요청된 날짜만큼 채우기
-        for (int i = 0; i < request.dayList().size(); i++) {
-            existingDays.get(i).update(request.dayList().get(i).date(), request.dayList().get(i).day(), request.dayList().get(i).memo());
-
-            List<TravelPlace> travelPlaces = travelPlaceRepository.findAllByTravelDayId(existingDays.get(i).getTravelDayId());
-
-            if (request.dayList().get(i).placeList() == null || request.dayList().get(i).placeList().isEmpty() && !travelPlaces.isEmpty()) {
-                travelPlaceRepository.deleteAllByTravelDayId(existingDays.get(i).getTravelDayId());
-                for (TravelPlace travelPlace : travelPlaces) {
-                    placeService.addCount(travelPlace.getPlaceId(), false);
-                }
-            } else if (request.dayList().get(i).placeList() != null && !request.dayList().get(i).placeList().isEmpty() && travelPlaces.isEmpty()) {
-                travelPlaces = new ArrayList<>();
-                for (int j = 0; j < request.dayList().get(i).placeList().size(); j++) {
-                    travelPlaces.add(new TravelPlace(existingDays.get(i).getTravelDayId(), request.dayList().get(i).placeList().get(j).placeId(), request.dayList().get(i).placeList().get(j).placeOrder()));
-                    placeService.addCount(request.dayList().get(i).placeList().get(j).placeId(), true);
-                }
-                travelPlaceRepository.saveAll(travelPlaces);
-            } else if (request.dayList().get(i).placeList() != null && !request.dayList().get(i).placeList().isEmpty() && !travelPlaces.isEmpty()) {
-                if (travelPlaces.size() > request.dayList().get(i).placeList().size()) {
-                    for (int j = 0; j < travelPlaces.size(); j++) {
-                        if (request.dayList().get(i).placeList().size() > j) {
-                            travelPlaces.get(j).update(request.dayList().get(i).placeList().get(j).placeId(), request.dayList().get(i).placeList().get(j).placeOrder());
-                            placeService.addCount(request.dayList().get(i).placeList().get(j).placeId(), true);
-                        } else {
-                            travelPlaceRepository.deleteByTravelDayIdAndPlaceId(existingDays.get(i).getTravelDayId(), travelPlaces.get(j).getPlaceId());
-                            placeService.addCount(travelPlaces.get(j).getPlaceId(), false);
-                        }
-                    }
-                } else if (travelPlaces.size() == request.dayList().get(i).placeList().size()) {
-                    for (int j = 0; j < travelPlaces.size(); j++) {
-                        travelPlaces.get(j).update(request.dayList().get(i).placeList().get(j).placeId(), request.dayList().get(i).placeList().get(j).placeOrder());
-                        placeService.addCount(request.dayList().get(i).placeList().get(j).placeId(), true);
-                    }
-                } else {
-                    for (int j = 0; j < request.dayList().get(i).placeList().size(); j++) {
-                        if (travelPlaces.size() > j) {
-                            travelPlaces.get(j).update(request.dayList().get(i).placeList().get(j).placeId(), request.dayList().get(i).placeList().get(j).placeOrder());
-                            placeService.addCount(request.dayList().get(i).placeList().get(j).placeId(), true);
-                        } else {
-                            travelPlaces.add(new TravelPlace(existingDays.get(i).getTravelDayId(), request.dayList().get(i).placeList().get(j).placeId(), request.dayList().get(i).placeList().get(j).placeOrder()));
-                            placeService.addCount(request.dayList().get(i).placeList().get(j).placeId(), true);
-                        }
-                        travelPlaceRepository.saveAll(travelPlaces);
-                    }
-                }
-            }
-        }
-        // 전체 기간에서 비어있는 날짜 지우기
-        for (int day = request.dayList().size() + 1; day <= totalDays; day++) {
+    private void handleNewTravel(final Travel travel, final CreateMyTravelRequest request, final int totalDays) {
+        for (int day = 1; day <= totalDays; day++) {
             LocalDate date = request.startDate().plusDays(day - 1);
-            List<TravelPlace> travelPlaces = travelPlaceRepository.findAllByTravelDayId(existingDays.get(day - 1).getTravelDayId());
+            TravelDay travelDay = createOrUpdateTravelDay(travel.getTravelId(), date, day,
+                    day <= request.dayList().size() ? request.dayList().get(day - 1).memo() : "");
 
-            if (!travelPlaces.isEmpty()) {
-                for (TravelPlace travelPlace : travelPlaces) {
-                    placeService.addCount(travelPlace.getPlaceId(), false);
-                }
+            if (day <= request.dayList().size() && request.dayList().get(day - 1).placeList() != null) {
+                updateTravelPlaces(travelDay.getTravelDayId(), Collections.emptyList(), request.dayList().get(day - 1).placeList());
             }
-            existingDays.get(day - 1).update(date, day, "");
-            travelPlaceRepository.deleteAllByTravelDayId(existingDays.get(day - 1).getTravelDayId());
+        }
+    }
+
+    private void handleExistingTravel(final CreateMyTravelRequest request, final int totalDays, final List<TravelDay> existingDays) {
+        if (request.dayList() == null || request.dayList().isEmpty()) {
+            clearAllTravelDays(existingDays, request.startDate());
+            return;
         }
 
-        return CreateMyTravelResponse.from(travel.getTravelId());
+        for (int i = 0; i < Math.min(request.dayList().size(), totalDays); i++) {
+            TravelDay existingDay = existingDays.get(i);
+            CreateMyTravelRequest.DayInfo dayInfo = request.dayList().get(i);
+
+            updateTravelDay(existingDay, request.startDate().plusDays(i), i + 1, dayInfo.memo());
+
+            List<TravelPlace> existingPlaces = travelPlaceRepository.findAllByTravelDayId(existingDay.getTravelDayId());
+            updateTravelPlaces(existingDay.getTravelDayId(), existingPlaces, dayInfo.placeList());
+        }
+
+        clearRemainingDays(existingDays, request.dayList().size(), totalDays, request.startDate());
+    }
+
+    private TravelDay createOrUpdateTravelDay(
+            final Long travelId,
+            final LocalDate date,
+            final int day,
+            final String memo
+    ) {
+        TravelDay travelDay = new TravelDay(travelId, date, day, memo);
+        return travelDayRepository.save(travelDay);
+    }
+
+    private void updateTravelDay(
+            final TravelDay travelDay,
+            final LocalDate date,
+            final int day,
+            final String memo
+    ) {
+        travelDay.update(date, day, memo);
+        travelDayRepository.save(travelDay);
+    }
+
+    private void updateTravelPlaces(
+            final Long travelDayId,
+            final List<TravelPlace> existingPlaces,
+            final List<CreateMyTravelRequest.PlaceInfo> newPlaces
+    ) {
+        if (newPlaces == null || newPlaces.isEmpty()) {
+            deleteTravelPlaces(existingPlaces);
+            return;
+        }
+
+        for (int i = 0; i < Math.max(existingPlaces.size(), newPlaces.size()); i++) {
+            if (i < existingPlaces.size() && i < newPlaces.size()) {
+                updateTravelPlace(existingPlaces.get(i), newPlaces.get(i));
+            } else if (i < newPlaces.size()) {
+                createTravelPlace(travelDayId, newPlaces.get(i));
+            } else {
+                deleteTravelPlace(existingPlaces.get(i));
+            }
+        }
+    }
+
+    private void updateTravelPlace(final TravelPlace existingPlace, final CreateMyTravelRequest.PlaceInfo newPlace) {
+        existingPlace.update(newPlace.placeId(), newPlace.placeOrder());
+        travelPlaceRepository.save(existingPlace);
+        placeService.addCount(newPlace.placeId(), true);
+    }
+
+    private void createTravelPlace(final Long travelDayId, final CreateMyTravelRequest.PlaceInfo placeInfo) {
+        TravelPlace newPlace = new TravelPlace(travelDayId, placeInfo.placeId(), placeInfo.placeOrder());
+        travelPlaceRepository.save(newPlace);
+        placeService.addCount(placeInfo.placeId(), true);
+    }
+
+    private void deleteTravelPlaces(final List<TravelPlace> places) {
+        for (TravelPlace place : places) {
+            deleteTravelPlace(place);
+        }
+    }
+
+    private void deleteTravelPlace(final TravelPlace place) {
+        travelPlaceRepository.delete(place);
+        placeService.addCount(place.getPlaceId(), false);
+    }
+
+    private void clearAllTravelDays(final List<TravelDay> days, final LocalDate startDate) {
+        for (int i = 0; i < days.size(); i++) {
+            TravelDay day = days.get(i);
+            updateTravelDay(day, startDate.plusDays(i), i + 1, "");
+            deleteTravelPlaces(travelPlaceRepository.findAllByTravelDayId(day.getTravelDayId()));
+        }
+    }
+
+    private void clearRemainingDays(
+            final List<TravelDay> existingDays,
+            final int filledDays,
+            final int totalDays,
+            final LocalDate startDate
+    ) {
+        for (int i = filledDays; i < totalDays; i++) {
+            TravelDay day = existingDays.get(i);
+            updateTravelDay(day, startDate.plusDays(i), i + 1, "");
+            deleteTravelPlaces(travelPlaceRepository.findAllByTravelDayId(day.getTravelDayId()));
+        }
     }
 
     /*
@@ -190,31 +221,43 @@ public class TravelServiceImpl implements TravelService {
     @Override
     @Transactional(readOnly = true)
     public GetMyTravelResponse getMyTravel(final String currentMemberId, final Long travelId) {
-        Travel travel = travelRepository.findByTravelIdAndMemberId(travelId, currentMemberId)
-                .orElseThrow(() -> new TravelNotFoundException(currentMemberId));
-
+        Travel travel = findTravelByIdAndMemberId(travelId, currentMemberId);
         List<TravelDay> travelDays = travelDayRepository.findByTravelId(travelId);
+        List<List<TravelPlaceDTO>> travelPlaceDTOList = getTravelPlaceDTOList(currentMemberId, travelDays);
+        boolean hasTravelogue = travelogueRepository.findByTravelId(travelId) != null;
 
-        List<List<TravelPlaceDTO>> travelPlaceDTOList = new ArrayList<>();
-        for (TravelDay travelDay : travelDays) {
-            List<TravelPlace> travelPlaceList = travelPlaceRepository.findByTravelDayId(travelDay.getTravelDayId());
-            List<TravelPlaceDTO> travelPlaceDTOS = new ArrayList<>();
-            if (travelPlaceList == null) {
-                throw new TravelPlaceNotFoundException(travel.getTravelId());
-            }
-            for (TravelPlace travelPlace : travelPlaceList) {
-                PlaceReview placeReviewInfo = placeReviewRepository.findByMemberIdAndPlaceId(currentMemberId, travelPlace.getPlaceId())
-                        .orElse(PlaceReview.builder().build());
-                PlaceReviewDTO placeReview = null;
-                if (placeReviewInfo.getPlaceReviewId() != null && placeReviewInfo.getPlaceReviewId() != 0) {
-                    placeReview = placeService.getReview(currentMemberId, placeReviewInfo.getPlaceReviewId());
-                }
-                travelPlaceDTOS.add(TravelPlaceDTO.of(placeReview, travelPlace, placeService.get(currentMemberId, travelPlace.getPlaceId()).place()));
-            }
-            travelPlaceDTOList.add(travelPlaceDTOS);
+        return GetMyTravelResponse.of(hasTravelogue, travel, travelDays, travelPlaceDTOList);
+    }
+
+    private Travel findTravelByIdAndMemberId(final Long travelId, final String memberId) {
+        return travelRepository.findByTravelIdAndMemberId(travelId, memberId)
+                .orElseThrow(() -> new TravelNotFoundException(travelId));
+    }
+
+    private List<List<TravelPlaceDTO>> getTravelPlaceDTOList(final String memberId, final List<TravelDay> travelDays) {
+        return travelDays.stream()
+                .map(day -> getTravelPlaceDTOs(memberId, day))
+                .collect(Collectors.toList());
+    }
+
+    private List<TravelPlaceDTO> getTravelPlaceDTOs(final String memberId, final TravelDay travelDay) {
+        List<TravelPlace> travelPlaces = travelPlaceRepository.findByTravelDayId(travelDay.getTravelDayId());
+        if (travelPlaces == null) {
+            throw new TravelPlaceNotFoundException(travelDay.getTravelId());
         }
-        Travelogue travelogue = travelogueRepository.findByTravelId(travelId);
-        return GetMyTravelResponse.of(travelogue != null, travel, travelDays, travelPlaceDTOList);
+        return travelPlaces.stream()
+                .map(place -> createTravelPlaceDTO(memberId, place))
+                .collect(Collectors.toList());
+    }
+
+    private TravelPlaceDTO createTravelPlaceDTO(final String memberId, final TravelPlace travelPlace) {
+        PlaceReview placeReviewInfo = placeReviewRepository.findByMemberIdAndPlaceId(memberId, travelPlace.getPlaceId())
+                .orElse(PlaceReview.builder().build());
+        PlaceReviewDTO placeReview = null;
+        if (placeReviewInfo.getPlaceReviewId() != null && placeReviewInfo.getPlaceReviewId() != 0) {
+            placeReview = placeService.getReview(memberId, placeReviewInfo.getPlaceReviewId());
+        }
+        return TravelPlaceDTO.of(placeReview, travelPlace, placeService.get(memberId, travelPlace.getPlaceId()).place());
     }
 
     /*
@@ -240,23 +283,32 @@ public class TravelServiceImpl implements TravelService {
     @Override
     @Transactional
     public void deleteMyTravel(final String currentMemberId, final Long travelId) {
-        Travel travel = travelRepository.findByTravelIdAndMemberId(travelId, currentMemberId)
-                .orElseThrow(() -> new TravelNotFoundException(travelId));
+        Travel travel = findTravelByIdAndMemberId(travelId, currentMemberId);
 
         List<TravelDay> travelDays = travelDayRepository.findAllByTravelId(travel.getTravelId());
         if (!travelDays.isEmpty()) {
-            for (TravelDay travelDay : travelDays) {
-                List<TravelPlace> travelPlaces = travelPlaceRepository.findAllByTravelDayId(travelDay.getTravelDayId());
-
-                travelPlaceRepository.deleteAllByTravelDayId(travelDay.getTravelDayId());
-
-                for (TravelPlace travelPlace : travelPlaces) {
-                    placeService.addCount(travelPlace.getPlaceId(), false);
-                }
-            }
-            travelDayRepository.deleteAll(travelDays);
+            deleteTravelDaysAndPlaces(travelDays);
         }
 
         travelRepository.delete(travel);
+    }
+
+    private void deleteTravelDaysAndPlaces(final List<TravelDay> travelDays) {
+        for (TravelDay travelDay : travelDays) {
+            deleteTravelPlacesForDay(travelDay);
+        }
+        travelDayRepository.deleteAll(travelDays);
+    }
+
+    private void deleteTravelPlacesForDay(final TravelDay travelDay) {
+        List<TravelPlace> travelPlaces = travelPlaceRepository.findAllByTravelDayId(travelDay.getTravelDayId());
+        travelPlaceRepository.deleteAllByTravelDayId(travelDay.getTravelDayId());
+        decrementPlaceCounts(travelPlaces);
+    }
+
+    private void decrementPlaceCounts(final List<TravelPlace> travelPlaces) {
+        for (TravelPlace travelPlace : travelPlaces) {
+            placeService.addCount(travelPlace.getPlaceId(), false);
+        }
     }
 }

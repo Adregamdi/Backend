@@ -118,21 +118,21 @@ public class MemberServiceImpl implements MemberService {
      */
     @Override
     @Transactional(readOnly = true)
-    public GetMemberContentsResponse<?> getMemberContentsOfAll(GetMemberContentsRequest request) {
+    public GetMemberContentsResponse<?> getMemberContentsOfAll(final GetMemberContentsRequest request) {
         return memberRepository.getMemberContentsOfAll(request);
     }
 
-    private Member findMemberById(String memberId) {
+    private Member findMemberById(final String memberId) {
         return memberRepository.findById(memberId)
                 .orElseThrow(() -> new MemberNotFoundException(memberId));
     }
 
-    private Member findActiveMemberById(String memberId) {
+    private Member findActiveMemberById(final String memberId) {
         return memberRepository.findByMemberIdAndMemberStatus(memberId, true)
                 .orElseThrow(() -> new MemberNotFoundException(memberId));
     }
 
-    private void validateUniqueHandle(String newHandle, String currentHandle) {
+    private void validateUniqueHandle(final String newHandle, final String currentHandle) {
         Member another = memberRepository.findByHandle(newHandle);
         if (another != null && !Objects.equals(another.getHandle(), currentHandle)) {
             throw new HandleExistException(newHandle);

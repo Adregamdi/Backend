@@ -56,7 +56,7 @@ public class TravelServiceImpl implements TravelService {
         LocalDate today = LocalDate.now();
         int totalDays = (int) (ChronoUnit.DAYS.between(request.startDate(), request.endDate()) + 1);
 
-        if (request.startDate().isAfter(today) || request.startDate().isEqual(today)) {
+        if (request.startDate().isAfter(today)) {
             throw new InvalidTravelStartDateException();
         }
 

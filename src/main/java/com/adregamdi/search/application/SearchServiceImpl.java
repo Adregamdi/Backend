@@ -14,10 +14,7 @@ import org.springframework.data.domain.SliceImpl;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Collections;
-import java.util.EnumMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import static com.adregamdi.core.constant.Constant.LARGE_PAGE_SIZE;
 import static com.adregamdi.core.utils.PageUtil.generatePageAsc;
@@ -27,10 +24,12 @@ import static com.adregamdi.core.utils.PageUtil.generatePageAsc;
 @Service
 public class SearchServiceImpl implements SearchService {
     private final SearchRepository searchRepository;
+    int pageSize = LARGE_PAGE_SIZE;
 
     /*
      * [콘텐츠 검색]
      * */
+    @Override
     @Transactional(readOnly = true)
     public SearchResponse search(
             final String keyword,
@@ -38,41 +37,97 @@ public class SearchServiceImpl implements SearchService {
             final Set<ContentType> types,
             final String memberId
     ) {
-        int pageSize = LARGE_PAGE_SIZE;
-        Slice<TravelogueSearchDTO> travelogues = emptySlice(page, pageSize);
-        Slice<ShortsSearchDTO> shorts = emptySlice(page, pageSize);
-        Slice<PlaceSearchDTO> places = emptySlice(page, pageSize);
+        Map<ContentType, SearchResult<?>> searchResults = performSearch(keyword, page, types, memberId);
+        Map<ContentType, Long> totalCounts = getTotalCounts(keyword, types);
+
+        return createSearchResponse(page, searchResults, totalCounts);
+    }
+
+    private Map<ContentType, SearchResult<?>> performSearch(
+            final String keyword,
+            final int page,
+            final Set<ContentType> types,
+            final String memberId
+    ) {
+        Map<ContentType, SearchResult<?>> results = new EnumMap<>(ContentType.class);
+
+        results.put(ContentType.TRAVELOGUE, types.contains(ContentType.TRAVELOGUE)
+                ? searchTravelogues(keyword, page)
+                : new SearchResult<>(emptySlice(page)));
+
+        results.put(ContentType.SHORTS, types.contains(ContentType.SHORTS)
+                ? searchShorts(keyword, page, memberId)
+                : new SearchResult<>(emptySlice(page)));
+
+        results.put(ContentType.PLACE, types.contains(ContentType.PLACE)
+                ? searchPlaces(keyword, page)
+                : new SearchResult<>(emptySlice(page)));
+
+        return results;
+    }
+
+    private SearchResult<TravelogueSearchDTO> searchTravelogues(final String keyword, final int page) {
+        Slice<TravelogueSearchDTO> slice = searchRepository.searchTravelogues(keyword, generatePageAsc(page, pageSize, "title"));
+        return new SearchResult<>(slice);
+    }
+
+    private SearchResult<ShortsSearchDTO> searchShorts(final String keyword, final int page, final String memberId) {
+        Slice<ShortsSearchDTO> slice = searchRepository.searchShorts(keyword, generatePageAsc(page, pageSize, "title"), memberId);
+        return new SearchResult<>(slice);
+    }
+
+    private SearchResult<PlaceSearchDTO> searchPlaces(final String keyword, final int page) {
+        Slice<PlaceSearchDTO> slice = searchRepository.searchPlaces(keyword, generatePageAsc(page, pageSize, "title"));
+        return new SearchResult<>(slice);
+    }
+
+    private Map<ContentType, Long> getTotalCounts(final String keyword, final Set<ContentType> types) {
         Map<ContentType, Long> totalCounts = new EnumMap<>(ContentType.class);
 
         if (types.contains(ContentType.TRAVELOGUE)) {
-            travelogues = searchRepository.searchTravelogues(keyword, generatePageAsc(page, pageSize, "title"));
             totalCounts.put(ContentType.TRAVELOGUE, searchRepository.countTravelogues(keyword));
         }
         if (types.contains(ContentType.SHORTS)) {
-            shorts = searchRepository.searchShorts(keyword, generatePageAsc(page, pageSize, "title"), memberId);
             totalCounts.put(ContentType.SHORTS, searchRepository.countShorts(keyword));
         }
         if (types.contains(ContentType.PLACE)) {
-            places = searchRepository.searchPlaces(keyword, generatePageAsc(page, pageSize, "title"));
             totalCounts.put(ContentType.PLACE, searchRepository.countPlaces(keyword));
         }
 
+        return totalCounts;
+    }
+
+    private SearchResponse createSearchResponse(
+            final int page,
+            final Map<ContentType, SearchResult<?>> searchResults,
+            final Map<ContentType, Long> totalCounts
+    ) {
         return SearchResponse.of(
                 page,
                 pageSize,
-                travelogues.hasNext(),
-                shorts.hasNext(),
-                places.hasNext(),
+                searchResults.get(ContentType.TRAVELOGUE).hasNext,
+                searchResults.get(ContentType.SHORTS).hasNext,
+                searchResults.get(ContentType.PLACE).hasNext,
                 totalCounts.getOrDefault(ContentType.TRAVELOGUE, 0L),
                 totalCounts.getOrDefault(ContentType.SHORTS, 0L),
                 totalCounts.getOrDefault(ContentType.PLACE, 0L),
-                travelogues.getContent(),
-                shorts.getContent(),
-                places.getContent()
+                (List<TravelogueSearchDTO>) searchResults.get(ContentType.TRAVELOGUE).content,
+                (List<ShortsSearchDTO>) searchResults.get(ContentType.SHORTS).content,
+                (List<PlaceSearchDTO>) searchResults.get(ContentType.PLACE).content
         );
     }
 
-    private <T> Slice<T> emptySlice(final int page, final int pageSize) {
+    private <T> Slice<T> emptySlice(final int page) {
         return new SliceImpl<>(Collections.emptyList(), PageRequest.of(page, pageSize), false);
+    }
+
+    private static class SearchResult<T> {
+        final List<T> content;
+        final boolean hasNext;
+
+        SearchResult(Slice<T> slice) {
+            this.content = slice.getContent();
+            this.hasNext = slice.hasNext();
+        }
     }
 }

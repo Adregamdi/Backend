@@ -12,6 +12,7 @@ import com.adregamdi.member.dto.response.GetMemberContentsResponse;
 import com.adregamdi.member.dto.response.GetMyMemberResponse;
 import com.adregamdi.member.exception.MemberException.HandleExistException;
 import com.adregamdi.member.exception.MemberException.MemberNotFoundException;
+import com.adregamdi.member.exception.MemberException.UnsupportedSocialTypeException;
 import com.adregamdi.member.infrastructure.MemberRepository;
 import com.adregamdi.place.application.PlaceService;
 import com.adregamdi.shorts.application.ShortsService;
@@ -61,9 +62,7 @@ public class MemberServiceImpl implements MemberService {
     @Override
     @Transactional(readOnly = true)
     public GetMyMemberResponse getMyMember(final String memberId) {
-        Member member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new MemberNotFoundException(memberId));
-
+        Member member = findMemberById(memberId);
         return GetMyMemberResponse.from(member);
     }
 
@@ -73,17 +72,12 @@ public class MemberServiceImpl implements MemberService {
     @Override
     @Transactional
     public void update(final UpdateMyMemberRequest request, final String memberId) {
-        Member another = memberRepository.findByHandle(request.handle());
-        Member member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new MemberNotFoundException(memberId));
-
-        if (another != null && !Objects.equals(another.getHandle(), member.getHandle())) {
-            throw new HandleExistException(request.handle());
-        }
-
+        Member member = findMemberById(memberId);
+        validateUniqueHandle(request.handle(), member.getHandle());
         member.updateMember(request.name(), request.profile(), request.handle());
         imageService.updateImage(request.profile(), PROFILE, memberId);
     }
+
 
     /*
      * [로그아웃]
@@ -91,11 +85,6 @@ public class MemberServiceImpl implements MemberService {
     @Override
     @Transactional
     public void logout(final String memberId, final String accessToken) {
-//        Member member = memberRepository.findByMemberIdAndMemberStatus(memberId, true)
-//                .orElseThrow(() -> new MemberNotFoundException(memberId));
-//
-//        member.updateRefreshTokenStatus(false);
-
         // Redis에서 리프레시 토큰 삭제 및 액세스 토큰 로그아웃 처리
         tokenRedisService.logoutUser(memberId, accessToken);
     }
@@ -106,9 +95,7 @@ public class MemberServiceImpl implements MemberService {
     @Override
     @Transactional
     public void delete(final String memberId) {
-        Member member = memberRepository.findByMemberIdAndMemberStatus(memberId, true)
-                .orElseThrow(() -> new MemberNotFoundException(memberId));
-
+        Member member = findActiveMemberById(memberId);
         member.updateAuthorization(Role.GUEST);
         member.updateMemberStatus(false);
     }
@@ -121,20 +108,40 @@ public class MemberServiceImpl implements MemberService {
     protected void leave() {
         LocalDateTime date = LocalDateTime.now().minusDays(30);
         List<Member> members = memberRepository.findByMemberStatusAndUpdatedAt(date);
-        if (members.isEmpty()) {
-            return;
-        }
 
-        for (Member member : members) {
-            // 회원과 관련된 데이터 삭제
-            deleteData(member.getMemberId());
-
-            // 소셜 연결 끊기
-            unlink(member.getSocialType(), member.getSocialId(), member.getSocialAccessToken());
-        }
-
-        // 회원 물리 삭제
+        members.forEach(this::processLeavingMember);
         memberRepository.deleteByMemberStatusAndUpdatedAt(date);
+    }
+
+    /*
+     * [특정 멤버 컨텐츠 조회]
+     */
+    @Override
+    @Transactional(readOnly = true)
+    public GetMemberContentsResponse<?> getMemberContentsOfAll(final GetMemberContentsRequest request) {
+        return memberRepository.getMemberContentsOfAll(request);
+    }
+
+    private Member findMemberById(final String memberId) {
+        return memberRepository.findById(memberId)
+                .orElseThrow(() -> new MemberNotFoundException(memberId));
+    }
+
+    private Member findActiveMemberById(final String memberId) {
+        return memberRepository.findByMemberIdAndMemberStatus(memberId, true)
+                .orElseThrow(() -> new MemberNotFoundException(memberId));
+    }
+
+    private void validateUniqueHandle(final String newHandle, final String currentHandle) {
+        Member another = memberRepository.findByHandle(newHandle);
+        if (another != null && !Objects.equals(another.getHandle(), currentHandle)) {
+            throw new HandleExistException(newHandle);
+        }
+    }
+
+    private void processLeavingMember(Member member) {
+        deleteData(member.getMemberId());
+        unlink(member.getSocialType(), member.getSocialId(), member.getSocialAccessToken());
     }
 
     private void deleteData(final String memberId) {
@@ -144,31 +151,25 @@ public class MemberServiceImpl implements MemberService {
         travelogueService.deleteMyTravelogue(memberId);
     }
 
-    /*
-     * [연결 끊기]
-     */
     private void unlink(
             final SocialType socialType,
             final String memberId,
-            final String socialAccessToken) {
-        if (("KAKAO").equals(String.valueOf(socialType))) {
-            unlinkKakao(memberId, socialAccessToken).block();
+            final String socialAccessToken
+    ) {
+        switch (socialType) {
+            case KAKAO:
+                unlinkKakao(memberId, socialAccessToken).block();
+                break;
+            case GOOGLE:
+                unlinkGoogle(socialAccessToken).block();
+                break;
+            default:
+                throw new UnsupportedSocialTypeException(socialType);
         }
-        if (("GOOGLE").equals(String.valueOf(socialType))) {
-            unlinkGoogle(socialAccessToken).block();
-        }
-        throw new RuntimeException();
     }
 
-    /*
-     * [카카오 연결 끊기]
-     */
-    private Mono<String> unlinkKakao(
-            final String memberId,
-            final String accessToken
-    ) {
+    private Mono<String> unlinkKakao(final String memberId, final String accessToken) {
         String url = "https://kapi.kakao.com/v1/user/unlink";
-
         return webClient.post()
                 .uri(url)
                 .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken)
@@ -178,28 +179,11 @@ public class MemberServiceImpl implements MemberService {
                 .bodyToMono(String.class);
     }
 
-    /*
-     * [구글 연결 끊기]
-     */
     private Mono<String> unlinkGoogle(final String accessToken) {
         String url = "https://accounts.google.com/o/oauth2/revoke";
-
-        return webClient
-                .post()
-                .uri(uriBuilder -> uriBuilder
-                        .path(url)
-                        .queryParam("token", accessToken)
-                        .build())
+        return webClient.post()
+                .uri(uriBuilder -> uriBuilder.path(url).queryParam("token", accessToken).build())
                 .retrieve()
                 .bodyToMono(String.class);
-    }
-
-    /*
-     * [특정 멤버 컨텐츠 조회]
-     */
-    @Override
-    @Transactional(readOnly = true)
-    public GetMemberContentsResponse<?> getMemberContentsOfAll(GetMemberContentsRequest request) {
-        return memberRepository.getMemberContentsOfAll(request);
     }
 }

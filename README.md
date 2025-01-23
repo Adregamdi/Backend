@@ -12,11 +12,11 @@
 🏆 *2024 관광데이터 활용 공모전 우수상* 🏆
 
 <p align="center" width="100%">
-    <img src="https://github.com/user-attachments/assets/50fa5f42-e335-4390-9a05-1f44e33daa93" width="21%">
-    <img src="https://github.com/user-attachments/assets/7141e6d1-46b1-4d48-8fcf-8d722fb3bf42" width="21%">
-    <img src="https://github.com/user-attachments/assets/b412159d-e158-4e8b-8caa-11d94cbf6484" width="21%">
-    <img src="https://github.com/user-attachments/assets/d355535a-64a6-45ef-a9bb-9015807ab0cc" width="21%">
-    <img src="https://github.com/user-attachments/assets/58981ab0-d0d1-479b-b8b1-f2cec6245329" width="21%">
+    <img src="https://github.com/user-attachments/assets/50fa5f42-e335-4390-9a05-1f44e33daa93" width="31%">
+    <img src="https://github.com/user-attachments/assets/7141e6d1-46b1-4d48-8fcf-8d722fb3bf42" width="31%">
+    <img src="https://github.com/user-attachments/assets/b412159d-e158-4e8b-8caa-11d94cbf6484" width="31%">
+    <img src="https://github.com/user-attachments/assets/d355535a-64a6-45ef-a9bb-9015807ab0cc" width="31%">
+    <img src="https://github.com/user-attachments/assets/58981ab0-d0d1-479b-b8b1-f2cec6245329" width="31%">
 </p>
 
 </div>

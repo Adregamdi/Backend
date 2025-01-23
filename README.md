@@ -1,6 +1,4 @@
-## 제주도 여행을 더 쉽고 즐겁게! 제주도 여행 플래너 앱, 어드레감디
-
-<img alt="image" width="100" src="https://github.com/user-attachments/assets/3d4e97f8-1308-4dc5-a89b-7170c3dea2e6" align="left">
+## 제주도 여행을 더 쉽고 즐겁게! 제주도 여행 플래너 앱, 어드레감디 <img alt="image" width="100" src="https://github.com/user-attachments/assets/3d4e97f8-1308-4dc5-a89b-7170c3dea2e6" align="left">
 
 [![App Store](https://img.shields.io/badge/App_Store-0D96F6?style=flat-square&logo=app-store&logoColor=white)](https://apps.apple.com/kr/app/%EC%96%B4%EB%93%9C%EB%A0%88%EA%B0%90%EB%94%94-%EC%A0%9C%EC%A3%BC%EB%8F%84-%EC%97%AC%ED%96%89%EC%9D%84-%EB%8D%94-%EC%89%BD%EA%B3%A0-%EC%A6%90%EA%B2%81%EA%B2%8C/id6680183383)
 [![One Store](https://img.shields.io/badge/OneStore-414141?style=flat-square&logo=onestore&logoColor=white)](https://m.onestore.co.kr/ko-kr/apps/appsDetail.omp?prodId=0000778914)

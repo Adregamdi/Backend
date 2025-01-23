@@ -1,4 +1,4 @@
-# 제주도 여행을 더 쉽고 즐겁게! 제주도 여행 플래너 앱, 어드레감디
+## 제주도 여행을 더 쉽고 즐겁게! 제주도 여행 플래너 앱, 어드레감디
 
 <img alt="image" width="100" src="https://github.com/user-attachments/assets/3d4e97f8-1308-4dc5-a89b-7170c3dea2e6" align="left">
 

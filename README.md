@@ -24,9 +24,8 @@
 ![image](https://github.com/user-attachments/assets/3b7806b8-3801-4d64-9690-e763ecee7e8e)
 
 ## 🍊 Tech Stack
-<p align="left">
-  <img src="https://github.com/user-attachments/assets/feeef5fc-3828-4dd1-99ec-043f3b0d6dab" width="80%">
-</p>
+![image](https://github.com/user-attachments/assets/dccccc42-046c-4147-a6e4-141483d03df4)
+
 
 ## 🍊 Contributor
 <table>

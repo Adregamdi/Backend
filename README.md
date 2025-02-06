@@ -20,8 +20,10 @@
 
 </div>
 
-## 🍊 Tech Stack
+## 🍊 Architecture
+![image](https://github.com/user-attachments/assets/3b7806b8-3801-4d64-9690-e763ecee7e8e)
 
+## 🍊 Tech Stack
 <p align="left">
   <img src="https://github.com/user-attachments/assets/feeef5fc-3828-4dd1-99ec-043f3b0d6dab" width="80%">
 </p>
